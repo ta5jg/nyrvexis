@@ -1,0 +1,24 @@
+{
+  "$ref": "#/definitions/KrShopBuyRequest",
+  "definitions": {
+    "KrShopBuyRequest": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "offerId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "v",
+        "offerId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

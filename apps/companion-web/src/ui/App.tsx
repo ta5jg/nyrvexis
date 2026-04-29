@@ -36,6 +36,9 @@ export function App() {
   const [gatewayInfo, setGatewayInfo] = useState<string>("");
   const [userId, setUserId] = useState<string>("");
   const [currency, setCurrency] = useState<{ gold: number; shards: number; keys: number } | null>(null);
+  const [catalogNameById, setCatalogNameById] = useState<Record<string, string>>({});
+  const [shopOffers, setShopOffers] = useState<Array<{ offerId: string; archetype: string; priceGold: number }>>([]);
+  const [owned, setOwned] = useState<Record<string, number>>({});
 
   const [seed, setSeed] = useState<string>(() => {
     const url = new URL(window.location.href);
@@ -83,6 +86,15 @@ export function App() {
   }, [sdk]);
 
   useEffect(() => {
+    sdk
+      .catalogUnits()
+      .then((c) => {
+        const map: Record<string, string> = {};
+        for (const u of c.catalog.units) map[u.id] = u.name;
+        setCatalogNameById(map);
+      })
+      .catch(() => {});
+
     // Auto guest login
     const deviceId = getOrCreateDeviceId();
     sdk
@@ -91,10 +103,14 @@ export function App() {
         setToken(a.token);
         sdk.setToken(a.token);
         setUserId(a.userId);
-        return sdk.inventory();
+        return Promise.all([sdk.inventory(), sdk.shopDaily(), sdk.ownedUnits()]);
       })
-      .then((inv) => {
+      .then(([inv, shop, ownedRes]) => {
         setCurrency(inv.inventory.currency);
+        setShopOffers(shop.offers.map((o) => ({ offerId: o.offerId, archetype: o.archetype, priceGold: o.priceGold })));
+        const m: Record<string, number> = {};
+        for (const u of ownedRes.owned) m[u.archetype] = u.level;
+        setOwned(m);
       })
       .catch(() => {
         // remain logged out
@@ -172,6 +188,42 @@ export function App() {
     try {
       const res = await sdk.dailyClaim();
       setCurrency(res.inventory.currency);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown error";
+      setState({ kind: "err", message: msg });
+    }
+  }
+
+  async function refreshMeta() {
+    if (!userId) return;
+    try {
+      const [inv, shop, ownedRes] = await Promise.all([sdk.inventory(), sdk.shopDaily(), sdk.ownedUnits()]);
+      setCurrency(inv.inventory.currency);
+      setShopOffers(shop.offers.map((o) => ({ offerId: o.offerId, archetype: o.archetype, priceGold: o.priceGold })));
+      const m: Record<string, number> = {};
+      for (const u of ownedRes.owned) m[u.archetype] = u.level;
+      setOwned(m);
+    } catch {
+      // ignore
+    }
+  }
+
+  async function buy(offerId: string) {
+    try {
+      const res = await sdk.shopBuy({ v: 1, offerId });
+      setCurrency({ gold: res.gold, shards: res.shards, keys: res.keys });
+      setOwned(res.owned);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown error";
+      setState({ kind: "err", message: msg });
+    }
+  }
+
+  async function upgrade(archetype: string) {
+    try {
+      const res = await sdk.unitUpgrade({ v: 1, archetype });
+      setCurrency({ gold: res.gold, shards: res.shards, keys: res.keys });
+      setOwned((o) => ({ ...o, [archetype]: res.level }));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
       setState({ kind: "err", message: msg });
@@ -259,6 +311,9 @@ export function App() {
           </div>
           <button className="btn" onClick={claimDaily} disabled={!userId}>
             Claim daily
+          </button>
+          <button className="btn" onClick={refreshMeta} disabled={!userId}>
+            Refresh
           </button>
         </div>
       </div>
@@ -390,6 +445,47 @@ export function App() {
                 </div>
               </div>
             </>
+          )}
+        </div>
+      </div>
+
+      <div className="grid" style={{ marginTop: 14 }}>
+        <div className="card">
+          <h2>Shop (daily)</h2>
+          <div className="row">
+            {shopOffers.map((o) => (
+              <div key={o.offerId} className="pill">
+                <strong>{catalogNameById[o.archetype] ?? o.archetype}</strong>
+                <span className="mono">{o.priceGold}G</span>
+                <button className="btn" onClick={() => buy(o.offerId)} disabled={!userId}>
+                  Buy
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="sub" style={{ marginTop: 10 }}>
+            Buy unlocks a unit at level 1 (v0).
+          </div>
+        </div>
+
+        <div className="card">
+          <h2>Collection</h2>
+          {Object.keys(owned).length === 0 ? (
+            <div className="log">No units yet. Buy from shop.</div>
+          ) : (
+            <div className="row">
+              {Object.entries(owned)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([arch, lvl]) => (
+                  <div key={arch} className="pill">
+                    <strong>{catalogNameById[arch] ?? arch}</strong>
+                    <span className="mono">Lv {lvl}</span>
+                    <button className="btn" onClick={() => upgrade(arch)} disabled={!userId}>
+                      Upgrade
+                    </button>
+                  </div>
+                ))}
+            </div>
           )}
         </div>
       </div>

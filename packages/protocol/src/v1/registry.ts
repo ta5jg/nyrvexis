@@ -5,6 +5,9 @@ import { KrBattleSimRequest, KrBattleSimResult } from "./battle.js";
 import { KrDailySeedResponse } from "./daily.js";
 import { KrAuthGuestRequest, KrAuthGuestResponse, KrMeResponse } from "./account.js";
 import { KrDailyClaimResponse, KrInventoryResponse } from "./inventory.js";
+import { KrCatalogResponse } from "./content.js";
+import { KrDailyShopResponse, KrShopBuyRequest, KrShopBuyResponse } from "./shop.js";
+import { KrOwnedUnitsResponse, KrUpgradeUnitRequest, KrUpgradeUnitResponse } from "./progression.js";
 
 /**
  * Central schema registry for:
@@ -22,6 +25,13 @@ export const KrV1Schemas = {
   KrAuthGuestResponse,
   KrMeResponse,
   KrInventoryResponse,
-  KrDailyClaimResponse
+  KrDailyClaimResponse,
+  KrCatalogResponse,
+  KrDailyShopResponse,
+  KrShopBuyRequest,
+  KrShopBuyResponse,
+  KrOwnedUnitsResponse,
+  KrUpgradeUnitRequest,
+  KrUpgradeUnitResponse
 } satisfies Record<string, z.ZodTypeAny>;
 

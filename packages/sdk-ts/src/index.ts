@@ -4,10 +4,17 @@ import {
   KrAuthGuestResponse,
   KrBattleSimRequest,
   KrBattleSimResult,
+  KrCatalogResponse,
   KrDailyClaimResponse,
   KrDailySeedResponse,
+  KrDailyShopResponse,
   KrInventoryResponse,
-  KrMeResponse
+  KrMeResponse,
+  KrOwnedUnitsResponse,
+  KrShopBuyRequest,
+  KrShopBuyResponse,
+  KrUpgradeUnitRequest,
+  KrUpgradeUnitResponse
 } from "@kindrail/protocol";
 
 export type KindrailSdkOptions = {
@@ -111,6 +118,66 @@ export class KindrailSdk {
     if (!res.ok) throw new Error(`dailyClaim failed: ${res.status}`);
     const json = await res.json();
     return KrDailyClaimResponse.parse(json);
+  }
+
+  async catalogUnits(): Promise<KrCatalogResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/catalog/units`, {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) throw new Error(`catalogUnits failed: ${res.status}`);
+    const json = await res.json();
+    return KrCatalogResponse.parse(json);
+  }
+
+  async shopDaily(): Promise<KrDailyShopResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/shop/daily`, {
+      method: "GET",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`shopDaily failed: ${res.status}`);
+    const json = await res.json();
+    return KrDailyShopResponse.parse(json);
+  }
+
+  async shopBuy(req: KrShopBuyRequest): Promise<KrShopBuyResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/shop/buy`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`shopBuy failed: ${res.status}`);
+    const json = await res.json();
+    return KrShopBuyResponse.parse(json);
+  }
+
+  async ownedUnits(): Promise<KrOwnedUnitsResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/units/owned`, {
+      method: "GET",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`ownedUnits failed: ${res.status}`);
+    const json = await res.json();
+    return KrOwnedUnitsResponse.parse(json);
+  }
+
+  async unitUpgrade(req: KrUpgradeUnitRequest): Promise<KrUpgradeUnitResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/units/upgrade`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`unitUpgrade failed: ${res.status}`);
+    const json = await res.json();
+    return KrUpgradeUnitResponse.parse(json);
   }
 }
 

@@ -21,18 +21,25 @@ export type DailyClaimRow = {
   claimedAtMs: number;
 };
 
+export type OwnedUnitRow = {
+  archetype: string;
+  level: number;
+};
+
 export type StoreState = {
   users: Record<string, UserRow>; // userId -> row
   deviceToUser: Record<string, string>; // deviceId -> userId
   inventory: Record<string, InventoryRow>; // userId -> row
   dailyClaims: Record<string, DailyClaimRow>; // key `${userId}:${dateUtc}`
+  ownedUnits: Record<string, Record<string, OwnedUnitRow>>; // userId -> archetype -> row
 };
 
 const DEFAULT_STATE: StoreState = {
   users: {},
   deviceToUser: {},
   inventory: {},
-  dailyClaims: {}
+  dailyClaims: {},
+  ownedUnits: {}
 };
 
 export class FileStore {
@@ -50,7 +57,12 @@ export class FileStore {
     await fs.mkdir(this.dir, { recursive: true });
     try {
       const raw = await fs.readFile(this.file, "utf8");
-      this.state = JSON.parse(raw) as StoreState;
+      const parsed = JSON.parse(raw) as Partial<StoreState>;
+      this.state = {
+        ...DEFAULT_STATE,
+        ...parsed,
+        ownedUnits: parsed.ownedUnits ?? {}
+      } as StoreState;
     } catch {
       this.state = { ...DEFAULT_STATE };
       await this.save();

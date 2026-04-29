@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "contentVersion": "v0.0.1",
+  "units": [
+    { "id": "soldier", "name": "Soldier", "role": "tank", "base": { "hp": 30, "atk": 8, "def": 2, "spd": 10 } },
+    { "id": "brute", "name": "Brute", "role": "tank", "base": { "hp": 40, "atk": 7, "def": 3, "spd": 8 } },
+    { "id": "archer", "name": "Archer", "role": "dps", "base": { "hp": 18, "atk": 10, "def": 1, "spd": 12 } },
+    { "id": "rogue", "name": "Rogue", "role": "dps", "base": { "hp": 20, "atk": 9, "def": 1, "spd": 14 } }
+  ]
+}
+
