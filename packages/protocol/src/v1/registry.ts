@@ -8,6 +8,18 @@ import { KrDailyClaimResponse, KrInventoryResponse } from "./inventory.js";
 import { KrCatalogResponse } from "./content.js";
 import { KrDailyShopResponse, KrShopBuyRequest, KrShopBuyResponse } from "./shop.js";
 import { KrOwnedUnitsResponse, KrUpgradeUnitRequest, KrUpgradeUnitResponse } from "./progression.js";
+import {
+  KrLeaderboardMeResponse,
+  KrLeaderboardSubmitRequest,
+  KrLeaderboardSubmitResponse,
+  KrLeaderboardTopResponse,
+  KrReferralAcceptRequest,
+  KrReferralAcceptResponse,
+  KrReferralStatusResponse,
+  KrShareRedeemRequest,
+  KrShareRedeemResponse,
+  KrShareTicketCreateResponse
+} from "./growth.js";
 
 /**
  * Central schema registry for:
@@ -32,6 +44,16 @@ export const KrV1Schemas = {
   KrShopBuyResponse,
   KrOwnedUnitsResponse,
   KrUpgradeUnitRequest,
-  KrUpgradeUnitResponse
+  KrUpgradeUnitResponse,
+  KrLeaderboardSubmitRequest,
+  KrLeaderboardSubmitResponse,
+  KrLeaderboardTopResponse,
+  KrLeaderboardMeResponse,
+  KrReferralAcceptRequest,
+  KrReferralAcceptResponse,
+  KrReferralStatusResponse,
+  KrShareTicketCreateResponse,
+  KrShareRedeemRequest,
+  KrShareRedeemResponse
 } satisfies Record<string, z.ZodTypeAny>;
 

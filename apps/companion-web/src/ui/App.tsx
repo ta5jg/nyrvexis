@@ -39,6 +39,9 @@ export function App() {
   const [catalogNameById, setCatalogNameById] = useState<Record<string, string>>({});
   const [shopOffers, setShopOffers] = useState<Array<{ offerId: string; archetype: string; priceGold: number }>>([]);
   const [owned, setOwned] = useState<Record<string, number>>({});
+  const [leaderboardTop, setLeaderboardTop] = useState<Array<{ userId: string; score: number }>>([]);
+  const [leaderboardMe, setLeaderboardMe] = useState<{ rank?: number; total: number; score?: number } | null>(null);
+  const [shareLink, setShareLink] = useState<string>("");
 
   const [seed, setSeed] = useState<string>(() => {
     const url = new URL(window.location.href);
@@ -116,6 +119,21 @@ export function App() {
         // remain logged out
       });
   }, [sdk]);
+
+  useEffect(() => {
+    // Referral accept via URL: ?ref=<userId>
+    const url = new URL(window.location.href);
+    const ref = url.searchParams.get("ref");
+    if (!ref) return;
+    if (!userId) return;
+    sdk
+      .referralAccept({ v: 1, referrerUserId: ref })
+      .then(() => {
+        url.searchParams.delete("ref");
+        window.history.replaceState({}, "", url.toString());
+      })
+      .catch(() => {});
+  }, [sdk, userId]);
 
   function syncUrlFromReq(req: KrBattleSimRequest) {
     const url = new URL(window.location.href);
@@ -229,6 +247,68 @@ export function App() {
       setState({ kind: "err", message: msg });
     }
   }
+
+  async function refreshLeaderboard() {
+    try {
+      const d = await sdk.dailySeed();
+      const [top, me] = await Promise.all([sdk.leaderboardDaily(d.dateUtc, 20), sdk.leaderboardMe(d.dateUtc)]);
+      setLeaderboardTop(top.entries.map((e) => ({ userId: e.userId, score: e.score })));
+      setLeaderboardMe({ rank: me.rank, total: me.total, score: me.entry?.score });
+    } catch {
+      // ignore
+    }
+  }
+
+  async function submitDailyToLeaderboard() {
+    try {
+      const d = await sdk.dailySeed();
+      const req = makeRequest(d.seed, maxTicks);
+      const sim = await sdk.battleSim(req);
+      setState({ kind: "ok", result: sim });
+      setTick(0);
+
+      const submit = await sdk.leaderboardSubmit({ v: 1, dateUtc: d.dateUtc, battleRequest: req });
+      setLeaderboardMe({ rank: submit.rank, total: submit.total, score: submit.entry.score });
+      await refreshLeaderboard();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown error";
+      setState({ kind: "err", message: msg });
+    }
+  }
+
+  async function createShareTicketLink() {
+    try {
+      const t = await sdk.shareTicket();
+      const url = new URL(window.location.href);
+      url.searchParams.set("ticket", t.ticketId);
+      const link = url.toString();
+      setShareLink(link);
+      await copyToClipboard(link);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown error";
+      setState({ kind: "err", message: msg });
+    }
+  }
+
+  async function redeemTicketIfPresent() {
+    const url = new URL(window.location.href);
+    const ticket = url.searchParams.get("ticket");
+    if (!ticket) return;
+    if (!userId) return;
+    try {
+      await sdk.shareRedeem({ v: 1, ticketId: ticket });
+      url.searchParams.delete("ticket");
+      window.history.replaceState({}, "", url.toString());
+      await refreshMeta();
+    } catch {
+      // ignore
+    }
+  }
+
+  useEffect(() => {
+    redeemTicketIfPresent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const frames = state.kind === "ok" ? buildReplayFrames(state.result) : null;
   const maxTick = frames ? Math.max(0, frames.length - 1) : 0;
@@ -487,6 +567,49 @@ export function App() {
                 ))}
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="grid" style={{ marginTop: 14 }}>
+        <div className="card">
+          <h2>Daily leaderboard</h2>
+          <div className="btnbar">
+            <button className="btn" onClick={refreshLeaderboard} disabled={!userId}>
+              Refresh leaderboard
+            </button>
+            <button className="btn primary" onClick={submitDailyToLeaderboard} disabled={!userId}>
+              Play daily + submit
+            </button>
+          </div>
+          <div className="row" style={{ marginTop: 10 }}>
+            <div className="pill">
+              <strong>ME</strong>
+              <span className="mono">
+                {leaderboardMe ? `#${leaderboardMe.rank ?? "—"} / ${leaderboardMe.total}` : "—"}
+              </span>
+              <span className="mono">{leaderboardMe?.score ?? "—"}</span>
+            </div>
+          </div>
+          <div className="log" style={{ marginTop: 10 }}>
+            {leaderboardTop.length === 0
+              ? "No entries yet."
+              : leaderboardTop
+                  .map((e, i) => `${String(i + 1).padStart(2, "0")}  ${e.userId}  score=${e.score}`)
+                  .join("\n")}
+          </div>
+        </div>
+
+        <div className="card">
+          <h2>Share rewards</h2>
+          <div className="btnbar">
+            <button className="btn" onClick={createShareTicketLink} disabled={!userId}>
+              Create share ticket (copy link)
+            </button>
+          </div>
+          {shareLink ? <div className="log" style={{ marginTop: 10 }}>{shareLink}</div> : <div className="log">—</div>}
+          <div className="sub" style={{ marginTop: 10 }}>
+            Tip: send the copied link to a friend. When they open it, they get a small reward and you get a small reward.
+          </div>
         </div>
       </div>
 

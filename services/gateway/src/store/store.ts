@@ -26,12 +26,42 @@ export type OwnedUnitRow = {
   level: number;
 };
 
+export type LeaderboardEntryRow = {
+  userId: string;
+  dateUtc: string;
+  score: number;
+  ticks: number;
+  remainingHp: number;
+  updatedAtMs: number;
+};
+
+export type ReferralEdgeRow = {
+  referrerUserId: string;
+  newUserId: string;
+  createdAtMs: number;
+  rewardedAtMs?: number;
+};
+
+export type ShareTicketRow = {
+  ticketId: string;
+  issuerUserId: string;
+  dateUtc: string;
+  createdAtMs: number;
+  expiresAtMs: number;
+  redeemedByUserId?: string;
+  redeemedAtMs?: number;
+};
+
 export type StoreState = {
   users: Record<string, UserRow>; // userId -> row
   deviceToUser: Record<string, string>; // deviceId -> userId
   inventory: Record<string, InventoryRow>; // userId -> row
   dailyClaims: Record<string, DailyClaimRow>; // key `${userId}:${dateUtc}`
   ownedUnits: Record<string, Record<string, OwnedUnitRow>>; // userId -> archetype -> row
+  leaderboard: Record<string, Record<string, LeaderboardEntryRow>>; // dateUtc -> userId -> row
+  referrals: Record<string, ReferralEdgeRow>; // newUserId -> edge
+  shareTickets: Record<string, ShareTicketRow>; // ticketId -> row
+  caps: Record<string, number>; // generic counters, key `${kind}:${userId}:${dateUtc}`
 };
 
 const DEFAULT_STATE: StoreState = {
@@ -39,7 +69,11 @@ const DEFAULT_STATE: StoreState = {
   deviceToUser: {},
   inventory: {},
   dailyClaims: {},
-  ownedUnits: {}
+  ownedUnits: {},
+  leaderboard: {},
+  referrals: {},
+  shareTickets: {},
+  caps: {}
 };
 
 export class FileStore {
@@ -61,7 +95,11 @@ export class FileStore {
       this.state = {
         ...DEFAULT_STATE,
         ...parsed,
-        ownedUnits: parsed.ownedUnits ?? {}
+        ownedUnits: parsed.ownedUnits ?? {},
+        leaderboard: parsed.leaderboard ?? {},
+        referrals: parsed.referrals ?? {},
+        shareTickets: parsed.shareTickets ?? {},
+        caps: parsed.caps ?? {}
       } as StoreState;
     } catch {
       this.state = { ...DEFAULT_STATE };

@@ -14,7 +14,17 @@ import {
   KrShopBuyRequest,
   KrShopBuyResponse,
   KrUpgradeUnitRequest,
-  KrUpgradeUnitResponse
+  KrUpgradeUnitResponse,
+  KrLeaderboardMeResponse,
+  KrLeaderboardSubmitRequest,
+  KrLeaderboardSubmitResponse,
+  KrLeaderboardTopResponse,
+  KrReferralAcceptRequest,
+  KrReferralAcceptResponse,
+  KrReferralStatusResponse,
+  KrShareRedeemRequest,
+  KrShareRedeemResponse,
+  KrShareTicketCreateResponse
 } from "@kindrail/protocol";
 
 export type KindrailSdkOptions = {
@@ -178,6 +188,96 @@ export class KindrailSdk {
     if (!res.ok) throw new Error(`unitUpgrade failed: ${res.status}`);
     const json = await res.json();
     return KrUpgradeUnitResponse.parse(json);
+  }
+
+  async leaderboardSubmit(req: KrLeaderboardSubmitRequest): Promise<KrLeaderboardSubmitResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/leaderboard/submit`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`leaderboardSubmit failed: ${res.status}`);
+    const json = await res.json();
+    return KrLeaderboardSubmitResponse.parse(json);
+  }
+
+  async leaderboardDaily(dateUtc?: string, limit = 50): Promise<KrLeaderboardTopResponse> {
+    const url = new URL(`${this.baseUrl}/leaderboard/daily`);
+    if (dateUtc) url.searchParams.set("date", dateUtc);
+    url.searchParams.set("limit", String(limit));
+    const res = await this.fetchImpl(url.toString(), {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) throw new Error(`leaderboardDaily failed: ${res.status}`);
+    const json = await res.json();
+    return KrLeaderboardTopResponse.parse(json);
+  }
+
+  async leaderboardMe(dateUtc?: string): Promise<KrLeaderboardMeResponse> {
+    const url = new URL(`${this.baseUrl}/leaderboard/me`);
+    if (dateUtc) url.searchParams.set("date", dateUtc);
+    const res = await this.fetchImpl(url.toString(), {
+      method: "GET",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`leaderboardMe failed: ${res.status}`);
+    const json = await res.json();
+    return KrLeaderboardMeResponse.parse(json);
+  }
+
+  async referralAccept(req: KrReferralAcceptRequest): Promise<KrReferralAcceptResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/referral/accept`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`referralAccept failed: ${res.status}`);
+    const json = await res.json();
+    return KrReferralAcceptResponse.parse(json);
+  }
+
+  async referralStatus(): Promise<KrReferralStatusResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/referral/status`, {
+      method: "GET",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`referralStatus failed: ${res.status}`);
+    const json = await res.json();
+    return KrReferralStatusResponse.parse(json);
+  }
+
+  async shareTicket(): Promise<KrShareTicketCreateResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/share/ticket`, {
+      method: "POST",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`shareTicket failed: ${res.status}`);
+    const json = await res.json();
+    return KrShareTicketCreateResponse.parse(json);
+  }
+
+  async shareRedeem(req: KrShareRedeemRequest): Promise<KrShareRedeemResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/share/redeem`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`shareRedeem failed: ${res.status}`);
+    const json = await res.json();
+    return KrShareRedeemResponse.parse(json);
   }
 }
 

@@ -135,6 +135,8 @@ See: `docs/PHASE0_PRODUCT.md`
 ### Hedef
 - Paylaşım + rekabet + günlük hedef ile organik büyüme.
 
+See: `docs/PHASE4_GROWTH.md`
+
 ### Alt sistemler
 - **Daily leaderboard**
   - skor metriği: kalan HP + ticks + streak

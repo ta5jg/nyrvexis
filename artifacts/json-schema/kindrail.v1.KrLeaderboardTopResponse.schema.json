@@ -1,0 +1,62 @@
+{
+  "$ref": "#/definitions/KrLeaderboardTopResponse",
+  "definitions": {
+    "KrLeaderboardTopResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "dateUtc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "userId": {
+                "type": "string",
+                "minLength": 6,
+                "maxLength": 80
+              },
+              "score": {
+                "type": "integer"
+              },
+              "ticks": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "remainingHp": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "userId",
+              "score",
+              "ticks",
+              "remainingHp"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 200
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "dateUtc",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
