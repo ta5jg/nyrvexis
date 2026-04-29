@@ -200,6 +200,12 @@ See: `docs/PHASE7_NATIVE.md`
 
 ---
 
+## Faz 8–14 — Full game roadmap (v1)
+
+See: `docs/ROADMAP_V1_FULL.md`
+
+---
+
 ## “Şimdi ne yapıyoruz?” (en kısa kritik yol)
 1) Faz 1’i “UI polish + replay viewer” ile tamamla
 2) Faz 2 “guest auth + inventory minimal” (daily claim)
