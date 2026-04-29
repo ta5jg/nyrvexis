@@ -1,5 +1,7 @@
 ## Architecture (v0)
 
+See also: `docs/ROADMAP.md`
+
 ### Goals
 - **Fast iteration** on game meta + economy while keeping simulation deterministic in the client.
 - **Hybrid**: Unity for game client; TypeScript for gateway, SDK, web/mobile companion, ops integration.
