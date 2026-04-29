@@ -1,4 +1,9 @@
-import { HealthResponse, KrBattleSimRequest, KrBattleSimResult } from "@kindrail/protocol";
+import {
+  HealthResponse,
+  KrBattleSimRequest,
+  KrBattleSimResult,
+  KrDailySeedResponse
+} from "@kindrail/protocol";
 
 export type KindrailSdkOptions = {
   baseUrl: string;
@@ -36,6 +41,16 @@ export class KindrailSdk {
     if (!res.ok) throw new Error(`battleSim failed: ${res.status}`);
     const json = await res.json();
     return KrBattleSimResult.parse(json);
+  }
+
+  async dailySeed(): Promise<KrDailySeedResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/daily-seed`, {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) throw new Error(`dailySeed failed: ${res.status}`);
+    const json = await res.json();
+    return KrDailySeedResponse.parse(json);
   }
 }
 

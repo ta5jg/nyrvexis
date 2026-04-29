@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { nanoid } from "nanoid";
-import { HealthResponse } from "@kindrail/protocol";
+import { HealthResponse, KrDailySeedResponse } from "@kindrail/protocol";
 import { readEnv } from "./env.js";
 import { runBattleSim } from "./sim/battleSim.js";
 
@@ -37,6 +37,23 @@ app.get("/health", async () => {
     nowMs: Date.now()
   });
   return body;
+});
+
+app.get("/daily-seed", async () => {
+  const d = new Date();
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const dateUtc = `${yyyy}-${mm}-${dd}`;
+
+  // Seed format is stable and safe to publish/share.
+  const seed = `daily:${dateUtc}`;
+
+  return KrDailySeedResponse.parse({
+    ok: true,
+    dateUtc,
+    seed
+  });
 });
 
 app.post("/sim/battle", async (req, reply) => {

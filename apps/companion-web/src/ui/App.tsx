@@ -3,6 +3,7 @@ import { KindrailSdk } from "@kindrail/sdk-ts";
 import type { KrBattleSimRequest, KrBattleSimResult } from "@kindrail/protocol";
 import { decodeJsonFromUrlParam, encodeJsonToUrlParam, copyToClipboard } from "./share";
 import { makeRequest } from "./demoBattle";
+import { exportElementToPng } from "./exportPng";
 
 type LoadState =
   | { kind: "idle" }
@@ -104,6 +105,40 @@ export function App() {
     await copyToClipboard(text);
   }
 
+  function xShareUrl(): string {
+    if (state.kind !== "ok") return "https://x.com/intent/tweet";
+    const text = `KINDRAIL battle — ${summarize(state.result)}`;
+    const url = window.location.href;
+    const intent = new URL("https://x.com/intent/tweet");
+    intent.searchParams.set("text", text);
+    intent.searchParams.set("url", url);
+    return intent.toString();
+  }
+
+  async function exportPng() {
+    if (state.kind !== "ok") return;
+    const el = document.getElementById("kr-share-card");
+    if (!el) return;
+    await exportElementToPng(el, `kindrail-battle-${seed}.png`);
+  }
+
+  async function useDailySeed() {
+    try {
+      const d = await sdk.dailySeed();
+      setSeed(d.seed);
+      const req = makeRequest(d.seed, maxTicks);
+      setRequestText(JSON.stringify(req, null, 2));
+      // Run immediately for 1-click share
+      setState({ kind: "loading" });
+      syncUrlFromReq(req);
+      const res = await sdk.battleSim(req);
+      setState({ kind: "ok", result: res });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown error";
+      setState({ kind: "err", message: msg });
+    }
+  }
+
   return (
     <div className="wrap">
       <div className="top">
@@ -171,6 +206,9 @@ export function App() {
             <button className="btn primary" onClick={runSim} disabled={state.kind === "loading"}>
               {state.kind === "loading" ? "Running…" : "Run battle"}
             </button>
+            <button className="btn" onClick={useDailySeed} disabled={state.kind === "loading"}>
+              Daily battle
+            </button>
             <button
               className="btn"
               onClick={() => setRequestText(JSON.stringify(makeRequest(nowSeed(), maxTicks), null, 2))}
@@ -183,6 +221,12 @@ export function App() {
             <button className="btn" onClick={copySocialText} disabled={state.kind !== "ok"}>
               Copy social text
             </button>
+            <button className="btn" onClick={exportPng} disabled={state.kind !== "ok"}>
+              Export PNG
+            </button>
+            <a className="btn" href={xShareUrl()} target="_blank" rel="noreferrer">
+              Share to X
+            </a>
           </div>
         </div>
 
@@ -200,7 +244,16 @@ export function App() {
                 </strong>
                 <span className="mono">ticks={state.result.ticks}</span>
               </div>
-              <div className="log">{summarize(state.result)}</div>
+              <div id="kr-share-card" className="shareCard">
+                <div className="shareCardTitle">
+                  <div className="k">KINDRAIL</div>
+                  <div className="meta mono">{seed}</div>
+                </div>
+                <div className="log">{summarize(state.result)}</div>
+                <div className="log" style={{ marginTop: 8, color: "rgba(255,255,255,0.72)" }}>
+                  {window.location.href}
+                </div>
+              </div>
               <div className="log" style={{ marginTop: 10 }}>
                 {state.result.events.slice(0, 80).map((e: KrBattleSimResult["events"][number], i: number) => {
                   if (e.kind === "hit")
