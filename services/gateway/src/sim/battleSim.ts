@@ -8,6 +8,25 @@ import {
 } from "@kindrail/protocol";
 import { seedToU32, XorShift32 } from "./rng.js";
 
+/**
+ * Match pacing tuned for ~5–7 minute replay sessions at cinematic Auto-play speed (web UX target).
+ * Applied inside `runBattleSim` only — catalog JSON stays “readable”; determinism preserved per seed.
+ */
+const MATCH_PACING = {
+  hpMul: 6,
+  atkMul: 0.88,
+  /** Higher threshold ⇒ fewer actions per wall-clock tick ⇒ longer fights. */
+  actThreshold: 340
+} as const;
+
+function scaleUnitForMatchPacing(u: KrUnit): KrUnit {
+  return {
+    ...u,
+    hp: Math.max(1, Math.floor((u.hp | 0) * MATCH_PACING.hpMul)),
+    atk: Math.max(1, Math.floor((u.atk | 0) * MATCH_PACING.atkMul))
+  };
+}
+
 type StatusState = {
   kind: KrStatusKind;
   dur: number;
@@ -210,33 +229,39 @@ export function runBattleSim(input: unknown): KrBattleSimResult {
   const rng = new XorShift32(seedToU32(req.seed.seed));
 
   const units: LiveUnit[] = [
-    ...req.a.units.map((u) => ({
-      team: "a" as const,
-      base: u,
-      hp: u.hp | 0,
-      cd: 0,
-      alive: true,
-      shield: 0,
-      statuses: []
-    })),
-    ...req.b.units.map((u) => ({
-      team: "b" as const,
-      base: u,
-      hp: u.hp | 0,
-      cd: 0,
-      alive: true,
-      shield: 0,
-      statuses: []
-    }))
+    ...req.a.units.map((u) => {
+      const base = scaleUnitForMatchPacing(u);
+      return {
+        team: "a" as const,
+        base,
+        hp: base.hp | 0,
+        cd: 0,
+        alive: true,
+        shield: 0,
+        statuses: []
+      };
+    }),
+    ...req.b.units.map((u) => {
+      const base = scaleUnitForMatchPacing(u);
+      return {
+        team: "b" as const,
+        base,
+        hp: base.hp | 0,
+        cd: 0,
+        alive: true,
+        shield: 0,
+        statuses: []
+      };
+    })
   ];
 
   const events: KrBattleEvent[] = [];
 
   // v0 tick model:
   // - every tick, units accumulate cd += spd
-  // - when cd >= 100, unit acts once and cd -= 100
-  const ACT_THRESHOLD = 100;
-  const MAX_EVENTS = 5000;
+  // - when cd >= actThreshold, unit acts once and cd -= actThreshold
+  const ACT_THRESHOLD = MATCH_PACING.actThreshold;
+  const MAX_EVENTS = 40_000;
 
   let t = 0;
   for (; t < req.maxTicks; t++) {

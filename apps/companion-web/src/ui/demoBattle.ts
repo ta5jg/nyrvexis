@@ -33,7 +33,7 @@ export function makeDemoTeams(): { a: KrTeam; b: KrTeam } {
   };
 }
 
-export function makeRequest(seed: string, maxTicks = 200): KrBattleSimRequest {
+export function makeRequest(seed: string, maxTicks = 12000): KrBattleSimRequest {
   const { a, b } = makeDemoTeams();
   return {
     v: 1,

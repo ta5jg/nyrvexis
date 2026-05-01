@@ -65,7 +65,7 @@ export const KrBattleSimRequest = z
     seed: KrBattleSeed,
     a: KrTeam,
     b: KrTeam,
-    maxTicks: z.number().int().min(1).max(2000).default(400)
+    maxTicks: z.number().int().min(1).max(100_000).default(8000)
   })
   .strict();
 export type KrBattleSimRequest = z.infer<typeof KrBattleSimRequest>;

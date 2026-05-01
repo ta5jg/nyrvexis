@@ -5,7 +5,7 @@ Bu doküman Faz 0’ı **tamamlanmış** saymak için gerekli ürün tanımını
 ---
 
 ### North Star (tek cümle)
-**KINDRAIL = “1 dakikalık günlük deterministik savaş” + “paylaşılabilir replay” + “koleksiyon/progression”**
+**KINDRAIL = ~5–7 dk oturum (sinematik replay + günlük deterministik savaş) + “paylaşılabilir replay” + “koleksiyon/progression”**
 
 ---
 

@@ -68,6 +68,9 @@ function squadDisplayLine(units: KrBattleSimRequest["a"]["units"], defs: Map<str
   return units.map((u) => defs.get(u.archetype)?.name ?? u.archetype).join(" · ");
 }
 
+/** Target wall-clock (ms) for a full Auto-play at speed 1× (~5–7 min session design target). */
+const TARGET_AUTOPLAY_MS = 5.5 * 60 * 1000;
+
 function gatewayBaseUrl(): string {
   const raw = import.meta.env.VITE_GATEWAY_URL?.trim();
   if (raw && raw.length > 0) return raw.replace(/\/+$/, "");
@@ -118,7 +121,7 @@ export function App() {
   const [showAdvancedJson, setShowAdvancedJson] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(() => !isOnboardingDone());
   const [replaySpeed, setReplaySpeed] = useState<1 | 2 | 4>(1);
-  const [autoReplay, setAutoReplay] = useState(false);
+  const [autoReplay, setAutoReplay] = useState(true);
   const [shopOffers, setShopOffers] = useState<Array<{ offerId: string; archetype: string; priceGold: number }>>([]);
   const [owned, setOwned] = useState<Record<string, number>>({});
   const [leaderboardTop, setLeaderboardTop] = useState<Array<{ userId: string; score: number }>>([]);
@@ -178,8 +181,8 @@ export function App() {
 
   const [maxTicks, setMaxTicks] = useState<number>(() => {
     const url = new URL(window.location.href);
-    const mt = Number(url.searchParams.get("maxTicks") ?? "200");
-    return Number.isFinite(mt) ? Math.max(1, Math.min(2000, Math.floor(mt))) : 200;
+    const mt = Number(url.searchParams.get("maxTicks") ?? "12000");
+    return Number.isFinite(mt) ? Math.max(1, Math.min(100_000, Math.floor(mt))) : 12000;
   });
 
   const [requestText, setRequestText] = useState<string>(() => {
@@ -967,7 +970,9 @@ export function App() {
   useEffect(() => {
     if (state.kind !== "ok" || !autoReplay) return;
     const frameLen = frames?.length ?? 1;
-    const msPerTick = Math.max(50, 240 / replaySpeed);
+    const span = Math.max(1, frameLen - 1);
+    let msPerTick = TARGET_AUTOPLAY_MS / span / replaySpeed;
+    msPerTick = Math.max(70, Math.min(780, msPerTick));
     let acc = 0;
     let last = performance.now();
     let raf = 0;
@@ -1350,7 +1355,7 @@ export function App() {
               <input
                 value={String(maxTicks)}
                 onChange={(e) => {
-                  const n = Math.max(1, Math.min(2000, Math.floor(Number(e.target.value) || 200)));
+                  const n = Math.max(1, Math.min(100_000, Math.floor(Number(e.target.value) || 12000)));
                   setMaxTicks(n);
                 }}
               />
@@ -1552,6 +1557,9 @@ export function App() {
                       <option value={4}>4×</option>
                     </select>
                   </div>
+                </div>
+                <div className="sub" style={{ marginTop: 6, opacity: 0.85 }}>
+                  Full Auto-play at 1× is paced toward a ~5–7 minute watch — uncheck to scrub manually from tick 0.
                 </div>
                 <input
                   type="range"
