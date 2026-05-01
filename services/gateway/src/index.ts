@@ -107,6 +107,25 @@ import { utcDate } from "./time.js";
 import { verifyAppleBattlePassProduct } from "./iap/appleVerify.js";
 import { verifyAndroidProductPurchase } from "./iap/androidVerify.js";
 import { iapReceiptFingerprint } from "./iap/fingerprint.js";
+import { config as loadDotenv } from "dotenv";
+import { existsSync } from "node:fs";
+import path from "node:path";
+
+/** Dev/staging: load `.env` from gateway cwd or monorepo root (production relies on real env). */
+function loadOptionalDotenv() {
+  if (process.env.NODE_ENV === "production") return;
+  const candidates = [
+    path.resolve(process.cwd(), ".env"),
+    path.resolve(process.cwd(), "..", "..", ".env")
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) {
+      loadDotenv({ path: p });
+      return;
+    }
+  }
+}
+loadOptionalDotenv();
 
 const IAP_STUB_RECEIPT = "STUB_PREMIUM";
 

@@ -17,6 +17,7 @@
     "content:validate": "tsx scripts/validate-content.ts"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "@fastify/cors": "^10.1.0",
     "@kindrail/protocol": "workspace:*",
     "fastify": "^5.5.0",

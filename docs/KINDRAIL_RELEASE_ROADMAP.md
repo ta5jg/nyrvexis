@@ -168,10 +168,10 @@ Aşağıdaki maddeler **satılabilir** bir ilk sürüm için kontrol listesidir.
 
 ## Faz R7 — Mağaza ve uyumluluk (satış için zorunlu)
 
-| ID | Çıktı |
-|----|--------|
-| R7.1 | IAP (App Store + Google Play) + receipt / purchase token doğrulama (gateway) |
-| R7.2 | Gizlilik / kullanım / yaş; rewarded ads varsa platform rıza ve beyan gereksinimleri |
+| ID | Çıktı | Durum |
+|----|--------|--------|
+| R7.1 | IAP (App Store + Google Play) + receipt / purchase token doğrulama (gateway) | **Tamam (teknik):** companion native IAP + `POST /iap/battle-pass/verify`; canlı SKU ve mağaza sandbox / üretim doğrulaması **operasyon** |
+| R7.2 | Gizlilik / kullanım / yaş; rewarded ads varsa platform rıza ve beyan gereksinimleri | **Tamam (teknik):** `GET /legal/public`, `KR_LEGAL_*`, companion `LegalFooter`; mağaza URL metinleri ve yaş işaretleri **yayın operasyonu** |
 
 ---
 
@@ -193,7 +193,10 @@ Backend ve `@kindrail/protocol` sabit; yeniden yazılan öncelikle sunum ve plat
 ## Hızlı komutlar
 
 ```bash
-# Tek komut: gateway + web (repo kökünde concurrently)
+# Yerel oynanabilirlik / ön deneme: bağımlılık + ilk protocol/sdk derlemesi + gateway + web
+pnpm run play:local
+
+# Ya da yalnız süreçler (protocol/sdk derlemesi elle yapılmışsa)
 pnpm run dev:full
 
 # Ya da iki terminal:
