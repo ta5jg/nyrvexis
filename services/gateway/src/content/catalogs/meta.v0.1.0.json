@@ -1,0 +1,98 @@
+{
+  "v": 1,
+  "contentVersion": "v0.1.0",
+  "seasonId": "s0",
+  "economyDefaults": {
+    "dailyClaimGold": 125,
+    "dailyClaimShards": 9,
+    "dailyClaimKeys": 0,
+    "shopGoldMulPct": 100,
+    "upgradeGoldMulPct": 100,
+    "upgradeShardMulPct": 100,
+    "battlePassXpPerDailyClaim": 42,
+    "battlePassXpPerLeaderboard": 32,
+    "battlePassXpDailyCap": 520
+  },
+  "cosmetics": [
+    { "id": "cos_frame_kindrail_v1", "title": "Kindrail frame", "slot": "frame" },
+    { "id": "cos_arena_twilight_v1", "title": "Twilight arena tint", "slot": "arena" },
+    { "id": "cos_title_vanguard_v1", "title": "Vanguard title", "slot": "title" }
+  ],
+  "quests": [
+    {
+      "id": "q_daily_claim",
+      "scope": "daily",
+      "title": "Claim daily reward",
+      "target": 1,
+      "track": "daily_claim",
+      "reward": { "gold": 30, "shards": 2, "keys": 0, "battlePassXp": 10, "catchUpTokens": 0 }
+    },
+    {
+      "id": "q_daily_submit",
+      "scope": "daily",
+      "title": "Submit to daily leaderboard",
+      "target": 1,
+      "track": "leaderboard_submit",
+      "reward": { "gold": 45, "shards": 3, "keys": 0, "battlePassXp": 15, "catchUpTokens": 0 }
+    },
+    {
+      "id": "q_weekly_lb",
+      "scope": "weekly",
+      "title": "Daily leaderboard submits (5×)",
+      "target": 5,
+      "track": "leaderboard_submit",
+      "reward": { "gold": 120, "shards": 15, "keys": 0, "battlePassXp": 55, "catchUpTokens": 0 }
+    },
+    {
+      "id": "q_weekly_shop",
+      "scope": "weekly",
+      "title": "Buy from daily shop (3×)",
+      "target": 3,
+      "track": "shop_buy",
+      "reward": { "gold": 200, "shards": 25, "keys": 1, "battlePassXp": 80, "catchUpTokens": 1 }
+    }
+  ],
+  "battlePassTiers": [
+    { "tier": 1, "xpCumulative": 50, "freeReward": { "gold": 25, "shards": 2, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0 } },
+    { "tier": 2, "xpCumulative": 120, "freeReward": { "gold": 35, "shards": 4, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0 } },
+    { "tier": 3, "xpCumulative": 280, "freeReward": { "gold": 50, "shards": 6, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0, "cosmeticId": "cos_frame_kindrail_v1" } },
+    {
+      "tier": 4,
+      "xpCumulative": 500,
+      "freeReward": { "gold": 80, "shards": 10, "keys": 1, "battlePassXp": 0, "catchUpTokens": 0 },
+      "premiumReward": { "gold": 40, "shards": 20, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0 }
+    },
+    {
+      "tier": 5,
+      "xpCumulative": 800,
+      "freeReward": { "gold": 120, "shards": 15, "keys": 1, "battlePassXp": 0, "catchUpTokens": 1 },
+      "premiumReward": { "gold": 60, "shards": 30, "keys": 1, "battlePassXp": 0, "catchUpTokens": 0 }
+    },
+    {
+      "tier": 6,
+      "xpCumulative": 1100,
+      "freeReward": { "gold": 150, "shards": 22, "keys": 1, "battlePassXp": 0, "catchUpTokens": 0 },
+      "premiumReward": { "gold": 90, "shards": 35, "keys": 1, "battlePassXp": 0, "catchUpTokens": 0 }
+    },
+    {
+      "tier": 7,
+      "xpCumulative": 1450,
+      "freeReward": {
+        "gold": 200,
+        "shards": 28,
+        "keys": 2,
+        "battlePassXp": 0,
+        "catchUpTokens": 0,
+        "cosmeticId": "cos_arena_twilight_v1"
+      },
+      "premiumReward": {
+        "gold": 100,
+        "shards": 45,
+        "keys": 1,
+        "battlePassXp": 0,
+        "catchUpTokens": 0,
+        "cosmeticId": "cos_title_vanguard_v1"
+      }
+    }
+  ]
+}

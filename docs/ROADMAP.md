@@ -222,7 +222,8 @@ See: `docs/PHASE7_NATIVE.md`
 ## Faz 8–14 — Full game roadmap (v1)
 
 See: `docs/ROADMAP_V1_FULL.md`  
-**Faz 13 (prod deploy + Postgres + backup + analytics ingest):** `docs/PHASE13_PRODUCTION.md`
+**Faz 13 (prod deploy + Postgres + backup + analytics ingest):** `docs/PHASE13_PRODUCTION.md`  
+**R8 yayın checklist:** `docs/R8_LAUNCH_CHECKLIST.md`
 
 ---
 

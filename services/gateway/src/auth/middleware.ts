@@ -1,6 +1,10 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { verifyToken } from "./token.js";
 
+function isRefreshPayload(payload: { typ?: string }): boolean {
+  return payload.typ === "refresh";
+}
+
 declare module "fastify" {
   interface FastifyRequest {
     krUserId?: string;
@@ -17,6 +21,7 @@ export function registerAuth(app: FastifyInstance, opts: { secret: string }) {
     if (!m) return;
     const payload = verifyToken(m[1], opts.secret);
     if (!payload) return;
+    if (isRefreshPayload(payload)) return;
     req.krUserId = payload.userId;
   });
 }

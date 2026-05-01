@@ -10,7 +10,9 @@
     "mobile:sync": "pnpm --filter @kindrail/companion-web build && pnpm --filter @kindrail/companion-mobile cap:sync",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "test:e2e": "pnpm --filter @kindrail/companion-web run test:e2e",
+    "test:e2e:smoke": "bash scripts/ci-e2e-smoke.sh"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

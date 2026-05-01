@@ -20,13 +20,18 @@
         "token": {
           "type": "string",
           "minLength": 20
+        },
+        "refreshToken": {
+          "type": "string",
+          "minLength": 20
         }
       },
       "required": [
         "v",
         "ok",
         "userId",
-        "token"
+        "token",
+        "refreshToken"
       ],
       "additionalProperties": false
     }

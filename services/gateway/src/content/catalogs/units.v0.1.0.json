@@ -1,0 +1,66 @@
+{
+  "v": 1,
+  "contentVersion": "v0.1.0",
+  "units": [
+    { "id": "soldier", "name": "Soldier", "role": "tank", "base": { "hp": 30, "atk": 8, "def": 2, "spd": 10 } },
+    { "id": "brute", "name": "Brute", "role": "tank", "base": { "hp": 40, "atk": 7, "def": 3, "spd": 8 } },
+    { "id": "knight", "name": "Knight", "role": "tank", "base": { "hp": 36, "atk": 8, "def": 4, "spd": 9 } },
+    { "id": "guardian", "name": "Guardian", "role": "tank", "base": { "hp": 44, "atk": 6, "def": 5, "spd": 7 } },
+    { "id": "warden", "name": "Warden", "role": "tank", "base": { "hp": 38, "atk": 7, "def": 4, "spd": 9 } },
+    { "id": "paladin", "name": "Paladin", "role": "tank", "base": { "hp": 34, "atk": 8, "def": 3, "spd": 9 } },
+    { "id": "archer", "name": "Archer", "role": "dps", "base": { "hp": 18, "atk": 10, "def": 1, "spd": 12 } },
+    { "id": "rogue", "name": "Rogue", "role": "dps", "base": { "hp": 20, "atk": 9, "def": 1, "spd": 14 } },
+    { "id": "ranger", "name": "Ranger", "role": "dps", "base": { "hp": 22, "atk": 9, "def": 2, "spd": 13 } },
+    { "id": "mage", "name": "Mage", "role": "dps", "base": { "hp": 16, "atk": 11, "def": 0, "spd": 11 } },
+    { "id": "berserker", "name": "Berserker", "role": "dps", "base": { "hp": 26, "atk": 10, "def": 1, "spd": 10 } },
+    { "id": "assassin", "name": "Assassin", "role": "dps", "base": { "hp": 19, "atk": 10, "def": 1, "spd": 15 } },
+    { "id": "spearman", "name": "Spearman", "role": "dps", "base": { "hp": 24, "atk": 9, "def": 2, "spd": 10 } },
+    { "id": "warlock", "name": "Warlock", "role": "dps", "base": { "hp": 21, "atk": 10, "def": 1, "spd": 11 } },
+    { "id": "cleric", "name": "Cleric", "role": "support", "base": { "hp": 26, "atk": 6, "def": 2, "spd": 10 } },
+    { "id": "monk", "name": "Monk", "role": "support", "base": { "hp": 28, "atk": 7, "def": 2, "spd": 12 } },
+    { "id": "bard", "name": "Bard", "role": "support", "base": { "hp": 22, "atk": 7, "def": 1, "spd": 13 } },
+    { "id": "witch", "name": "Witch", "role": "control", "base": { "hp": 20, "atk": 8, "def": 1, "spd": 12 } },
+    { "id": "druid", "name": "Druid", "role": "support", "base": { "hp": 25, "atk": 7, "def": 2, "spd": 10 } },
+    { "id": "engineer", "name": "Engineer", "role": "support", "base": { "hp": 24, "atk": 7, "def": 3, "spd": 9 } },
+    { "id": "sentinel", "name": "Sentinel", "role": "control", "base": { "hp": 32, "atk": 7, "def": 3, "spd": 9 } },
+    { "id": "hexer", "name": "Hexer", "role": "control", "base": { "hp": 19, "atk": 8, "def": 1, "spd": 11 } },
+    { "id": "champion", "name": "Champion", "role": "tank", "base": { "hp": 35, "atk": 9, "def": 3, "spd": 10 } },
+    { "id": "duelist", "name": "Duelist", "role": "dps", "base": { "hp": 23, "atk": 9, "def": 2, "spd": 13 } }
+  ],
+  "synergies": [
+    {
+      "id": "frontline",
+      "name": "Frontline",
+      "requireRole": "tank",
+      "minCount": 2,
+      "bonus": { "defFlat": 1, "hpFlat": 2 }
+    },
+    {
+      "id": "glass_cannon",
+      "name": "Glass Cannon",
+      "requireRole": "dps",
+      "minCount": 3,
+      "bonus": { "atkFlat": 2 }
+    },
+    {
+      "id": "backline",
+      "name": "Backline",
+      "requireRole": "support",
+      "minCount": 2,
+      "bonus": { "spdFlat": 1, "hpFlat": 2 }
+    },
+    {
+      "id": "crowd_control",
+      "name": "Crowd Control",
+      "requireRole": "control",
+      "minCount": 2,
+      "bonus": { "atkFlat": 1, "spdFlat": 1 }
+    }
+  ],
+  "augments": [
+    { "id": "warmachine", "name": "War Machine", "bonus": { "atkFlat": 2 } },
+    { "id": "bulwark", "name": "Bulwark", "bonus": { "hpFlat": 4, "defFlat": 1 } },
+    { "id": "swift_rails", "name": "Swift Rails", "bonus": { "spdFlat": 2 } },
+    { "id": "iron_skin", "name": "Iron Skin", "bonus": { "defFlat": 2, "hpFlat": 2 } }
+  ]
+}

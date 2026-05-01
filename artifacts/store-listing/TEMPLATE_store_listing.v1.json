@@ -1,0 +1,31 @@
+{
+  "v": 1,
+  "appName": "KINDRAIL",
+  "subtitleHint": "Async auto-battler — daily battles, meta progression, fair monetization (no pay-to-win).",
+  "shortDescription": {
+    "en": "Build a squad, run daily battles, climb the pass — strategic auto-combat you can finish in minutes.",
+    "tr": "Kadronu kur, günlük savaşları oyna, pass'te ilerle — dakikalar içinde bitebilen stratejik auto-combat."
+  },
+  "fullDescription": {
+    "en": "PLACEHOLDER: Expand with features (replay share, seasons, cosmetics). Replace before submission.",
+    "tr": "PLACEHOLDER: Özellikleri mağaza diline göre genişletin; gönderim öncesi güncelleyin."
+  },
+  "keywordsSuggest": ["strategy", "auto battler", "async", "pvp", "battle pass"],
+  "urls": {
+    "supportEmailPlaceholder": "support@example.com",
+    "marketingSitePlaceholder": "https://example.com",
+    "privacyPolicyFromGateway": "KR_LEGAL_PRIVACY_URL",
+    "termsFromGateway": "KR_LEGAL_TERMS_URL"
+  },
+  "visualChecklist": {
+    "iosIconPx": 1024,
+    "androidAdaptiveIconPx": 512,
+    "screenshots": [
+      "iphone_6.7_primary",
+      "iphone_6.5_legacy",
+      "ipad_13_optional",
+      "android_phone_16_9",
+      "android_7inch_tablet_optional"
+    ]
+  }
+}

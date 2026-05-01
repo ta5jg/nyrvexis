@@ -1,0 +1,134 @@
+{
+  "$ref": "#/definitions/KrAdminBalanceGetResponse",
+  "definitions": {
+    "KrAdminBalanceGetResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "override": {
+          "type": "object",
+          "properties": {
+            "dailyClaimGold": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 120
+            },
+            "dailyClaimShards": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 8
+            },
+            "dailyClaimKeys": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "shopGoldMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "upgradeGoldMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "upgradeShardMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "battlePassXpPerDailyClaim": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 40
+            },
+            "battlePassXpPerLeaderboard": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 35
+            },
+            "battlePassXpDailyCap": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 500
+            }
+          },
+          "additionalProperties": false
+        },
+        "effective": {
+          "type": "object",
+          "properties": {
+            "dailyClaimGold": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 120
+            },
+            "dailyClaimShards": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 8
+            },
+            "dailyClaimKeys": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "shopGoldMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "upgradeGoldMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "upgradeShardMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "battlePassXpPerDailyClaim": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 40
+            },
+            "battlePassXpPerLeaderboard": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 35
+            },
+            "battlePassXpDailyCap": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 500
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "override",
+        "effective"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

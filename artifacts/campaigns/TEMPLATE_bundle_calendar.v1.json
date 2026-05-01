@@ -1,0 +1,26 @@
+{
+  "v": 1,
+  "notes": "Operations calendar — UTC. Does not auto-activate in gateway until wired to content pipeline; copy rows into release notes and store consoles.",
+  "campaigns": [
+    {
+      "campaignId": "example_season_kickoff",
+      "titleKey": "campaign.example_season_kickoff.title",
+      "bodyKey": "campaign.example_season_kickoff.body",
+      "startsAtUtc": "2026-06-01T00:00:00Z",
+      "endsAtUtc": "2026-06-07T23:59:59Z",
+      "highlightOfferIds": ["starter_pack_v1"],
+      "channels": ["push_optional", "store_listing", "in_game_banner_future"],
+      "owner": "live_ops"
+    },
+    {
+      "campaignId": "example_theme_bundle",
+      "titleKey": "campaign.example_theme_bundle.title",
+      "bodyKey": "campaign.example_theme_bundle.body",
+      "startsAtUtc": "2026-07-15T12:00:00Z",
+      "endsAtUtc": "2026-07-22T12:00:00Z",
+      "highlightOfferIds": [],
+      "channels": ["iap_promo_future"],
+      "owner": "live_ops"
+    }
+  ]
+}

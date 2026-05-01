@@ -1,0 +1,79 @@
+{
+  "$ref": "#/definitions/KrQuestDef",
+  "definitions": {
+    "KrQuestDef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "daily",
+            "weekly"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 999
+        },
+        "track": {
+          "type": "string",
+          "enum": [
+            "daily_claim",
+            "leaderboard_submit",
+            "shop_buy"
+          ]
+        },
+        "reward": {
+          "type": "object",
+          "properties": {
+            "gold": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "shards": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "keys": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "battlePassXp": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "catchUpTokens": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "scope",
+        "title",
+        "target",
+        "track",
+        "reward"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

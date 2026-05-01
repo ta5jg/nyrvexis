@@ -1,0 +1,222 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="256" viewBox="0 0 768 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1020" stop-opacity="1"/>
+      <stop offset="1" stop-color="#070a12" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="768" height="256" fill="url(#bg)"/>
+
+  <!--
+    Sprite atlas (SVG) placeholder art.
+    Cell size: 64x64. Grid: 12 cols x 4 rows.
+    Keys are defined in atlas.json and map to these cells.
+  -->
+
+  <g font-family="system-ui, -apple-system, ui-sans-serif" font-size="9" fill="rgba(255,255,255,0.75)">
+    <!-- Row 0 -->
+    <g transform="translate(0,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <text x="8" y="16">soldier idle0</text>
+    </g>
+    <g transform="translate(64,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.90"/>
+      <text x="8" y="16">soldier idle1</text>
+    </g>
+    <g transform="translate(128,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <text x="8" y="16">soldier idle2</text>
+    </g>
+    <g transform="translate(192,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.88"/>
+      <text x="8" y="16">soldier idle3</text>
+    </g>
+    <g transform="translate(256,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <path d="M18 34 L52 22" stroke="rgba(255,255,255,0.75)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">soldier atk0</text>
+    </g>
+    <g transform="translate(320,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <path d="M16 34 L54 18" stroke="rgba(255,255,255,0.78)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">soldier atk1</text>
+    </g>
+    <g transform="translate(384,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <path d="M14 34 L56 14" stroke="rgba(255,255,255,0.70)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">soldier atk2</text>
+    </g>
+    <g transform="translate(448,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.40"/>
+      <path d="M16 18 L48 50" stroke="rgba(0,0,0,0.28)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M48 18 L16 50" stroke="rgba(0,0,0,0.24)" stroke-width="6" stroke-linecap="round"/>
+      <text x="8" y="16">soldier death</text>
+    </g>
+
+    <!-- Archer row0 tail -->
+    <g transform="translate(512,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M46 18 C32 22 24 34 24 48" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"/>
+      <text x="8" y="16">archer idle0</text>
+    </g>
+    <g transform="translate(576,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.90"/>
+      <path d="M46 18 C32 22 24 34 24 48" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round"/>
+      <text x="8" y="16">archer idle1</text>
+    </g>
+    <g transform="translate(640,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M50 18 L26 42" stroke="rgba(255,255,255,0.75)" stroke-width="4" stroke-linecap="round"/>
+      <text x="8" y="16">archer atk0</text>
+    </g>
+    <g transform="translate(704,0)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M52 20 L28 44" stroke="rgba(255,255,255,0.78)" stroke-width="4" stroke-linecap="round"/>
+      <text x="8" y="16">archer atk1</text>
+    </g>
+
+    <!-- Row 1 -->
+    <g transform="translate(0,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M16 18 L48 50" stroke="rgba(0,0,0,0.28)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M48 18 L16 50" stroke="rgba(0,0,0,0.24)" stroke-width="6" stroke-linecap="round"/>
+      <text x="8" y="16">archer death</text>
+    </g>
+    <g transform="translate(64,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M42 18 L58 26" stroke="rgba(255,255,255,0.65)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">archer atk2</text>
+    </g>
+
+    <!-- Mage -->
+    <g transform="translate(128,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <circle cx="44" cy="16" r="8" fill="rgba(255,215,64,0.70)"/>
+      <text x="8" y="16">mage idle0</text>
+    </g>
+    <g transform="translate(192,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.90"/>
+      <circle cx="44" cy="16" r="8" fill="rgba(255,215,64,0.65)"/>
+      <text x="8" y="16">mage idle1</text>
+    </g>
+    <g transform="translate(256,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M40 16 L60 26" stroke="rgba(255,215,64,0.75)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">mage atk0</text>
+    </g>
+    <g transform="translate(320,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M42 18 L60 30" stroke="rgba(255,215,64,0.78)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">mage atk1</text>
+    </g>
+    <g transform="translate(384,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.92"/>
+      <path d="M44 20 L60 36" stroke="rgba(255,215,64,0.65)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">mage atk2</text>
+    </g>
+    <g transform="translate(448,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#ff5c7c" fill-opacity="0.40"/>
+      <path d="M16 18 L48 50" stroke="rgba(0,0,0,0.28)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M48 18 L16 50" stroke="rgba(0,0,0,0.24)" stroke-width="6" stroke-linecap="round"/>
+      <text x="8" y="16">mage death</text>
+    </g>
+
+    <!-- Cleric -->
+    <g transform="translate(512,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#7c5cff" fill-opacity="0.92"/>
+      <path d="M32 14 V50" stroke="rgba(158,255,255,0.70)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M22 30 H42" stroke="rgba(158,255,255,0.55)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">cleric idle0</text>
+    </g>
+    <g transform="translate(576,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#7c5cff" fill-opacity="0.90"/>
+      <path d="M32 14 V50" stroke="rgba(158,255,255,0.70)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M22 30 H42" stroke="rgba(158,255,255,0.55)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">cleric idle1</text>
+    </g>
+    <g transform="translate(640,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#7c5cff" fill-opacity="0.92"/>
+      <path d="M32 14 V52" stroke="rgba(158,255,255,0.75)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M44 18 C52 26 56 34 60 44" stroke="rgba(158,255,255,0.35)" stroke-width="4" stroke-linecap="round"/>
+      <text x="8" y="16">cleric atk0</text>
+    </g>
+    <g transform="translate(704,64)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#7c5cff" fill-opacity="0.92"/>
+      <path d="M32 14 V52" stroke="rgba(158,255,255,0.78)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M46 18 C54 26 58 34 62 44" stroke="rgba(158,255,255,0.30)" stroke-width="4" stroke-linecap="round"/>
+      <text x="8" y="16">cleric atk1</text>
+    </g>
+
+    <!-- Row 2: cleric death + witch + knight -->
+    <g transform="translate(0,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#7c5cff" fill-opacity="0.40"/>
+      <path d="M16 18 L48 50" stroke="rgba(0,0,0,0.28)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M48 18 L16 50" stroke="rgba(0,0,0,0.24)" stroke-width="6" stroke-linecap="round"/>
+      <text x="8" y="16">cleric death</text>
+    </g>
+    <g transform="translate(64,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#56c2ff" fill-opacity="0.92"/>
+      <path d="M22 18 L32 28 L42 18" stroke="rgba(208,124,255,0.65)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="8" y="16">witch idle0</text>
+    </g>
+    <g transform="translate(128,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#56c2ff" fill-opacity="0.90"/>
+      <path d="M22 19 L32 29 L42 19" stroke="rgba(208,124,255,0.65)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="8" y="16">witch idle1</text>
+    </g>
+    <g transform="translate(192,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#56c2ff" fill-opacity="0.92"/>
+      <path d="M44 16 L62 30" stroke="rgba(208,124,255,0.78)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">witch atk0</text>
+    </g>
+    <g transform="translate(256,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#56c2ff" fill-opacity="0.92"/>
+      <path d="M46 18 L62 34" stroke="rgba(208,124,255,0.80)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">witch atk1</text>
+    </g>
+    <g transform="translate(320,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#56c2ff" fill-opacity="0.92"/>
+      <path d="M48 20 L62 40" stroke="rgba(208,124,255,0.65)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">witch atk2</text>
+    </g>
+    <g transform="translate(384,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#56c2ff" fill-opacity="0.40"/>
+      <path d="M16 18 L48 50" stroke="rgba(0,0,0,0.28)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M48 18 L16 50" stroke="rgba(0,0,0,0.24)" stroke-width="6" stroke-linecap="round"/>
+      <text x="8" y="16">witch death</text>
+    </g>
+
+    <g transform="translate(448,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <path d="M24 14 H40 L44 24 V42 C44 50 38 54 32 54 C26 54 20 50 20 42 V24 Z"
+        stroke="rgba(0,0,0,0.22)" stroke-width="4" stroke-linejoin="round"/>
+      <text x="8" y="16">knight idle0</text>
+    </g>
+    <g transform="translate(512,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.90"/>
+      <path d="M24 15 H40 L44 25 V43 C44 51 38 55 32 55 C26 55 20 51 20 43 V25 Z"
+        stroke="rgba(0,0,0,0.22)" stroke-width="4" stroke-linejoin="round"/>
+      <text x="8" y="16">knight idle1</text>
+    </g>
+    <g transform="translate(576,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <path d="M32 14 V54" stroke="rgba(255,255,255,0.70)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M36 16 L62 34" stroke="rgba(255,255,255,0.55)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">knight atk0</text>
+    </g>
+    <g transform="translate(640,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.92"/>
+      <path d="M32 14 V54" stroke="rgba(255,255,255,0.72)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M34 16 L62 38" stroke="rgba(255,255,255,0.55)" stroke-width="5" stroke-linecap="round"/>
+      <text x="8" y="16">knight atk1</text>
+    </g>
+    <g transform="translate(704,128)">
+      <rect x="2" y="2" width="60" height="60" rx="12" fill="#35d07f" fill-opacity="0.40"/>
+      <path d="M16 18 L48 50" stroke="rgba(0,0,0,0.28)" stroke-width="6" stroke-linecap="round"/>
+      <path d="M48 18 L16 50" stroke="rgba(0,0,0,0.24)" stroke-width="6" stroke-linecap="round"/>
+      <text x="8" y="16">knight death</text>
+    </g>
+
+    <!-- Row 3 reserved / unused for now -->
+  </g>
+</svg>

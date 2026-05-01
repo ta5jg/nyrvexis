@@ -12,7 +12,14 @@ build
 .kr-data-*
 .kr-data-*/**
 .kr-data-*/
-.kr-data-*/** 
+.kr-data-*/**
+
+playwright-report/
+test-results/
+
+__pycache__/
+*.py[cod]
+
 .env
 .env.*
 !.env.example

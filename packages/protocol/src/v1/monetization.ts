@@ -59,3 +59,32 @@ export const KrPurchaseStatusResponse = z
   .strict();
 export type KrPurchaseStatusResponse = z.infer<typeof KrPurchaseStatusResponse>;
 
+/** R7 — mağaza satın alındıktan sonra sunucuda doğrulama (Premium Battle Pass açma). */
+export const KrIapPlatform = z.enum(["ios", "android"]);
+export type KrIapPlatform = z.infer<typeof KrIapPlatform>;
+
+export const KrBattlePassIapVerifyRequest = z
+  .object({
+    v: z.literal(1),
+    platform: KrIapPlatform,
+    /** App Store veya Play Console‘daki ürün kimliği (gateway env ile eşleşmeli). */
+    productId: z.string().min(1).max(120),
+    /**
+     * iOS: App Receipt (base64) veya `verifyReceipt` gövdesi için kullanılan payload.
+     * Android: satın alma `purchaseToken`.
+     */
+    receipt: z.string().min(4).max(500_000)
+  })
+  .strict();
+export type KrBattlePassIapVerifyRequest = z.infer<typeof KrBattlePassIapVerifyRequest>;
+
+export const KrBattlePassIapVerifyResponseOk = z
+  .object({
+    v: z.literal(1),
+    ok: z.literal(true),
+    premium: z.literal(true),
+    seasonId: z.string().min(1)
+  })
+  .strict();
+export type KrBattlePassIapVerifyResponseOk = z.infer<typeof KrBattlePassIapVerifyResponseOk>;
+

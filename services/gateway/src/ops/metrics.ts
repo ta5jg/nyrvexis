@@ -9,6 +9,8 @@ export type MetricsSnapshot = {
   pushDailySkipped: number;
   pushDailyFailed: number;
   pushDailyRemoved: number;
+  analyticsEventsIngested: number;
+  analyticsEventsFailed: number;
 };
 
 export class Metrics {
@@ -22,6 +24,16 @@ export class Metrics {
   pushDailySkipped = 0;
   pushDailyFailed = 0;
   pushDailyRemoved = 0;
+  analyticsEventsIngested = 0;
+  analyticsEventsFailed = 0;
+
+  incAnalyticsEventsFailed() {
+    this.analyticsEventsFailed += 1;
+  }
+
+  incAnalyticsEventsIngested() {
+    this.analyticsEventsIngested += 1;
+  }
 
   recordPushDailyRun(o: {
     scanned: number;
@@ -58,7 +70,9 @@ export class Metrics {
       pushDailySent: this.pushDailySent,
       pushDailySkipped: this.pushDailySkipped,
       pushDailyFailed: this.pushDailyFailed,
-      pushDailyRemoved: this.pushDailyRemoved
+      pushDailyRemoved: this.pushDailyRemoved,
+      analyticsEventsIngested: this.analyticsEventsIngested,
+      analyticsEventsFailed: this.analyticsEventsFailed
     };
   }
 
@@ -108,6 +122,14 @@ export class Metrics {
     lines.push(`# HELP kr_push_daily_removed_total Subscriptions removed after 410 in daily job`);
     lines.push(`# TYPE kr_push_daily_removed_total counter`);
     lines.push(`kr_push_daily_removed_total{service="${service}"} ${this.pushDailyRemoved}`);
+
+    lines.push(`# HELP kr_analytics_events_ingested_total Accepted analytics events (Postgres)`);
+    lines.push(`# TYPE kr_analytics_events_ingested_total counter`);
+    lines.push(`kr_analytics_events_ingested_total{service="${service}"} ${this.analyticsEventsIngested}`);
+
+    lines.push(`# HELP kr_analytics_events_failed_total Failed / rejected analytics events`);
+    lines.push(`# TYPE kr_analytics_events_failed_total counter`);
+    lines.push(`kr_analytics_events_failed_total{service="${service}"} ${this.analyticsEventsFailed}`);
 
     return lines.join("\n") + "\n";
   }

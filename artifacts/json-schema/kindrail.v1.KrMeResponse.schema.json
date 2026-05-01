@@ -20,6 +20,17 @@
         "createdAtMs": {
           "type": "integer",
           "minimum": 0
+        },
+        "email": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "email"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [

@@ -1,7 +1,11 @@
 import type { FileStore } from "../store/store.js";
+import type { PgStore } from "../store/pgStore.js";
 import { getOffer } from "./offers.js";
 
-export function grantOfferToUser(store: FileStore, input: { userId: string; offerId: string; purchaseId: string }) {
+export function grantOfferToUser(
+  store: FileStore | PgStore,
+  input: { userId: string; offerId: string; purchaseId: string }
+) {
   const offer = getOffer(input.offerId);
   if (!offer) throw new Error("UNKNOWN_OFFER");
 

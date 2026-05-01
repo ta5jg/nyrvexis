@@ -7,27 +7,33 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && node scripts/copy-catalogs.mjs",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "db:verify-analytics-db": "tsx scripts/verify-analytics-db.ts",
+    "db:import-filestore": "tsx scripts/import-filestore-to-pg.ts",
+    "content:validate": "tsx scripts/validate-content.ts"
   },
   "dependencies": {
     "@fastify/cors": "^10.1.0",
     "@kindrail/protocol": "workspace:*",
     "fastify": "^5.5.0",
+    "google-auth-library": "^9.0.0",
     "nanoid": "^5.1.6",
+    "pg": "^8.20.0",
     "web-push": "^3.6.7",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",
-    "@types/web-push": "^3.6.4",
     "@types/node": "^24.3.0",
+    "@types/pg": "^8.20.0",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9.30.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.41.0"
   }
 }
-

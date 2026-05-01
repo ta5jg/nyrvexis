@@ -1,0 +1,9 @@
+{
+  "v": 1,
+  "eventId": "e0",
+  "title": "Launch Week Event",
+  "startsAtUtc": "2026-04-01T00:00:00Z",
+  "endsAtUtc": "2026-05-01T00:00:00Z",
+  "flag": "event_launch_week"
+}
+

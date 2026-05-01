@@ -1,10 +1,16 @@
 import crypto from "node:crypto";
 
-type TokenPayload = {
+export type KrTokenTyp = "access" | "refresh";
+
+export type TokenPayload = {
   v: 1;
+  /** Missing on legacy tokens; treated as access in middleware. */
+  typ?: KrTokenTyp;
   userId: string;
   iatMs: number;
   expMs: number;
+  /** Rotation id for refresh tokens (must exist in gateway `refreshSessions`). */
+  jti?: string;
 };
 
 function b64url(buf: Buffer): string {
@@ -47,6 +53,8 @@ export function verifyToken(token: string, secret: string): TokenPayload | null 
   try {
     const payload = JSON.parse(unb64url(p).toString("utf8")) as TokenPayload;
     if (payload.v !== 1) return null;
+    if (typeof payload.userId !== "string" || payload.userId.length < 1) return null;
+    if (typeof payload.iatMs !== "number" || typeof payload.expMs !== "number") return null;
     if (Date.now() > payload.expMs) return null;
     return payload;
   } catch {
@@ -54,11 +62,12 @@ export function verifyToken(token: string, secret: string): TokenPayload | null 
   }
 }
 
-export function issueSessionToken(input: { userId: string; ttlMs: number; secret: string }): string {
+export function issueAccessToken(input: { userId: string; ttlMs: number; secret: string }): string {
   const now = Date.now();
   return signToken(
     {
       v: 1,
+      typ: "access",
       userId: input.userId,
       iatMs: now,
       expMs: now + input.ttlMs
@@ -67,3 +76,22 @@ export function issueSessionToken(input: { userId: string; ttlMs: number; secret
   );
 }
 
+export function issueRefreshToken(input: {
+  userId: string;
+  ttlMs: number;
+  secret: string;
+  jti: string;
+}): string {
+  const now = Date.now();
+  return signToken(
+    {
+      v: 1,
+      typ: "refresh",
+      userId: input.userId,
+      iatMs: now,
+      expMs: now + input.ttlMs,
+      jti: input.jti
+    },
+    input.secret
+  );
+}

@@ -2,6 +2,21 @@ import {
   HealthResponse,
   KrAuthGuestRequest,
   KrAuthGuestResponse,
+  KrAuthRefreshRequest,
+  KrAuthRefreshResponse,
+  KrAuthLogoutRequest,
+  KrAuthLogoutResponse,
+  KrAuthRegisterEmailRequest,
+  KrAuthRegisterEmailResponse,
+  KrAuthLoginEmailRequest,
+  KrAuthLoginEmailResponse,
+  KrAuthLinkEmailRequest,
+  KrAuthLinkEmailResponse,
+  KrAuthGoogleRequest,
+  KrAuthGoogleResponse,
+  KrAuthLinkGoogleRequest,
+  KrAuthLinkGoogleResponse,
+  KrAuthSessionIssued,
   KrBattleSimRequest,
   KrBattleSimResult,
   KrCatalogResponse,
@@ -29,13 +44,28 @@ import {
   KrCheckoutCreateResponse,
   KrOffersResponse,
   KrPurchaseStatusResponse,
+  KrBattlePassIapVerifyRequest,
+  KrBattlePassIapVerifyResponseOk,
   KrPushWebSubscribeRequest,
   KrPushWebSubscribeResponse,
   KrPushWebUnsubscribeRequest,
   KrPushWebUnsubscribeResponse,
   KrPushWebVapidResponse,
   KrInternalPushDailyRequest,
-  KrInternalPushDailyResponse
+  KrInternalPushDailyResponse,
+  KrMetaProgressResponse,
+  KrMetaQuestClaimRequest,
+  KrMetaQuestClaimResponse,
+  KrMetaBattlePassClaimRequest,
+  KrMetaBattlePassClaimResponse,
+  KrSeasonViewResponse,
+  KrCosmeticsCatalogResponse,
+  KrCosmeticsMeResponse,
+  KrCosmeticsEquipRequest,
+  KrCosmeticsEquipResponse,
+  KrLegalPublicResponse,
+  KrAnalyticsEventRequest,
+  KrAnalyticsEventResponse
 } from "@kindrail/protocol";
 
 export type KindrailSdkOptions = {
@@ -55,10 +85,19 @@ function defaultFetch(input: Parameters<typeof fetch>[0], init?: Parameters<type
   return globalThis.fetch.call(globalThis, input, init);
 }
 
+function errorFromGateway(json: unknown, fallback: string): string {
+  if (json && typeof json === "object" && "error" in json) {
+    const e = (json as { error?: unknown }).error;
+    if (typeof e === "string" && e.length > 0) return e;
+  }
+  return fallback;
+}
+
 export class KindrailSdk {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
   private token: string | null = null;
+  private refreshToken: string | null = null;
 
   constructor(opts: KindrailSdkOptions) {
     this.baseUrl = opts.baseUrl.replace(/\/+$/, "");
@@ -67,6 +106,15 @@ export class KindrailSdk {
 
   setToken(token: string | null) {
     this.token = token;
+  }
+
+  setRefreshToken(token: string | null) {
+    this.refreshToken = token;
+  }
+
+  private applyIssuedSession(out: KrAuthSessionIssued) {
+    this.setToken(out.token);
+    this.setRefreshToken(out.refreshToken);
   }
 
   private authHeaders(): Record<string, string> {
@@ -81,6 +129,31 @@ export class KindrailSdk {
     if (!res.ok) throw new Error(`health failed: ${res.status}`);
     const json = await res.json();
     return HealthResponse.parse(json);
+  }
+
+  async legalPublic(): Promise<KrLegalPublicResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/legal/public`, {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) throw new Error(`legalPublic failed: ${res.status}`);
+    const json = await res.json();
+    return KrLegalPublicResponse.parse(json);
+  }
+
+  async analyticsEvent(req: KrAnalyticsEventRequest): Promise<KrAnalyticsEventResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/analytics/event`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `analyticsEvent failed: ${res.status}`));
+    return KrAnalyticsEventResponse.parse(json);
   }
 
   async battleSim(req: KrBattleSimRequest): Promise<KrBattleSimResult> {
@@ -116,10 +189,127 @@ export class KindrailSdk {
       },
       body: JSON.stringify(req)
     });
-    if (!res.ok) throw new Error(`authGuest failed: ${res.status}`);
     const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authGuest failed: ${res.status}`));
     const out = KrAuthGuestResponse.parse(json);
+    this.applyIssuedSession(out);
+    return out;
+  }
+
+  async authRefresh(req: KrAuthRefreshRequest): Promise<KrAuthRefreshResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authRefresh failed: ${res.status}`));
+    const out = KrAuthRefreshResponse.parse(json);
     this.setToken(out.token);
+    this.setRefreshToken(out.refreshToken);
+    return out;
+  }
+
+  async authLogout(): Promise<KrAuthLogoutResponse> {
+    const body: KrAuthLogoutRequest = this.refreshToken
+      ? { v: 1, refreshToken: this.refreshToken }
+      : { v: 1 };
+    const res = await this.fetchImpl(`${this.baseUrl}/auth/logout`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(body)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authLogout failed: ${res.status}`));
+    return KrAuthLogoutResponse.parse(json);
+  }
+
+  async authRegisterEmail(req: KrAuthRegisterEmailRequest): Promise<KrAuthRegisterEmailResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/auth/register-email`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authRegisterEmail failed: ${res.status}`));
+    const out = KrAuthRegisterEmailResponse.parse(json);
+    this.applyIssuedSession(out);
+    return out;
+  }
+
+  async authLoginEmail(req: KrAuthLoginEmailRequest): Promise<KrAuthLoginEmailResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/auth/login-email`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authLoginEmail failed: ${res.status}`));
+    const out = KrAuthLoginEmailResponse.parse(json);
+    this.applyIssuedSession(out);
+    return out;
+  }
+
+  async authLinkEmail(req: KrAuthLinkEmailRequest): Promise<KrAuthLinkEmailResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/auth/link-email`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authLinkEmail failed: ${res.status}`));
+    const out = KrAuthLinkEmailResponse.parse(json);
+    this.applyIssuedSession(out);
+    return out;
+  }
+
+  async authGoogle(req: KrAuthGoogleRequest): Promise<KrAuthGoogleResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/auth/oauth/google`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authGoogle failed: ${res.status}`));
+    const out = KrAuthGoogleResponse.parse(json);
+    this.applyIssuedSession(out);
+    return out;
+  }
+
+  async authLinkGoogle(req: KrAuthLinkGoogleRequest): Promise<KrAuthLinkGoogleResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/auth/link-google`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `authLinkGoogle failed: ${res.status}`));
+    const out = KrAuthLinkGoogleResponse.parse(json);
+    this.applyIssuedSession(out);
     return out;
   }
 
@@ -323,7 +513,16 @@ export class KindrailSdk {
       },
       body: JSON.stringify(req)
     });
-    if (!res.ok) throw new Error(`checkoutCreate failed: ${res.status}`);
+    if (!res.ok) {
+      let suffix = String(res.status);
+      try {
+        const body = (await res.json()) as { error?: unknown };
+        if (typeof body?.error === "string" && body.error.length > 0) suffix = `${res.status}: ${body.error}`;
+      } catch {
+        /* ignore */
+      }
+      throw new Error(`checkoutCreate failed: ${suffix}`);
+    }
     const json = await res.json();
     return KrCheckoutCreateResponse.parse(json);
   }
@@ -336,6 +535,107 @@ export class KindrailSdk {
     if (!res.ok) throw new Error(`purchaseStatus failed: ${res.status}`);
     const json = await res.json();
     return KrPurchaseStatusResponse.parse(json);
+  }
+
+  async seasonView(): Promise<KrSeasonViewResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/season/view`, {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) throw new Error(`seasonView failed: ${res.status}`);
+    const json = await res.json();
+    return KrSeasonViewResponse.parse(json);
+  }
+
+  async metaProgress(): Promise<KrMetaProgressResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/meta/progress`, {
+      method: "GET",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`metaProgress failed: ${res.status}`);
+    const json = await res.json();
+    return KrMetaProgressResponse.parse(json);
+  }
+
+  async metaQuestClaim(req: KrMetaQuestClaimRequest): Promise<KrMetaQuestClaimResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/meta/quest/claim`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`metaQuestClaim failed: ${res.status}`);
+    const json = await res.json();
+    return KrMetaQuestClaimResponse.parse(json);
+  }
+
+  async metaBattlePassClaim(req: KrMetaBattlePassClaimRequest): Promise<KrMetaBattlePassClaimResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/meta/battle-pass/claim`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`metaBattlePassClaim failed: ${res.status}`);
+    const json = await res.json();
+    return KrMetaBattlePassClaimResponse.parse(json);
+  }
+
+  async cosmeticsCatalog(): Promise<KrCosmeticsCatalogResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/cosmetics/catalog`, {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) throw new Error(`cosmeticsCatalog failed: ${res.status}`);
+    const json = await res.json();
+    return KrCosmeticsCatalogResponse.parse(json);
+  }
+
+  async cosmeticsMe(): Promise<KrCosmeticsMeResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/cosmetics/me`, {
+      method: "GET",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`cosmeticsMe failed: ${res.status}`);
+    const json = await res.json();
+    return KrCosmeticsMeResponse.parse(json);
+  }
+
+  async cosmeticsEquip(req: KrCosmeticsEquipRequest): Promise<KrCosmeticsEquipResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/cosmetics/equip`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`cosmeticsEquip failed: ${res.status}`);
+    const json = await res.json();
+    return KrCosmeticsEquipResponse.parse(json);
+  }
+
+  /** R7 — Premium Battle Pass (Apple verifyReceipt veya Play ürün token). */
+  async iapBattlePassVerify(req: KrBattlePassIapVerifyRequest): Promise<KrBattlePassIapVerifyResponseOk> {
+    const res = await this.fetchImpl(`${this.baseUrl}/iap/battle-pass/verify`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `iapBattlePassVerify failed: ${res.status}`));
+    return KrBattlePassIapVerifyResponseOk.parse(json);
   }
 
   async pushWebVapidPublic(): Promise<KrPushWebVapidResponse> {
@@ -397,4 +697,3 @@ export class KindrailSdk {
     return KrInternalPushDailyResponse.parse(json);
   }
 }
-

@@ -18,13 +18,31 @@
         "nowMs": {
           "type": "integer",
           "minimum": 0
+        },
+        "checks": {
+          "type": "object",
+          "properties": {
+            "database": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "skipped",
+                "error"
+              ]
+            }
+          },
+          "required": [
+            "database"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
         "ok",
         "service",
         "version",
-        "nowMs"
+        "nowMs",
+        "checks"
       ],
       "additionalProperties": false
     }

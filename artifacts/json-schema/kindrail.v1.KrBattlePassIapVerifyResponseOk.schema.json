@@ -1,0 +1,34 @@
+{
+  "$ref": "#/definitions/KrBattlePassIapVerifyResponseOk",
+  "definitions": {
+    "KrBattlePassIapVerifyResponseOk": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "premium": {
+          "type": "boolean",
+          "const": true
+        },
+        "seasonId": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "premium",
+        "seasonId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

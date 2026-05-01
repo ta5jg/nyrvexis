@@ -15,13 +15,8 @@
   "include": ["src/**/*"],
   "exclude": [
     "src/content/eventLoader.ts",
-    "src/content/metaLoader.ts",
-    "src/content/seasonLoader.ts",
-    "src/meta/balanceFile.ts",
-    "src/meta/metaHandlers.ts",
     "src/store/pgStore.ts",
-    "src/security/**/*",
-    "src/time.ts"
+    "src/security/**/*"
   ]
 }
 

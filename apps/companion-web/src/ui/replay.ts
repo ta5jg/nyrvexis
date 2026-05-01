@@ -1,5 +1,11 @@
 import type { KrBattleSimRequest, KrBattleSimResult } from "@kindrail/protocol";
 
+/** Derived UI feed for canvas/Pixi layers (optional on frames). */
+export type ReplayUiEvent =
+  | { kind: "hit"; src?: string; dst: string; text: string; crit?: boolean }
+  | { kind: "ability"; src?: string; dst?: string; text: string }
+  | { kind: "end"; text: string };
+
 export type ReplayFrame = {
   t: number;
   hp: Record<string, number>;
@@ -8,6 +14,10 @@ export type ReplayFrame = {
   log: string[];
   /** Unit ids that took damage or died this tick (UI flash). */
   flashIds: string[];
+  critIds?: string[];
+  atkIds?: string[];
+  tgtIds?: string[];
+  uiEvents?: ReplayUiEvent[];
 };
 
 /**
@@ -42,6 +52,10 @@ export function buildReplayFrames(req: KrBattleSimRequest, result: KrBattleSimRe
   for (let t = 0; t <= ticks; t++) {
     const log: string[] = [];
     const flashIds: string[] = [];
+    const critIds: string[] = [];
+    const atkIds: string[] = [];
+    const tgtIds: string[] = [];
+    const uiEvents: ReplayUiEvent[] = [];
 
     while (evi < evSorted.length && evSorted[evi].t === t) {
       const e = evSorted[evi++];
@@ -50,7 +64,12 @@ export function buildReplayFrames(req: KrBattleSimRequest, result: KrBattleSimRe
         const next = Math.max(0, (cur - (e.dmg | 0)) | 0);
         hp[e.dst] = next;
         flashIds.push(e.dst);
-        log.push(`${e.src ?? "?"} → ${e.dst}  dmg=${e.dmg}${e.crit ? " CRIT" : ""}`);
+        const line = `${e.src ?? "?"} → ${e.dst}  dmg=${e.dmg}${e.crit ? " CRIT" : ""}`;
+        log.push(line);
+        uiEvents.push({ kind: "hit", src: e.src, dst: e.dst, text: line, crit: Boolean(e.crit) });
+        if (e.src) atkIds.push(e.src);
+        tgtIds.push(e.dst);
+        if (e.crit && e.src) critIds.push(e.src);
       } else if (e.kind === "death" && e.dst) {
         hp[e.dst] = 0;
         alive[e.dst] = false;
@@ -61,9 +80,12 @@ export function buildReplayFrames(req: KrBattleSimRequest, result: KrBattleSimRe
       } else if (e.kind === "status_tick") {
         log.push(`${e.status?.kind} tick on ${e.dst}: ${e.status?.mag ?? 0}`);
       } else if (e.kind === "ability") {
-        log.push(`${e.src} ability ${e.abilityId}${e.dst ? ` → ${e.dst}` : ""}`);
+        const line = `${e.src} ability ${e.abilityId}${e.dst ? ` → ${e.dst}` : ""}`;
+        log.push(line);
+        uiEvents.push({ kind: "ability", src: e.src, dst: e.dst, text: line });
       } else if (e.kind === "end") {
         log.push("END");
+        uiEvents.push({ kind: "end", text: "END" });
       }
     }
 
@@ -73,7 +95,11 @@ export function buildReplayFrames(req: KrBattleSimRequest, result: KrBattleSimRe
       maxHp: { ...maxHp },
       alive: { ...alive },
       log,
-      flashIds
+      flashIds,
+      critIds: critIds.length ? critIds : undefined,
+      atkIds: atkIds.length ? atkIds : undefined,
+      tgtIds: tgtIds.length ? tgtIds : undefined,
+      uiEvents: uiEvents.length ? uiEvents : undefined
     });
   }
 

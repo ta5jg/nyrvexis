@@ -1,0 +1,24 @@
+{
+  "v": 1,
+  "notes": "Store-facing copy SSOT draft. KrOffer grants stay authoritative in gateway code (services/gateway/src/monetization/offers.ts) until offers load from JSON.",
+  "bundles": [
+    {
+      "offerId": "starter_pack_v1",
+      "stripeSkuRef": "starter_pack_v1",
+      "iapSkuIosOptional": null,
+      "iapSkuAndroidOptional": null,
+      "localization": {
+        "en": {
+          "name": "Starter Pack",
+          "shortDescription": "Gold, shards, and a key — fixed contents, no random loot.",
+          "storeCompliance": "Does not grant gameplay power proportional to payment beyond stated currencies."
+        },
+        "tr": {
+          "name": "Başlangıç Paketi",
+          "shortDescription": "Altın, shard ve anahtar — sabit içerik, rastgele ödül yok.",
+          "storeCompliance": "Ödemeyle belirsiz güç artışı yok; yalnızca tablodaki para birimleri."
+        }
+      }
+    }
+  ]
+}

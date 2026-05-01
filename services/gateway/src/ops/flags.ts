@@ -6,7 +6,9 @@ export type Flags = Record<string, boolean>;
 const DEFAULT_FLAGS: Flags = {
   growth_referral: true,
   growth_share_rewards: true,
+  growth_rewarded_ads: false,
   monetization_offers: true,
+  iap_battle_pass: true,
   push_web: true
 };
 
