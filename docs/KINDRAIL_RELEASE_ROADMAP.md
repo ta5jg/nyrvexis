@@ -179,7 +179,10 @@ Backend ve `@kindrail/protocol` sabit; yeniden yazılan öncelikle sunum ve plat
 ## Hızlı komutlar
 
 ```bash
-# Geliştirme: terminal A — gateway; terminal B — web istemci
+# Tek komut: gateway + web (repo kökünde concurrently)
+pnpm run dev:full
+
+# Ya da iki terminal:
 pnpm dev
 pnpm run dev:companion
 

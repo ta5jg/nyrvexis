@@ -38,13 +38,15 @@ corepack enable
 pnpm i
 ```
 
-2) Run gateway (terminal A)
+2) Run gateway **and** web together
 
 ```bash
-pnpm dev
+pnpm run dev:full
 ```
 
-3) Run web client (terminal B)
+Or two terminals: `pnpm dev` then `pnpm run dev:companion`.
+
+3) Run web only (if gateway already running elsewhere)
 
 ```bash
 pnpm run dev:companion
