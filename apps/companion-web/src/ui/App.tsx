@@ -39,11 +39,12 @@ function summarize(result: KrBattleSimResult): string {
 function gatewayBaseUrl(): string {
   const raw = import.meta.env.VITE_GATEWAY_URL?.trim();
   if (raw && raw.length > 0) return raw.replace(/\/+$/, "");
-  // Dev: go through Vite proxy so the UI hits same-origin `/__kr-api/*` → localhost:8787 (see vite.config.ts).
-  if (import.meta.env.DEV) return "/__kr-api";
   if (typeof window !== "undefined" && window.location?.hostname) {
     const proto = window.location.protocol === "https:" ? "https:" : "http:";
-    return `${proto}//${window.location.hostname}:8787`;
+    const h = window.location.hostname;
+    // Avoid localhost → ::1 IPv6 when gateway listens on IPv4-only (common Node bind).
+    const host = h === "localhost" || h === "127.0.0.1" ? "127.0.0.1" : h;
+    return `${proto}//${host}:8787`;
   }
   return "http://127.0.0.1:8787";
 }
@@ -145,11 +146,9 @@ export function App() {
       })
       .catch(() => {
         setGatewayOk(false);
-        const hint =
-          import.meta.env.DEV && gatewayUrl.startsWith("/")
-            ? " · start gateway: pnpm dev (repo root) or pnpm run dev:full"
-            : "";
-        setGatewayInfo(`offline · ${gatewayUrl}${hint}`);
+        setGatewayInfo(
+          `offline · ${gatewayUrl} · run pnpm dev (:8787) or pnpm run dev:full — local UI uses 127.0.0.1 for IPv4`
+        );
       });
   }, [sdk, gatewayUrl, gatewayProbe]);
 

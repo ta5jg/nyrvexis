@@ -23,14 +23,7 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
-    proxy: {
-      /** Same-origin API in dev; gateway must still run on 8787 (pnpm dev / dev:full). */
-      "/__kr-api": {
-        target: "http://127.0.0.1:8787",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/__kr-api/, "")
-      }
-    }
+    host: true
   }
 });
 

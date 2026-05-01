@@ -58,8 +58,10 @@ pnpm run dev:companion
 
 ### “DOWN / gateway offline”
 
-The UI talks to the **gateway on port 8787**. Run **`pnpm run dev:full`** from repo root, or **`pnpm dev`** in one terminal and **`pnpm run dev:companion`** in another.
+The UI talks to the **gateway on port 8787**. Run **`pnpm run dev:full`** from repo root, or **`pnpm dev`** plus **`pnpm run dev:companion`**.
 
-In development the browser calls **`/__kr-api`** on Vite; those requests are proxied to **`127.0.0.1:8787`**. DOWN usually means the gateway process is not running.
+If you use **`http://localhost:5173`**, the client calls **`http://127.0.0.1:8787`** on purpose (IPv4 loopback) so it still works when `localhost` would otherwise hit IPv6-only listeners.
 
-Optional: set **`VITE_GATEWAY_URL`** in `apps/companion-web/.env.local` to override the API base (preview/production builds).
+From another device on your LAN, open **`http://<your-LAN-IP>:5173`** (Vite uses **`host: true`**); the client then uses **`http://<same-LAN-IP>:8787`**. Keep the gateway bound to **`0.0.0.0`** (default **`KR_HOST`**).
+
+Optional: **`VITE_GATEWAY_URL`** in `apps/companion-web/.env.local` overrides the API base.
