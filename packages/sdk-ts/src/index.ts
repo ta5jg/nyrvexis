@@ -48,6 +48,13 @@ export type KindrailInternalCronOptions = {
   cronSecret: string;
 };
 
+/**
+ * Safari/WebKit throws if `fetch` is detached from Window (`fetch(...)` after assigning `const f = fetch`).
+ */
+function defaultFetch(input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]): Promise<Response> {
+  return globalThis.fetch.call(globalThis, input, init);
+}
+
 export class KindrailSdk {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
@@ -55,7 +62,7 @@ export class KindrailSdk {
 
   constructor(opts: KindrailSdkOptions) {
     this.baseUrl = opts.baseUrl.replace(/\/+$/, "");
-    this.fetchImpl = opts.fetchImpl ?? fetch;
+    this.fetchImpl = opts.fetchImpl ?? defaultFetch;
   }
 
   setToken(token: string | null) {
