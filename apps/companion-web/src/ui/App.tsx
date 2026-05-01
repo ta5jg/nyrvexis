@@ -141,6 +141,8 @@ export function App() {
   const [iapReceipt, setIapReceipt] = useState("STUB_PREMIUM");
   const [iapBusy, setIapBusy] = useState(false);
   const autoRunConsumed = useRef(false);
+  /** Play win/loss fanfare once when replay reaches the final tick (Run battle starts at tick 0). */
+  const outcomeFanfareBattleKeyRef = useRef<string | null>(null);
 
   const persistShellPhase = useCallback((phase: "gate" | "play") => {
     try {
@@ -486,10 +488,8 @@ export function App() {
       syncUrlFromReq(req);
       const res = await sdk.battleSim(req);
       setState({ kind: "ok", result: res, request: req });
-      setTick(Math.max(0, res.ticks));
+      setTick(0);
       focusResultSection();
-      if (res.outcome === "a") sfxWin();
-      else if (res.outcome === "b") sfxLoss();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
       setState({ kind: "err", message: msg });
@@ -545,10 +545,8 @@ export function App() {
       syncUrlFromReq(req);
       const res = await sdk.battleSim(req);
       setState({ kind: "ok", result: res, request: req });
-      setTick(Math.max(0, res.ticks));
+      setTick(0);
       focusResultSection();
-      if (res.outcome === "a") sfxWin();
-      else if (res.outcome === "b") sfxLoss();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
       setState({ kind: "err", message: msg });
@@ -813,10 +811,8 @@ export function App() {
       setRequestText(JSON.stringify(req, null, 2));
       const sim = await sdk.battleSim(req);
       setState({ kind: "ok", result: sim, request: req });
-      setTick(Math.max(0, sim.ticks));
+      setTick(0);
       focusResultSection();
-      if (sim.outcome === "a") sfxWin();
-      else if (sim.outcome === "b") sfxLoss();
 
       const submit = await sdk.leaderboardSubmit({ v: 1, dateUtc: d.dateUtc, battleRequest: req });
       setLeaderboardMe({ rank: submit.rank, total: submit.total, score: submit.entry.score });
@@ -1027,6 +1023,26 @@ export function App() {
   }, [state.kind, frames?.length]);
   const maxTick = frames ? Math.max(0, frames.length - 1) : 0;
   const frame = frames ? frames[Math.max(0, Math.min(maxTick, tick))] : null;
+
+  useEffect(() => {
+    if (state.kind !== "ok") {
+      outcomeFanfareBattleKeyRef.current = null;
+      return;
+    }
+    const battleKey = `${state.request.seed.seed}:${state.result.ticks}:${state.result.outcome}`;
+    if (tick < maxTick) return;
+    if (outcomeFanfareBattleKeyRef.current === battleKey) return;
+    outcomeFanfareBattleKeyRef.current = battleKey;
+    if (state.result.outcome === "a") sfxWin();
+    else if (state.result.outcome === "b") sfxLoss();
+  }, [
+    state.kind,
+    tick,
+    maxTick,
+    state.kind === "ok" ? state.request.seed.seed : "",
+    state.kind === "ok" ? state.result.ticks : 0,
+    state.kind === "ok" ? state.result.outcome : ""
+  ]);
 
   const defsByMap = useMemo(() => new Map(catalogDefs.map((d) => [d.id, d])), [catalogDefs]);
 
@@ -1549,8 +1565,8 @@ export function App() {
                   }}
                 />
                 <div className="sub" style={{ marginTop: 8, opacity: 0.78 }}>
-                  HP bars follow the scrubber; each run opens on the <strong>last tick</strong>. Scrub left to replay from
-                  the start.
+                  HP bars follow the scrubber; each run starts at <strong>tick 0</strong>. Scrub right or enable{" "}
+                  <strong>Auto-play</strong> to watch the fight — scrub left anytime to re-watch from the start.
                 </div>
                 <div className="replayHintKbd">
                   Keyboard: <kbd>←</kbd> <kbd>→</kbd> scrub · <kbd>Home</kbd> <kbd>End</kbd> jump · <kbd>Space</kbd>{" "}
@@ -2029,8 +2045,8 @@ export function App() {
                 <strong>Run battle</strong>.
               </li>
               <li>
-                Scrub <strong>Replay</strong> — HP bars track every hit. Turn on <strong>Auto-play</strong> to watch
-                it play out.
+                Replay opens at the <strong>first tick</strong> — scrub the timeline or turn on <strong>Auto-play</strong>{" "}
+                to watch hits; HP bars follow the scrubber.
               </li>
             </ol>
             <div className="btnbar" style={{ marginTop: 12 }}>
