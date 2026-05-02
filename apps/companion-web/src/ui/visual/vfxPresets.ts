@@ -3,7 +3,7 @@
  * Author:         USDTG GROUP TECHNOLOGY LLC
  * Developer:      Irfan Gedik
  * Created Date:   2026-05-01
- * Last Update:    2026-05-01
+ * Last Update:    2026-05-02
  * Version:        1.0.0
  *
  * Description:
@@ -38,7 +38,7 @@ export function arenaVfxTuning(prefersReducedMotion: boolean): ArenaVfxTuning {
     strikeLinesMax: 6,
     abilityParticles: 8,
     dmgFloatMs: 820,
-    bobMultiplier: 1,
+    bobMultiplier: 1.14,
     endWashAlpha: 1,
     critExpansionRing: true
   };

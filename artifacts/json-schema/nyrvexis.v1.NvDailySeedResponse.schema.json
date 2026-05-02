@@ -1,0 +1,29 @@
+{
+  "$ref": "#/definitions/NvDailySeedResponse",
+  "definitions": {
+    "NvDailySeedResponse": {
+      "type": "object",
+      "properties": {
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "dateUtc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "seed": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "ok",
+        "dateUtc",
+        "seed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

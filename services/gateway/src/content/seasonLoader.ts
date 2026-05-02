@@ -16,13 +16,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { KrSeasonDef } from "@kindrail/protocol";
+import { NvSeasonDef } from "@nyrvexis/protocol";
 
-export async function loadSeasonDef(version = "v0.1.0"): Promise<KrSeasonDef> {
+export async function loadSeasonDef(version = "v0.1.0"): Promise<NvSeasonDef> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const p = path.join(__dirname, "catalogs", `season.${version}.json`);
   const raw = await fs.readFile(p, "utf8");
-  return KrSeasonDef.parse(JSON.parse(raw));
+  return NvSeasonDef.parse(JSON.parse(raw));
 }
 

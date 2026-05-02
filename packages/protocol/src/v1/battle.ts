@@ -4,22 +4,23 @@ import { z } from "zod";
  * v0 auto-battler simulation contract.
  * - Deterministic: all randomness comes from seed + deterministic tick loop
  * - Minimal: small surface area to iterate quickly
+ * - Optional `presentation` on events is derived in sim for clients only (Animator hints); must not affect outcomes.
  */
 
-export const KrBattleSeed = z
+export const NvBattleSeed = z
   .object({
     seed: z.string().min(1)
   })
   .strict();
-export type KrBattleSeed = z.infer<typeof KrBattleSeed>;
+export type NvBattleSeed = z.infer<typeof NvBattleSeed>;
 
-export const KrUnitArchetypeId = z.string().min(1);
-export type KrUnitArchetypeId = z.infer<typeof KrUnitArchetypeId>;
+export const NvUnitArchetypeId = z.string().min(1);
+export type NvUnitArchetypeId = z.infer<typeof NvUnitArchetypeId>;
 
-export const KrUnit = z
+export const NvUnit = z
   .object({
     id: z.string().min(1),
-    archetype: KrUnitArchetypeId,
+    archetype: NvUnitArchetypeId,
     // Core stats (ints only for determinism)
     hp: z.number().int().min(1),
     atk: z.number().int().min(0),
@@ -32,22 +33,22 @@ export const KrUnit = z
     slot: z.number().int().min(0).max(11).default(0)
   })
   .strict();
-export type KrUnit = z.infer<typeof KrUnit>;
+export type NvUnit = z.infer<typeof NvUnit>;
 
-export const KrTeam = z
+export const NvTeam = z
   .object({
     name: z.string().min(1),
-    units: z.array(KrUnit).min(1).max(12)
+    units: z.array(NvUnit).min(1).max(12)
   })
   .strict();
-export type KrTeam = z.infer<typeof KrTeam>;
+export type NvTeam = z.infer<typeof NvTeam>;
 
-export const KrStatusKind = z.enum(["shield", "bleed", "taunt", "stun"]);
-export type KrStatusKind = z.infer<typeof KrStatusKind>;
+export const NvStatusKind = z.enum(["shield", "bleed", "taunt", "stun"]);
+export type NvStatusKind = z.infer<typeof NvStatusKind>;
 
-export const KrStatusApply = z
+export const NvStatusApply = z
   .object({
-    kind: KrStatusKind,
+    kind: NvStatusKind,
     // duration in ticks
     dur: z.number().int().min(0).max(2000),
     // magnitude depends on status
@@ -57,20 +58,33 @@ export const KrStatusApply = z
     mag: z.number().int().min(0).max(1_000_000).default(0)
   })
   .strict();
-export type KrStatusApply = z.infer<typeof KrStatusApply>;
+export type NvStatusApply = z.infer<typeof NvStatusApply>;
 
-export const KrBattleSimRequest = z
+export const NvBattleSimRequest = z
   .object({
     v: z.literal(1),
-    seed: KrBattleSeed,
-    a: KrTeam,
-    b: KrTeam,
+    seed: NvBattleSeed,
+    a: NvTeam,
+    b: NvTeam,
     maxTicks: z.number().int().min(1).max(100_000).default(8000)
   })
   .strict();
-export type KrBattleSimRequest = z.infer<typeof KrBattleSimRequest>;
+export type NvBattleSimRequest = z.infer<typeof NvBattleSimRequest>;
 
-export const KrBattleEvent = z
+/** Matches Unity `NyrvexisAnimStates`; presentation-only, never affects outcomes. */
+export const NvBattleAnimIntent = z.enum(["idle", "advance", "attack", "hit", "death"]);
+export type NvBattleAnimIntent = z.infer<typeof NvBattleAnimIntent>;
+
+/** Optional per-event hints for web / Unity; derived deterministically in sim; clients must not branch gameplay on this. */
+export const NvBattleEventPresentation = z
+  .object({
+    srcIntent: NvBattleAnimIntent.optional(),
+    dstIntent: NvBattleAnimIntent.optional()
+  })
+  .strict();
+export type NvBattleEventPresentation = z.infer<typeof NvBattleEventPresentation>;
+
+export const NvBattleEvent = z
   .object({
     t: z.number().int().nonnegative(),
     kind: z.enum(["hit", "death", "end", "status_apply", "status_tick", "ability"]),
@@ -78,21 +92,22 @@ export const KrBattleEvent = z
     dst: z.string().min(1).optional(),
     dmg: z.number().int().min(0).optional(),
     crit: z.boolean().optional(),
-    status: KrStatusApply.optional(),
+    status: NvStatusApply.optional(),
     // for ability events
-    abilityId: z.string().min(1).optional()
+    abilityId: z.string().min(1).optional(),
+    presentation: NvBattleEventPresentation.optional()
   })
   .strict();
-export type KrBattleEvent = z.infer<typeof KrBattleEvent>;
+export type NvBattleEvent = z.infer<typeof NvBattleEvent>;
 
-export const KrBattleOutcome = z.enum(["a", "b", "draw"]);
-export type KrBattleOutcome = z.infer<typeof KrBattleOutcome>;
+export const NvBattleOutcome = z.enum(["a", "b", "draw"]);
+export type NvBattleOutcome = z.infer<typeof NvBattleOutcome>;
 
-export const KrBattleSimResult = z
+export const NvBattleSimResult = z
   .object({
     v: z.literal(1),
-    seed: KrBattleSeed,
-    outcome: KrBattleOutcome,
+    seed: NvBattleSeed,
+    outcome: NvBattleOutcome,
     ticks: z.number().int().nonnegative(),
     // remaining HP snapshot
     remaining: z
@@ -101,8 +116,8 @@ export const KrBattleSimResult = z
         b: z.record(z.string(), z.number().int().nonnegative())
       })
       .strict(),
-    events: z.array(KrBattleEvent).max(5000)
+    events: z.array(NvBattleEvent).max(50_000)
   })
   .strict();
-export type KrBattleSimResult = z.infer<typeof KrBattleSimResult>;
+export type NvBattleSimResult = z.infer<typeof NvBattleSimResult>;
 

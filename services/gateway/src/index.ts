@@ -5,74 +5,80 @@ import cors from "@fastify/cors";
 import { nanoid } from "nanoid";
 import {
   HealthResponse,
-  KrAuthGuestRequest,
-  KrAuthGuestResponse,
-  KrAuthRefreshRequest,
-  KrAuthRefreshResponse,
-  KrAuthLogoutRequest,
-  KrAuthLogoutResponse,
-  KrAuthRegisterEmailRequest,
-  KrAuthRegisterEmailResponse,
-  KrAuthLoginEmailRequest,
-  KrAuthLoginEmailResponse,
-  KrAuthLinkEmailRequest,
-  KrAuthLinkEmailResponse,
-  KrAuthGoogleRequest,
-  KrAuthGoogleResponse,
-  KrAuthLinkGoogleRequest,
-  KrAuthLinkGoogleResponse,
-  KrCatalogResponse,
-  KrDailyClaimResponse,
-  KrDailySeedResponse,
-  KrDailyShopResponse,
-  KrInventoryResponse,
-  KrMeResponse,
-  KrOwnedUnitsResponse,
-  KrLeaderboardMeResponse,
-  KrLeaderboardSubmitRequest,
-  KrLeaderboardSubmitResponse,
-  KrLeaderboardTopResponse,
-  KrReferralAcceptRequest,
-  KrReferralAcceptResponse,
-  KrReferralStatusResponse,
-  KrShopBuyRequest,
-  KrShopBuyResponse,
-  KrShareRedeemRequest,
-  KrShareRedeemResponse,
-  KrShareTicketCreateResponse,
-  KrUpgradeUnitRequest,
-  KrUpgradeUnitResponse,
-  KrCheckoutCreateRequest,
-  KrCheckoutCreateResponse,
-  KrOffersResponse,
-  KrPurchaseStatusResponse,
-  KrBattlePassIapVerifyRequest,
-  KrBattlePassIapVerifyResponseOk,
-  KrPushWebSubscribeRequest,
-  KrPushWebSubscribeResponse,
-  KrPushWebUnsubscribeRequest,
-  KrPushWebUnsubscribeResponse,
-  KrPushWebVapidResponse,
-  KrInternalPushDailyRequest,
-  KrInternalPushDailyResponse,
-  KrEconomyTuning,
-  KrMetaProgressResponse,
-  KrMetaQuestClaimRequest,
-  KrMetaQuestClaimResponse,
-  KrMetaBattlePassClaimRequest,
-  KrMetaBattlePassClaimResponse,
-  KrAdminBalanceGetResponse,
-  KrAdminBalanceSetRequest,
-  KrAdminBalanceSetResponse,
-  KrSeasonViewResponse,
-  KrCosmeticsCatalogResponse,
-  KrCosmeticsMeResponse,
-  KrCosmeticsEquipRequest,
-  KrCosmeticsEquipResponse,
-  KrLegalPublicResponse,
-  KrAnalyticsEventRequest,
-  KrAnalyticsEventResponse
-} from "@kindrail/protocol";
+  NvAuthGuestRequest,
+  NvAuthGuestResponse,
+  NvAuthRefreshRequest,
+  NvAuthRefreshResponse,
+  NvAuthLogoutRequest,
+  NvAuthLogoutResponse,
+  NvAuthRegisterEmailRequest,
+  NvAuthRegisterEmailResponse,
+  NvAuthLoginEmailRequest,
+  NvAuthLoginEmailResponse,
+  NvAuthLinkEmailRequest,
+  NvAuthLinkEmailResponse,
+  NvAuthGoogleRequest,
+  NvAuthGoogleResponse,
+  NvAuthLinkGoogleRequest,
+  NvAuthLinkGoogleResponse,
+  NvCatalogResponse,
+  NvDailyClaimResponse,
+  NvDailySeedResponse,
+  NvDailyShopResponse,
+  NvInventoryResponse,
+  NvMeResponse,
+  NvOwnedUnitsResponse,
+  NvLeaderboardMeResponse,
+  NvLeaderboardSubmitRequest,
+  NvLeaderboardSubmitResponse,
+  NvLeaderboardTopResponse,
+  NvReferralAcceptRequest,
+  NvReferralAcceptResponse,
+  NvReferralStatusResponse,
+  NvShopBuyRequest,
+  NvShopBuyResponse,
+  NvShareRedeemRequest,
+  NvShareRedeemResponse,
+  NvShareTicketCreateResponse,
+  NvUpgradeUnitRequest,
+  NvUpgradeUnitResponse,
+  NvCheckoutCreateRequest,
+  NvCheckoutCreateResponse,
+  NvOffersResponse,
+  NvPurchaseStatusResponse,
+  NvBattlePassIapVerifyRequest,
+  NvBattlePassIapVerifyResponseOk,
+  NvPushWebSubscribeRequest,
+  NvPushWebSubscribeResponse,
+  NvPushWebUnsubscribeRequest,
+  NvPushWebUnsubscribeResponse,
+  NvPushWebVapidResponse,
+  NvInternalPushDailyRequest,
+  NvInternalPushDailyResponse,
+  NvEconomyTuning,
+  NvMetaProgressResponse,
+  NvMetaQuestClaimRequest,
+  NvMetaQuestClaimResponse,
+  NvMetaBattlePassClaimRequest,
+  NvMetaBattlePassClaimResponse,
+  NvAdminBalanceGetResponse,
+  NvAdminBalanceSetRequest,
+  NvAdminBalanceSetResponse,
+  NvSeasonViewResponse,
+  NvCosmeticsCatalogResponse,
+  NvCosmeticsMeResponse,
+  NvCosmeticsEquipRequest,
+  NvCosmeticsEquipResponse,
+  KR_HUB_CELL_IDS,
+  NvHubLayoutPutRequest,
+  NvHubLayoutResponse,
+  NvHubShareCreateRequest,
+  NvHubShareCreateResponse,
+  NvHubSharePublicResponse,
+  NvLegalPublicResponse,
+  NvAnalyticsEventRequest,
+  NvAnalyticsEventResponse
+} from "@nyrvexis/protocol";
 import { readEnv } from "./env.js";
 import { runBattleSim } from "./sim/battleSim.js";
 import { registerAuth, requireAuth } from "./auth/middleware.js";
@@ -152,13 +158,13 @@ const [contentLoaded, metaLoaded, seasonLoaded, balancePartial] = await Promise.
 let content = contentLoaded;
 let metaContent = metaLoaded;
 let seasonDef = seasonLoaded;
-let balanceOverride: Partial<KrEconomyTuning> = balancePartial;
+let balanceOverride: Partial<NvEconomyTuning> = balancePartial;
 const flags = new FlagStore(env.KR_STORE_DIR);
 await flags.load();
 const limiter = new FixedWindowRateLimiter(env.KR_RATE_WINDOW_MS);
 const metrics = new Metrics();
 
-function economyEffective(): KrEconomyTuning {
+function economyEffective(): NvEconomyTuning {
   return effectiveEconomy(metaContent, balanceOverride);
 }
 
@@ -191,6 +197,45 @@ function issueAuthPair(userId: string, revokeJti?: string): { token: string; ref
       jti
     })
   };
+}
+
+/** First hub decoration for new accounts (cosmetic-only; meta catalog SSOT). */
+function grantStarterHubCosmetic(s: StoreState, userId: string): void {
+  const starterId = "hub_starter_beacon";
+  if (!metaContent.cosmetics.some((c) => c.id === starterId && c.slot === "hub")) return;
+  (s.cosmeticOwned[userId] ??= {})[starterId] = true;
+}
+
+function hubLayoutView(snapshot: StoreState, userId: string) {
+  const bag = snapshot.hubLayout[userId];
+  const cells = {} as Record<(typeof KR_HUB_CELL_IDS)[number], string | null>;
+  for (const k of KR_HUB_CELL_IDS) {
+    const v = bag?.[k];
+    cells[k] = typeof v === "string" && v.length > 0 ? v : null;
+  }
+  return NvHubLayoutResponse.parse({ v: 1, ok: true, cells });
+}
+
+function hubSharePublicPayload(expiresAtMs: number, snapCells: Record<string, string | null>) {
+  const cells = {} as Record<
+    (typeof KR_HUB_CELL_IDS)[number],
+    { cosmeticId: string | null; title: string | null; iconId: string | null }
+  >;
+  for (const k of KR_HUB_CELL_IDS) {
+    const raw = snapCells[k];
+    const cid = typeof raw === "string" && raw.length > 0 ? raw : null;
+    if (!cid) {
+      cells[k] = { cosmeticId: null, title: null, iconId: null };
+      continue;
+    }
+    const def = metaContent.cosmetics.find((c) => c.id === cid);
+    cells[k] = {
+      cosmeticId: cid,
+      title: def?.title ?? cid,
+      iconId: def?.iconId ?? null
+    };
+  }
+  return NvHubSharePublicResponse.parse({ v: 1, ok: true, expiresAtMs, cells });
 }
 
 function webPushKeysReady(): boolean {
@@ -227,7 +272,7 @@ registerAuth(app, { secret: env.KR_AUTH_SECRET });
 
 app.addHook("onRequest", async (req, reply) => {
   reply.header("x-kr-trace-id", nanoid());
-  reply.header("x-kr-service", "kindrail-gateway");
+  reply.header("x-kr-service", "nyrvexis-gateway");
   reply.header("x-kr-version", env.KR_SERVICE_VERSION);
   // Basic hardening defaults (can be replaced with helmet later)
   reply.header("x-content-type-options", "nosniff");
@@ -275,7 +320,7 @@ app.get("/health", async () => {
   const alive = database !== "error";
   const body = HealthResponse.parse({
     ok: alive,
-    service: "kindrail-gateway",
+    service: "nyrvexis-gateway",
     version: env.KR_SERVICE_VERSION,
     nowMs: Date.now(),
     checks: { database }
@@ -292,7 +337,7 @@ app.get("/legal/public", async () => {
   const ok = Boolean(
     privacyPolicyUrl || termsOfServiceUrl || supportEmail || accountDeletionUrl || contentDescriptorsHint
   );
-  return KrLegalPublicResponse.parse({
+  return NvLegalPublicResponse.parse({
     v: 1,
     ok,
     ...(privacyPolicyUrl ? { privacyPolicyUrl } : {}),
@@ -305,7 +350,7 @@ app.get("/legal/public", async () => {
 
 app.get("/metrics", async (_req, reply) => {
   reply.header("content-type", "text/plain; charset=utf-8");
-  return metrics.renderPrometheus("kindrail-gateway");
+  return metrics.renderPrometheus("nyrvexis-gateway");
 });
 
 app.post("/analytics/event", async (req, reply) => {
@@ -314,7 +359,7 @@ app.post("/analytics/event", async (req, reply) => {
     return { ok: false, error: "ANALYTICS_REQUIRES_DATABASE" };
   }
   try {
-    const body = KrAnalyticsEventRequest.parse(req.body);
+    const body = NvAnalyticsEventRequest.parse(req.body);
     const userId = req.krUserId ?? null;
     await pgStore.insertAnalyticsEvent({
       userId,
@@ -322,7 +367,7 @@ app.post("/analytics/event", async (req, reply) => {
       props: body.props ?? {}
     });
     metrics.incAnalyticsEventsIngested();
-    return KrAnalyticsEventResponse.parse({ v: 1, ok: true });
+    return NvAnalyticsEventResponse.parse({ v: 1, ok: true });
   } catch (err) {
     metrics.incAnalyticsEventsFailed();
     if (err instanceof z.ZodError) {
@@ -342,7 +387,7 @@ app.get("/flags", async () => {
 
 app.get("/push/web/vapid-public", async () => {
   const enabled = flags.isEnabled("push_web") && webPushKeysReady();
-  return KrPushWebVapidResponse.parse({
+  return NvPushWebVapidResponse.parse({
     v: 1,
     ok: true,
     enabled,
@@ -361,7 +406,7 @@ app.post("/push/web/subscribe", async (req, reply) => {
       return { ok: false, error: "PUSH_DISABLED" };
     }
     const userId = requireAuth(req);
-    const body = KrPushWebSubscribeRequest.parse(req.body);
+    const body = NvPushWebSubscribeRequest.parse(req.body);
     const dateUtc = utcDate();
     const now = Date.now();
     const subId = pushWebSubscriptionId(body.subscription.endpoint);
@@ -388,7 +433,7 @@ app.post("/push/web/subscribe", async (req, reply) => {
       return { ok: false, error: "RATE_LIMITED" };
     }
 
-    return KrPushWebSubscribeResponse.parse({ v: 1, ok: true, subscriptionId: subId });
+    return NvPushWebSubscribeResponse.parse({ v: 1, ok: true, subscriptionId: subId });
   } catch (err) {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       reply.code(401);
@@ -403,7 +448,7 @@ app.post("/push/web/subscribe", async (req, reply) => {
 app.post("/push/web/unsubscribe", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrPushWebUnsubscribeRequest.parse(req.body);
+    const body = NvPushWebUnsubscribeRequest.parse(req.body);
     const subId = pushWebSubscriptionId(body.endpoint);
     const removed = store.mutate((s) => {
       const bucket = s.pushWebSubs[userId];
@@ -412,7 +457,7 @@ app.post("/push/web/unsubscribe", async (req, reply) => {
       if (Object.keys(bucket).length === 0) delete s.pushWebSubs[userId];
       return true;
     });
-    return KrPushWebUnsubscribeResponse.parse({ v: 1, ok: true, removed });
+    return NvPushWebUnsubscribeResponse.parse({ v: 1, ok: true, removed });
   } catch (err) {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       reply.code(401);
@@ -444,7 +489,7 @@ app.post("/admin/push/test", async (req, reply) => {
     .strict();
 
   const body = AdminPushTest.parse(req.body ?? {});
-  const title = body.title ?? "KINDRAIL";
+  const title = body.title ?? "NYRVEXIS";
   const text = body.body ?? "Daily battle is ready — open the app to claim and play.";
 
   const snap = store.snapshot().pushWebSubs;
@@ -469,7 +514,7 @@ app.post("/admin/push/test", async (req, reply) => {
   let failed = 0;
   for (const sub of targets) {
     try {
-      await sendWebPushJson(sub, { kind: "kindrail.push", v: 1, title, body: text, atMs: Date.now() });
+      await sendWebPushJson(sub, { kind: "nyrvexis.push", v: 1, title, body: text, atMs: Date.now() });
       sent += 1;
     } catch {
       failed += 1;
@@ -495,7 +540,7 @@ app.post("/internal/push/daily", async (req, reply) => {
     return { ok: false, error: "PUSH_DISABLED" };
   }
 
-  const body = KrInternalPushDailyRequest.parse(req.body ?? { v: 1 });
+  const body = NvInternalPushDailyRequest.parse(req.body ?? { v: 1 });
   const dateUtc = body.dateUtc ?? utcDate();
   const dryRun = Boolean(body.dryRun);
   const limit = Math.min(10_000, Math.max(1, body.limit ?? 2000));
@@ -525,10 +570,10 @@ app.post("/internal/push/daily", async (req, reply) => {
         await sendWebPushJson(
           { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
           {
-            kind: "kindrail.push.daily",
+            kind: "nyrvexis.push.daily",
             v: 1,
             dateUtc,
-            title: "KINDRAIL",
+            title: "NYRVEXIS",
             body: "Daily rewards and battle are ready.",
             atMs: Date.now()
           }
@@ -560,7 +605,7 @@ app.post("/internal/push/daily", async (req, reply) => {
 
   metrics.recordPushDailyRun({ scanned, sent, skipped, failed, removed });
 
-  return KrInternalPushDailyResponse.parse({
+  return NvInternalPushDailyResponse.parse({
     v: 1,
     ok: true,
     dateUtc,
@@ -593,10 +638,10 @@ app.get("/admin/balance", async (req, reply) => {
     reply.code(401);
     return { ok: false, error: "UNAUTHORIZED" };
   }
-  return KrAdminBalanceGetResponse.parse({
+  return NvAdminBalanceGetResponse.parse({
     v: 1,
     ok: true,
-    override: KrEconomyTuning.partial().parse(balanceOverride),
+    override: NvEconomyTuning.partial().parse(balanceOverride),
     effective: economyEffective()
   });
 });
@@ -608,11 +653,11 @@ app.post("/admin/balance", async (req, reply) => {
       reply.code(401);
       return { ok: false, error: "UNAUTHORIZED" };
     }
-    const body = KrAdminBalanceSetRequest.parse(req.body);
+    const body = NvAdminBalanceSetRequest.parse(req.body);
     balanceOverride = { ...balanceOverride, ...body.patch };
     await saveBalanceOverride(env.KR_STORE_DIR, balanceOverride);
     req.log.info({ krAudit: "admin_balance_set", keys: Object.keys(body.patch) }, "r3_audit");
-    return KrAdminBalanceSetResponse.parse({ v: 1, ok: true, effective: economyEffective() });
+    return NvAdminBalanceSetResponse.parse({ v: 1, ok: true, effective: economyEffective() });
   } catch (err) {
     req.log.warn({ err }, "admin balance rejected");
     reply.code(400);
@@ -656,7 +701,7 @@ app.get("/daily-seed", async () => {
   // Seed format is stable and safe to publish/share.
   const seed = `daily:${dateUtc}`;
 
-  return KrDailySeedResponse.parse({
+  return NvDailySeedResponse.parse({
     ok: true,
     dateUtc,
     seed
@@ -664,7 +709,7 @@ app.get("/daily-seed", async () => {
 });
 
 app.get("/catalog/units", async () => {
-  return KrCatalogResponse.parse({
+  return NvCatalogResponse.parse({
     v: 1,
     ok: true,
     catalog: content.catalog
@@ -673,7 +718,7 @@ app.get("/catalog/units", async () => {
 
 // ---------- Meta / season / cosmetics (R3) ----------
 app.get("/season/view", async () => {
-  return KrSeasonViewResponse.parse({ v: 1, ok: true, season: seasonDef });
+  return NvSeasonViewResponse.parse({ v: 1, ok: true, season: seasonDef });
 });
 
 app.get("/meta/progress", async (req, reply) => {
@@ -682,7 +727,7 @@ app.get("/meta/progress", async (req, reply) => {
     const dateUtc = utcDate();
     const econ = economyEffective();
     const raw = buildMetaProgressView(store.snapshot(), metaContent, econ, userId, dateUtc);
-    return KrMetaProgressResponse.parse(raw);
+    return NvMetaProgressResponse.parse(raw);
   } catch {
     reply.code(401);
     return { ok: false, error: "UNAUTHORIZED" };
@@ -692,7 +737,7 @@ app.get("/meta/progress", async (req, reply) => {
 app.post("/meta/quest/claim", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrMetaQuestClaimRequest.parse(req.body);
+    const body = NvMetaQuestClaimRequest.parse(req.body);
     const dateUtc = utcDate();
     let rateLimited = false;
     let claimResult: ReturnType<typeof claimQuestReward> | undefined;
@@ -724,7 +769,7 @@ app.post("/meta/quest/claim", async (req, reply) => {
     }
 
     req.log.info({ krAudit: "meta_quest_claim", userId, questId: body.questId }, "r3_audit");
-    return KrMetaQuestClaimResponse.parse({
+    return NvMetaQuestClaimResponse.parse({
       v: 1,
       ok: true,
       questId: body.questId,
@@ -741,7 +786,7 @@ app.post("/meta/quest/claim", async (req, reply) => {
 app.post("/meta/battle-pass/claim", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrMetaBattlePassClaimRequest.parse(req.body);
+    const body = NvMetaBattlePassClaimRequest.parse(req.body);
     const dateUtc = utcDate();
     let rateLimited = false;
     let bpResult: ReturnType<typeof claimBattlePassTier> | undefined;
@@ -773,7 +818,7 @@ app.post("/meta/battle-pass/claim", async (req, reply) => {
     }
 
     req.log.info({ krAudit: "meta_bp_claim", userId, tier: body.tier, track: body.track }, "r3_audit");
-    return KrMetaBattlePassClaimResponse.parse({
+    return NvMetaBattlePassClaimResponse.parse({
       v: 1,
       ok: true,
       tier: body.tier,
@@ -789,7 +834,7 @@ app.post("/meta/battle-pass/claim", async (req, reply) => {
 });
 
 app.get("/cosmetics/catalog", async () => {
-  return KrCosmeticsCatalogResponse.parse({ v: 1, ok: true, cosmetics: metaContent.cosmetics });
+  return NvCosmeticsCatalogResponse.parse({ v: 1, ok: true, cosmetics: metaContent.cosmetics });
 });
 
 app.get("/cosmetics/me", async (req, reply) => {
@@ -802,7 +847,7 @@ app.get("/cosmetics/me", async (req, reply) => {
     for (const [slot, cid] of Object.entries(equippedRaw)) {
       if (typeof cid === "string" && cid.length > 0) equipped[slot] = cid;
     }
-    return KrCosmeticsMeResponse.parse({ v: 1, ok: true, owned, equipped });
+    return NvCosmeticsMeResponse.parse({ v: 1, ok: true, owned, equipped });
   } catch {
     reply.code(401);
     return { ok: false, error: "UNAUTHORIZED" };
@@ -812,7 +857,11 @@ app.get("/cosmetics/me", async (req, reply) => {
 app.post("/cosmetics/equip", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrCosmeticsEquipRequest.parse(req.body);
+    const body = NvCosmeticsEquipRequest.parse(req.body);
+    if (body.slot === "hub") {
+      reply.code(400);
+      return { ok: false, error: "HUB_USE_LAYOUT" };
+    }
     const def = metaContent.cosmetics.find((c) => c.id === body.cosmeticId);
     if (!def || def.slot !== body.slot) {
       reply.code(400);
@@ -836,7 +885,7 @@ app.post("/cosmetics/equip", async (req, reply) => {
     }
 
     req.log.info({ krAudit: "cosmetics_equip", userId, slot: body.slot, cosmeticId: body.cosmeticId }, "r3_audit");
-    return KrCosmeticsEquipResponse.parse({ v: 1, ok: true, equipped });
+    return NvCosmeticsEquipResponse.parse({ v: 1, ok: true, equipped });
   } catch (err) {
     req.log.warn({ err }, "cosmetics equip rejected");
     reply.code(400);
@@ -844,10 +893,118 @@ app.post("/cosmetics/equip", async (req, reply) => {
   }
 });
 
+app.get("/hub/layout", async (req, reply) => {
+  try {
+    const userId = requireAuth(req);
+    store.mutate((s) => {
+      if (s.cosmeticOwned[userId]?.hub_starter_beacon) return;
+      grantStarterHubCosmetic(s, userId);
+    });
+    return hubLayoutView(store.snapshot(), userId);
+  } catch {
+    reply.code(401);
+    return { ok: false, error: "UNAUTHORIZED" };
+  }
+});
+
+app.post("/hub/layout", async (req, reply) => {
+  try {
+    const userId = requireAuth(req);
+    const body = NvHubLayoutPutRequest.parse(req.body);
+    const snap = store.snapshot();
+    for (const p of body.placements) {
+      if (p.cosmeticId === null) continue;
+      const def = metaContent.cosmetics.find((c) => c.id === p.cosmeticId);
+      const owned = snap.cosmeticOwned[userId]?.[p.cosmeticId];
+      if (!def || def.slot !== "hub" || !owned) {
+        reply.code(400);
+        return { ok: false, error: "BAD_PLACEMENT" };
+      }
+    }
+
+    store.mutate((s) => {
+      const layout = (s.hubLayout[userId] ??= {});
+      for (const id of KR_HUB_CELL_IDS) {
+        if (!(id in layout)) layout[id] = null;
+      }
+      for (const p of body.placements) {
+        layout[p.cellId] = p.cosmeticId;
+      }
+    });
+
+    req.log.info({ krAudit: "hub_layout_put", userId, n: body.placements.length }, "r3_audit");
+    return hubLayoutView(store.snapshot(), userId);
+  } catch (err) {
+    req.log.warn({ err }, "hub layout rejected");
+    reply.code(400);
+    return { ok: false, error: "BAD_REQUEST" };
+  }
+});
+
+app.post("/hub/share", async (req, reply) => {
+  try {
+    const userId = requireAuth(req);
+    NvHubShareCreateRequest.parse(req.body ?? { v: 1 });
+    const dateUtc = utcDate();
+    const now = Date.now();
+    const ttlMs = 86_400_000;
+    const maxDaily = 40;
+
+    const out = store.mutate((s) => {
+      if (!incCap(s, "hubPlanetShare", userId, dateUtc, maxDaily)) return null;
+      const view = hubLayoutView(s, userId);
+      const cells: Record<string, string | null> = {};
+      for (const k of KR_HUB_CELL_IDS) {
+        const v = view.cells[k];
+        cells[k] = typeof v === "string" && v.length > 0 ? v : null;
+      }
+      const ticketId = `hp_${nanoid(14)}`;
+      s.hubShareSnapshots[ticketId] = {
+        ticketId,
+        issuerUserId: userId,
+        cells,
+        createdAtMs: now,
+        expiresAtMs: now + ttlMs
+      };
+      return { ticketId, expiresAtMs: now + ttlMs };
+    });
+
+    if (!out) {
+      reply.code(400);
+      return { ok: false, error: "RATE_LIMIT" };
+    }
+
+    req.log.info({ krAudit: "hub_share_create", userId, ticketId: out.ticketId }, "r3_audit");
+    return NvHubShareCreateResponse.parse({ v: 1, ok: true, ...out });
+  } catch (err) {
+    req.log.warn({ err }, "hub share create rejected");
+    reply.code(400);
+    return { ok: false, error: "BAD_REQUEST" };
+  }
+});
+
+app.get("/hub/share/:ticketId", async (req, reply) => {
+  const ticketId =
+    typeof (req.params as { ticketId?: string }).ticketId === "string"
+      ? (req.params as { ticketId: string }).ticketId
+      : "";
+  if (!ticketId || ticketId.length < 8) {
+    reply.code(404);
+    return { ok: false, error: "NOT_FOUND" };
+  }
+  const now = Date.now();
+  const snap = store.snapshot().hubShareSnapshots[ticketId];
+  if (!snap || snap.expiresAtMs < now) {
+    reply.code(404);
+    return { ok: false, error: "NOT_FOUND" };
+  }
+  return hubSharePublicPayload(snap.expiresAtMs, snap.cells);
+});
+
 // ---------- Monetization (MVP) ----------
 app.get("/offers", async () => {
   if (!flags.isEnabled("monetization_offers")) return { ok: false, error: "DISABLED" };
-  return KrOffersResponse.parse({ v: 1, ok: true, offers: OFFERS });
+  return NvOffersResponse.parse({ v: 1, ok: true, offers: OFFERS });
 });
 
 app.post("/checkout/create", async (req, reply) => {
@@ -863,7 +1020,7 @@ app.post("/checkout/create", async (req, reply) => {
       reply.code(400);
       return { ok: false, error: "DISABLED" };
     }
-    const body = KrCheckoutCreateRequest.parse(req.body);
+    const body = NvCheckoutCreateRequest.parse(req.body);
     const offer = getOffer(body.offerId);
     if (!offer) {
       reply.code(400);
@@ -888,7 +1045,7 @@ app.post("/checkout/create", async (req, reply) => {
       const url = new URL(env.KR_PUBLIC_BASE_URL);
       url.searchParams.set("purchase", purchaseId);
       url.searchParams.set("status", "success");
-      return KrCheckoutCreateResponse.parse({ v: 1, ok: true, url: url.toString(), provider: "devstub" });
+      return NvCheckoutCreateResponse.parse({ v: 1, ok: true, url: url.toString(), provider: "devstub" });
     }
 
     // Stripe mode (skeleton): return a placeholder until keys are configured.
@@ -896,7 +1053,7 @@ app.post("/checkout/create", async (req, reply) => {
     const url = new URL(env.KR_PUBLIC_BASE_URL);
     url.searchParams.set("purchase", purchaseId);
     url.searchParams.set("status", "pending");
-    return KrCheckoutCreateResponse.parse({ v: 1, ok: true, url: url.toString(), provider: "stripe" });
+    return NvCheckoutCreateResponse.parse({ v: 1, ok: true, url: url.toString(), provider: "stripe" });
   } catch (err) {
     req.log.warn({ err }, "checkout create rejected");
     reply.code(400);
@@ -950,7 +1107,7 @@ app.get("/purchase/status", async (req, reply) => {
     const purchases = Object.values(store.snapshot().purchases)
       .filter((p) => p.userId === userId && p.fulfilledAtMs)
       .sort((a, b) => (b.fulfilledAtMs ?? 0) - (a.fulfilledAtMs ?? 0));
-    return KrPurchaseStatusResponse.parse({
+    return NvPurchaseStatusResponse.parse({
       v: 1,
       ok: true,
       lastPurchaseId: purchases[0]?.purchaseId
@@ -975,7 +1132,7 @@ app.post("/iap/battle-pass/verify", async (req, reply) => {
       return { ok: false, error: "IDENTITY_REQUIRED" };
     }
 
-    const body = KrBattlePassIapVerifyRequest.parse(req.body);
+    const body = NvBattlePassIapVerifyRequest.parse(req.body);
     const expectedSku =
       body.platform === "ios" ? env.KR_IAP_BATTLE_PASS_PRODUCT_ID_IOS : env.KR_IAP_BATTLE_PASS_PRODUCT_ID_ANDROID;
     if (!expectedSku || body.productId !== expectedSku) {
@@ -1060,7 +1217,7 @@ app.post("/iap/battle-pass/verify", async (req, reply) => {
       "r7_audit"
     );
 
-    return KrBattlePassIapVerifyResponseOk.parse({
+    return NvBattlePassIapVerifyResponseOk.parse({
       v: 1,
       ok: true,
       premium: true,
@@ -1075,7 +1232,7 @@ app.post("/iap/battle-pass/verify", async (req, reply) => {
 
 app.post("/auth/guest", async (req, reply) => {
   try {
-    const body = KrAuthGuestRequest.parse(req.body);
+    const body = NvAuthGuestRequest.parse(req.body);
     const now = Date.now();
 
     const userId = store.mutate((s) => {
@@ -1096,12 +1253,13 @@ app.post("/auth/guest", async (req, reply) => {
         keys: 0,
         updatedAtMs: now
       };
+      grantStarterHubCosmetic(s, uid);
       return uid;
     });
 
     const { token, refreshToken } = issueAuthPair(userId);
 
-    return KrAuthGuestResponse.parse({ v: 1, ok: true, userId, token, refreshToken });
+    return NvAuthGuestResponse.parse({ v: 1, ok: true, userId, token, refreshToken });
   } catch (err) {
     req.log.warn({ err }, "guest auth rejected");
     reply.code(400);
@@ -1111,7 +1269,7 @@ app.post("/auth/guest", async (req, reply) => {
 
 app.post("/auth/refresh", async (req, reply) => {
   try {
-    const body = KrAuthRefreshRequest.parse(req.body);
+    const body = NvAuthRefreshRequest.parse(req.body);
     const payload = verifyToken(body.refreshToken, env.KR_AUTH_SECRET);
     if (!payload || payload.typ !== "refresh") {
       reply.code(401);
@@ -1128,7 +1286,7 @@ app.post("/auth/refresh", async (req, reply) => {
     }
     const oldJti = typeof payload.jti === "string" && payload.jti.length >= 8 ? payload.jti : undefined;
     const { token, refreshToken } = issueAuthPair(payload.userId, oldJti);
-    return KrAuthRefreshResponse.parse({ v: 1, ok: true, token, refreshToken });
+    return NvAuthRefreshResponse.parse({ v: 1, ok: true, token, refreshToken });
   } catch (err) {
     req.log.warn({ err }, "refresh rejected");
     reply.code(400);
@@ -1139,7 +1297,7 @@ app.post("/auth/refresh", async (req, reply) => {
 app.post("/auth/logout", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrAuthLogoutRequest.parse({
+    const body = NvAuthLogoutRequest.parse({
       v: 1,
       ...(typeof req.body === "object" && req.body !== null && !Array.isArray(req.body) ? (req.body as object) : {})
     });
@@ -1166,7 +1324,7 @@ app.post("/auth/logout", async (req, reply) => {
       });
     }
 
-    return KrAuthLogoutResponse.parse({ v: 1, ok: true });
+    return NvAuthLogoutResponse.parse({ v: 1, ok: true });
   } catch (err) {
     if (err instanceof Error && err.message === "UNAUTHORIZED") {
       reply.code(401);
@@ -1180,7 +1338,7 @@ app.post("/auth/logout", async (req, reply) => {
 
 app.post("/auth/register-email", async (req, reply) => {
   try {
-    const body = KrAuthRegisterEmailRequest.parse(req.body);
+    const body = NvAuthRegisterEmailRequest.parse(req.body);
     const emailNorm = normalizeEmail(body.email);
     const now = Date.now();
     const { saltB64, hashB64 } = hashPassword(body.password);
@@ -1205,6 +1363,7 @@ app.post("/auth/register-email", async (req, reply) => {
         keys: 0,
         updatedAtMs: now
       };
+      grantStarterHubCosmetic(s, uid);
       return { t: "ok", userId: uid };
     });
 
@@ -1214,7 +1373,7 @@ app.post("/auth/register-email", async (req, reply) => {
     }
 
     const { token, refreshToken } = issueAuthPair(created.userId);
-    return KrAuthRegisterEmailResponse.parse({
+    return NvAuthRegisterEmailResponse.parse({
       v: 1,
       ok: true,
       userId: created.userId,
@@ -1230,7 +1389,7 @@ app.post("/auth/register-email", async (req, reply) => {
 
 app.post("/auth/login-email", async (req, reply) => {
   try {
-    const body = KrAuthLoginEmailRequest.parse(req.body);
+    const body = NvAuthLoginEmailRequest.parse(req.body);
     const emailNorm = normalizeEmail(body.email);
     const snap = store.snapshot();
     const uidFound = snap.emailToUser[emailNorm];
@@ -1251,7 +1410,7 @@ app.post("/auth/login-email", async (req, reply) => {
       });
     }
     const { token, refreshToken } = issueAuthPair(u.userId);
-    return KrAuthLoginEmailResponse.parse({
+    return NvAuthLoginEmailResponse.parse({
       v: 1,
       ok: true,
       userId: u.userId,
@@ -1268,7 +1427,7 @@ app.post("/auth/login-email", async (req, reply) => {
 app.post("/auth/link-email", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrAuthLinkEmailRequest.parse(req.body);
+    const body = NvAuthLinkEmailRequest.parse(req.body);
     const emailNorm = normalizeEmail(body.email);
     const { saltB64, hashB64 } = hashPassword(body.password);
 
@@ -1290,7 +1449,7 @@ app.post("/auth/link-email", async (req, reply) => {
     }
 
     const { token, refreshToken } = issueAuthPair(userId);
-    return KrAuthLinkEmailResponse.parse({
+    return NvAuthLinkEmailResponse.parse({
       v: 1,
       ok: true,
       userId,
@@ -1314,7 +1473,7 @@ app.post("/auth/oauth/google", async (req, reply) => {
       reply.code(503);
       return { ok: false, error: "OAUTH_DISABLED" };
     }
-    const body = KrAuthGoogleRequest.parse(req.body);
+    const body = NvAuthGoogleRequest.parse(req.body);
     const { sub, email } = await verifyGoogleIdToken(body.credential, env.KR_GOOGLE_CLIENT_ID);
     const emailNorm = normalizeEmail(email);
     const key = `google:${sub}`;
@@ -1359,6 +1518,7 @@ app.post("/auth/oauth/google", async (req, reply) => {
         keys: 0,
         updatedAtMs: now
       };
+      grantStarterHubCosmetic(s, uid);
       return { t: "ok", userId: uid };
     });
 
@@ -1375,7 +1535,7 @@ app.post("/auth/oauth/google", async (req, reply) => {
     }
 
     const { token, refreshToken } = issueAuthPair(created.userId);
-    return KrAuthGoogleResponse.parse({
+    return NvAuthGoogleResponse.parse({
       v: 1,
       ok: true,
       userId: created.userId,
@@ -1400,7 +1560,7 @@ app.post("/auth/link-google", async (req, reply) => {
       return { ok: false, error: "OAUTH_DISABLED" };
     }
     const userId = requireAuth(req);
-    const body = KrAuthLinkGoogleRequest.parse(req.body);
+    const body = NvAuthLinkGoogleRequest.parse(req.body);
     const { sub, email } = await verifyGoogleIdToken(body.credential, env.KR_GOOGLE_CLIENT_ID);
     const emailNorm = normalizeEmail(email);
     const key = `google:${sub}`;
@@ -1435,7 +1595,7 @@ app.post("/auth/link-google", async (req, reply) => {
     }
 
     const { token, refreshToken } = issueAuthPair(userId);
-    return KrAuthLinkGoogleResponse.parse({
+    return NvAuthLinkGoogleResponse.parse({
       v: 1,
       ok: true,
       userId,
@@ -1465,7 +1625,7 @@ app.get("/me", async (req, reply) => {
       reply.code(401);
       return { ok: false, error: "UNAUTHORIZED" };
     }
-    return KrMeResponse.parse({
+    return NvMeResponse.parse({
       v: 1,
       ok: true,
       userId,
@@ -1486,7 +1646,7 @@ app.get("/inventory", async (req, reply) => {
       reply.code(404);
       return { ok: false, error: "NOT_FOUND" };
     }
-    return KrInventoryResponse.parse({
+    return NvInventoryResponse.parse({
       v: 1,
       ok: true,
       inventory: {
@@ -1546,7 +1706,7 @@ app.post("/daily/claim", async (req, reply) => {
       return { claimed: true, delta, inv };
     });
 
-    return KrDailyClaimResponse.parse({
+    return NvDailyClaimResponse.parse({
       v: 1,
       ok: true,
       dateUtc,
@@ -1569,7 +1729,7 @@ app.post("/daily/claim", async (req, reply) => {
 app.post("/leaderboard/submit", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrLeaderboardSubmitRequest.parse(req.body);
+    const body = NvLeaderboardSubmitRequest.parse(req.body);
 
     // Server-run simulation: accept battleRequest (same shape as /sim/battle request)
     const sim = runBattleSim(body.battleRequest);
@@ -1620,7 +1780,7 @@ app.post("/leaderboard/submit", async (req, reply) => {
       sorted.findIndex((e) => e.userId === userId) + 1
     );
 
-    return KrLeaderboardSubmitResponse.parse({
+    return NvLeaderboardSubmitResponse.parse({
       v: 1,
       ok: true,
       dateUtc: body.dateUtc,
@@ -1640,7 +1800,7 @@ app.get("/leaderboard/daily", async (req, reply) => {
   const limit = typeof req.query === "object" && req.query && "limit" in req.query ? Math.max(1, Math.min(200, Number((req.query as any).limit) || 50)) : 50;
   const day = store.snapshot().leaderboard[dateUtc] ?? {};
   const sorted = Object.values(day).sort((a, b) => b.score - a.score).slice(0, limit);
-  return KrLeaderboardTopResponse.parse({
+  return NvLeaderboardTopResponse.parse({
     v: 1,
     ok: true,
     dateUtc,
@@ -1657,7 +1817,7 @@ app.get("/leaderboard/me", async (req, reply) => {
     const total = Math.max(1, sorted.length);
     const entry = day[userId];
     const rank = entry ? sorted.findIndex((e) => e.userId === userId) + 1 : undefined;
-    return KrLeaderboardMeResponse.parse({
+    return NvLeaderboardMeResponse.parse({
       v: 1,
       ok: true,
       dateUtc,
@@ -1675,9 +1835,9 @@ app.get("/leaderboard/me", async (req, reply) => {
 app.post("/referral/accept", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrReferralAcceptRequest.parse(req.body);
+    const body = NvReferralAcceptRequest.parse(req.body);
     if (body.referrerUserId === userId) {
-      return KrReferralAcceptResponse.parse({ v: 1, ok: true, accepted: false });
+      return NvReferralAcceptResponse.parse({ v: 1, ok: true, accepted: false });
     }
     const dateUtc = utcDate();
     const now = Date.now();
@@ -1712,7 +1872,7 @@ app.post("/referral/accept", async (req, reply) => {
       return { accepted: true, rewarded: true };
     });
 
-    return KrReferralAcceptResponse.parse({
+    return NvReferralAcceptResponse.parse({
       v: 1,
       ok: true,
       accepted: out.accepted,
@@ -1730,7 +1890,7 @@ app.get("/referral/status", async (req, reply) => {
   try {
     const userId = requireAuth(req);
     const edge = store.snapshot().referrals[userId];
-    return KrReferralStatusResponse.parse({
+    return NvReferralStatusResponse.parse({
       v: 1,
       ok: true,
       referrerUserId: edge?.referrerUserId,
@@ -1769,7 +1929,7 @@ app.post("/share/ticket", async (req, reply) => {
       reply.code(400);
       return { ok: false, error: "BAD_REQUEST" };
     }
-    return KrShareTicketCreateResponse.parse({ v: 1, ok: true, ...out });
+    return NvShareTicketCreateResponse.parse({ v: 1, ok: true, ...out });
   } catch (err) {
     req.log.warn({ err }, "share ticket rejected");
     reply.code(400);
@@ -1780,7 +1940,7 @@ app.post("/share/ticket", async (req, reply) => {
 app.post("/share/redeem", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrShareRedeemRequest.parse(req.body);
+    const body = NvShareRedeemRequest.parse(req.body);
     const now = Date.now();
     const reward = { gold: 40, shards: 2 };
 
@@ -1810,7 +1970,7 @@ app.post("/share/redeem", async (req, reply) => {
       return { redeemed: true, rewarded: true };
     });
 
-    return KrShareRedeemResponse.parse({
+    return NvShareRedeemResponse.parse({
       v: 1,
       ok: true,
       redeemed: out.redeemed,
@@ -1835,7 +1995,7 @@ app.get("/shop/daily", async (req) => {
     qty: o.qty
   }));
 
-  return KrDailyShopResponse.parse({
+  return NvDailyShopResponse.parse({
     v: 1,
     ok: true,
     dateUtc,
@@ -1847,7 +2007,7 @@ app.get("/shop/daily", async (req) => {
 app.post("/shop/buy", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrShopBuyRequest.parse(req.body);
+    const body = NvShopBuyRequest.parse(req.body);
     const dateUtc = utcDate();
     const econ = economyEffective();
     const offers = makeDailyOffers({ dateUtc, content, userId, shopGoldMulPct: econ.shopGoldMulPct });
@@ -1877,7 +2037,7 @@ app.post("/shop/buy", async (req, reply) => {
     const ownedLevels: Record<string, number> = {};
     for (const [k, v] of Object.entries(out.owned)) ownedLevels[k] = v.level;
 
-    return KrShopBuyResponse.parse({
+    return NvShopBuyResponse.parse({
       v: 1,
       ok: true,
       offerId: body.offerId,
@@ -1897,7 +2057,7 @@ app.get("/units/owned", async (req, reply) => {
   try {
     const userId = requireAuth(req);
     const owned = store.snapshot().ownedUnits[userId] ?? {};
-    return KrOwnedUnitsResponse.parse({
+    return NvOwnedUnitsResponse.parse({
       v: 1,
       ok: true,
       owned: Object.values(owned).map((u) => ({ archetype: u.archetype, level: u.level }))
@@ -1911,7 +2071,7 @@ app.get("/units/owned", async (req, reply) => {
 app.post("/units/upgrade", async (req, reply) => {
   try {
     const userId = requireAuth(req);
-    const body = KrUpgradeUnitRequest.parse(req.body);
+    const body = NvUpgradeUnitRequest.parse(req.body);
     if (!content.unitById.has(body.archetype)) {
       reply.code(400);
       return { ok: false, error: "BAD_REQUEST" };
@@ -1935,7 +2095,7 @@ app.post("/units/upgrade", async (req, reply) => {
       return { inv, level: row.level };
     });
 
-    return KrUpgradeUnitResponse.parse({
+    return NvUpgradeUnitResponse.parse({
       v: 1,
       ok: true,
       archetype: body.archetype,

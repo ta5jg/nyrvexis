@@ -1,0 +1,94 @@
+{
+  "$ref": "#/definitions/NvMetaBattlePassClaimResponse",
+  "definitions": {
+    "NvMetaBattlePassClaimResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "tier": {
+          "type": "integer"
+        },
+        "track": {
+          "type": "string",
+          "enum": [
+            "free",
+            "premium"
+          ]
+        },
+        "granted": {
+          "type": "object",
+          "properties": {
+            "gold": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "shards": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "keys": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "battlePassXp": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "catchUpTokens": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "cosmeticId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            }
+          },
+          "additionalProperties": false
+        },
+        "inventory": {
+          "type": "object",
+          "properties": {
+            "gold": {
+              "type": "integer"
+            },
+            "shards": {
+              "type": "integer"
+            },
+            "keys": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "gold",
+            "shards",
+            "keys"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "tier",
+        "track",
+        "granted",
+        "inventory"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

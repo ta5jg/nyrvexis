@@ -1,0 +1,28 @@
+{
+  "$ref": "#/definitions/NvPushWebUnsubscribeResponse",
+  "definitions": {
+    "NvPushWebUnsubscribeResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "removed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "removed"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

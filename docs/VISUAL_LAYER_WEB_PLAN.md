@@ -13,7 +13,7 @@ License:
   Proprietary. All rights reserved. See LICENSE in the repository root.
 ============================================================================= -->
 
-## Web-as-game Visual Layer Plan (KINDRAIL)
+## Web-as-game Visual Layer Plan (NYRVEXIS)
 
 Amaç: `apps/companion-web` arayüzünü “debug tool” hissinden çıkarıp **oyun sunumu** seviyesine taşımak; bunu yaparken deterministik sim core’u **dokunulmaz** kalır (görsel katman sadece render eder).
 

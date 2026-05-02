@@ -14,9 +14,12 @@
     "battlePassXpDailyCap": 520
   },
   "cosmetics": [
-    { "id": "cos_frame_kindrail_v1", "title": "Kindrail frame", "slot": "frame" },
+    { "id": "cos_frame_nyrvexis_v1", "title": "Nyrvexis frame", "slot": "frame" },
     { "id": "cos_arena_twilight_v1", "title": "Twilight arena tint", "slot": "arena" },
-    { "id": "cos_title_vanguard_v1", "title": "Vanguard title", "slot": "title" }
+    { "id": "cos_title_vanguard_v1", "title": "Vanguard title", "slot": "title" },
+    { "id": "hub_starter_beacon", "title": "Core beacon", "slot": "hub", "iconId": "unit_barrier_v1" },
+    { "id": "hub_twilight_spire", "title": "Twilight spire", "slot": "hub", "iconId": "unit_mage_v1" },
+    { "id": "hub_signal_array", "title": "Signal array", "slot": "hub", "iconId": "aug_warmachine_v1" }
   ],
   "quests": [
     {
@@ -54,8 +57,8 @@
   ],
   "battlePassTiers": [
     { "tier": 1, "xpCumulative": 50, "freeReward": { "gold": 25, "shards": 2, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0 } },
-    { "tier": 2, "xpCumulative": 120, "freeReward": { "gold": 35, "shards": 4, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0 } },
-    { "tier": 3, "xpCumulative": 280, "freeReward": { "gold": 50, "shards": 6, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0, "cosmeticId": "cos_frame_kindrail_v1" } },
+    { "tier": 2, "xpCumulative": 120, "freeReward": { "gold": 35, "shards": 4, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0, "cosmeticId": "hub_twilight_spire" } },
+    { "tier": 3, "xpCumulative": 280, "freeReward": { "gold": 50, "shards": 6, "keys": 0, "battlePassXp": 0, "catchUpTokens": 0, "cosmeticId": "cos_frame_nyrvexis_v1" } },
     {
       "tier": 4,
       "xpCumulative": 500,

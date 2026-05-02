@@ -13,7 +13,7 @@
  *   Proprietary. All rights reserved. See LICENSE in the repository root.
  * ============================================================================= */
 
-export const KINDRAIL_ART = {
+export const NYRVEXIS_ART = {
   id: "nyrvexa_twilight_v1",
   accent: "#7c5cff",
   good: "#35d07f",
@@ -29,9 +29,9 @@ export const KINDRAIL_ART = {
   teamTintB: "rgba(53, 208, 127, 0.10)"
 } as const;
 
-export type KindrailRoleKey = keyof typeof KINDRAIL_ART.roles;
+export type NyrvexisRoleKey = keyof typeof NYRVEXIS_ART.roles;
 
 export function roleStroke(role: string): string {
-  const k = role as KindrailRoleKey;
-  return KINDRAIL_ART.roles[k] ?? KINDRAIL_ART.roles.control;
+  const k = role as NyrvexisRoleKey;
+  return NYRVEXIS_ART.roles[k] ?? NYRVEXIS_ART.roles.control;
 }

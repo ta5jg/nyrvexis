@@ -4,19 +4,22 @@
  * Developer:      Irfan Gedik
  * Created Date:   2026-04-30
  * Last Update:    2026-05-01
- * Version:        0.4.0
+ * Version:        0.5.0
  *
  * Description:
- *   WebGL arena renderer: minimal tactical board + asset-driven unit cards.
+ *   WebGL arena: tactical board + unit cards driven by NyrvexisAnimationSystem
+ *   (BattleAnimationDirector + UnitVisual) and replay frames.
  *
  * License:
  *   Proprietary. All rights reserved. See LICENSE in the repository root.
  * ============================================================================= */
 
 import React, { useEffect, useMemo, useRef } from "react";
-import type { KrBattleSimRequest, KrUnitArchetypeDef, KrUnitRole } from "@kindrail/protocol";
+import { scaledMatchHp, type NvBattleSimRequest, type NvUnitArchetypeDef, type NvUnitRole } from "@nyrvexis/protocol";
 import { Application, Container, Graphics, Text } from "pixi.js";
 import type { ReplayFrame } from "../replay";
+import { BattleAnimationDirector, UnitVisual } from "../../game/animation/NyrvexisAnimationSystem";
+import { applyReplayTickToDirector } from "../../game/animation/replayAnimationBridge";
 import { createArenaBoardFrame, createArenaSceneBackdrop } from "./pixiSceneBackdrop";
 import { createUnitCardView } from "./pixiUnitCard";
 import { loadUnitVisualTextures } from "./visualAssetPipeline";
@@ -38,7 +41,7 @@ const CARD_H = 76;
 
 const texPromiseCache = new Map<string, ReturnType<typeof loadUnitVisualTextures>>();
 
-function texturesFor(archetypeId: string, role: KrUnitRole) {
+function texturesFor(archetypeId: string, role: NvUnitRole) {
   const key = `${archetypeId}:${role}`;
   let p = texPromiseCache.get(key);
   if (!p) {
@@ -55,14 +58,39 @@ type UnitVm = {
   slot: number;
   archetypeId: string;
   name: string;
-  role: KrUnitRole;
+  role: NvUnitRole;
   hp0: number;
 };
 
+function syncUnitsHard(fr: ReplayFrame, visuals: Map<string, { uv: UnitVisual; highlight: Graphics }>, slotToPos: Map<string, Pt>, units: UnitVm[]): void {
+  for (const u of units) {
+    const entry = visuals.get(u.id);
+    if (!entry) continue;
+    const hp = fr.hp[u.id] ?? 0;
+    const maxH = fr.maxHp[u.id] ?? 1;
+    const live = fr.alive[u.id] !== false && hp > 0;
+    const p0 = slotToPos.get(`${u.side}:${u.slot}`);
+    entry.uv.alive = live;
+    entry.uv.setHp(hp, maxH);
+    if (p0) entry.uv.syncSlotPosition(p0.x, p0.y);
+    if (!live) {
+      entry.uv.container.visible = false;
+      entry.uv.body.alpha = 0;
+      continue;
+    }
+    entry.uv.container.visible = true;
+    entry.uv.body.alpha = 1;
+    entry.uv.body.rotation = 0;
+    entry.uv.resetToIdle();
+  }
+}
+
 export function PixiArena(props: {
-  req: KrBattleSimRequest;
+  req: NvBattleSimRequest;
   frame: ReplayFrame | null;
-  defsById: Map<string, KrUnitArchetypeDef>;
+  /** Previous replay tick (must be `frames[tick-1]` when playback is sequential). Otherwise null → hard sync. */
+  prevFrame: ReplayFrame | null;
+  defsById: Map<string, NvUnitArchetypeDef>;
   outcome?: "a" | "b" | "draw";
   width?: number;
   height?: number;
@@ -71,8 +99,11 @@ export function PixiArena(props: {
   const appRef = useRef<Application | null>(null);
 
   const frameRef = useRef<ReplayFrame | null>(props.frame);
+  const prevFrameRef = useRef<ReplayFrame | null>(props.prevFrame);
   const outcomeRef = useRef(props.outcome);
-  const prevFrameRef = useRef<ReplayFrame | null>(null);
+
+  const directorRef = useRef<BattleAnimationDirector | null>(null);
+  const lastAppliedTickRef = useRef<number | null>(null);
 
   const deathAtRef = useRef<Record<string, number>>({});
   const critAtRef = useRef<Record<string, number>>({});
@@ -87,6 +118,10 @@ export function PixiArena(props: {
   }, [props.frame]);
 
   useEffect(() => {
+    prevFrameRef.current = props.prevFrame;
+  }, [props.prevFrame]);
+
+  useEffect(() => {
     outcomeRef.current = props.outcome;
   }, [props.outcome]);
 
@@ -95,12 +130,16 @@ export function PixiArena(props: {
     const cur = props.frame;
     const prev = prevFrameRef.current;
     if (cur) {
-      if (prev) {
-        for (const [id, aliveNow] of Object.entries(cur.alive)) {
+      if (prev && prev.t === cur.t - 1) {
+        const ids = new Set([...Object.keys(cur.hp), ...Object.keys(prev.hp), ...Object.keys(cur.alive), ...Object.keys(prev.alive)]);
+        for (const id of ids) {
+          const hpPrev = prev.hp[id] ?? 0;
+          const hpCur = cur.hp[id] ?? 0;
           const alivePrev = prev.alive[id];
-          if (alivePrev !== false && aliveNow === false) {
-            deathAtRef.current[id] = now;
-          }
+          const aliveCur = cur.alive[id];
+          const wasAlive = alivePrev !== false && hpPrev > 0;
+          const isDead = aliveCur === false || hpCur <= 0;
+          if (wasAlive && isDead) deathAtRef.current[id] = now;
         }
       }
       for (const id of cur.critIds ?? []) critAtRef.current[id] = now;
@@ -112,7 +151,6 @@ export function PixiArena(props: {
         }
       }
     }
-    prevFrameRef.current = cur;
   }, [props.frame?.t]);
 
   const w = props.width ?? 560;
@@ -138,7 +176,7 @@ export function PixiArena(props: {
 
   const units = useMemo((): UnitVm[] => {
     const out: UnitVm[] = [];
-    const roleOf = (r: string): KrUnitRole => {
+    const roleOf = (r: string): NvUnitRole => {
       if (r === "tank" || r === "dps" || r === "support" || r === "control") return r;
       return "dps";
     };
@@ -151,7 +189,7 @@ export function PixiArena(props: {
         archetypeId: u.archetype,
         name: d?.name ?? u.archetype,
         role: roleOf(d?.role ?? "dps"),
-        hp0: u.hp | 0
+        hp0: scaledMatchHp(u)
       });
     }
     for (const u of props.req.b.units) {
@@ -163,7 +201,7 @@ export function PixiArena(props: {
         archetypeId: u.archetype,
         name: d?.name ?? u.archetype,
         role: roleOf(d?.role ?? "dps"),
-        hp0: u.hp | 0
+        hp0: scaledMatchHp(u)
       });
     }
     return out;
@@ -194,15 +232,11 @@ export function PixiArena(props: {
     endBadge.position.set(w / 2, 28);
     endBadge.visible = false;
 
-    const unitWrapById = new Map<
-      string,
-      {
-        wrap: Container;
-        highlight: Graphics;
-        hpFill: Graphics;
-        cardRoot: Container;
-      }
-    >();
+    const unitVisualById = new Map<string, { uv: UnitVisual; highlight: Graphics }>();
+
+    const director = new BattleAnimationDirector();
+    directorRef.current = director;
+    lastAppliedTickRef.current = null;
 
     (async () => {
       await app.init({
@@ -253,68 +287,98 @@ export function PixiArena(props: {
           height: CARD_H
         });
 
-        const wrap = new Container();
         const highlight = new Graphics();
-        wrap.addChild(highlight);
-        wrap.addChild(card.root);
+        const p0 = slotToPos.get(`${u.side}:${u.slot}`) ?? { x: w / 2, y: h / 2 };
 
-        const barY = -CARD_H / 2 - 12;
-        const hpBg = new Graphics();
-        hpBg.roundRect(-23, barY, 46, 6, 2);
-        hpBg.fill({ color: 0xffffff, alpha: 0.12 });
-        wrap.addChild(hpBg);
-
-        const hpFill = new Graphics();
-        wrap.addChild(hpFill);
-
-        const nameLabel = new Text({
-          text: u.name,
-          style: {
-            fontFamily: "system-ui, -apple-system, ui-sans-serif",
-            fontSize: 11,
-            fill: 0xd9e4f5,
-            fontWeight: "600",
-            align: "center",
-            stroke: { color: 0x000000, width: 3 },
-            letterSpacing: 0
-          }
+        const uv = new UnitVisual({
+          id: u.id,
+          name: u.name,
+          team: u.side === "a" ? "A" : "B",
+          x: p0.x,
+          y: p0.y,
+          body: card.root,
+          bodyScale: 1
         });
-        nameLabel.anchor.set(0.5, 0);
-        nameLabel.position.set(0, CARD_H / 2 + 3);
-        wrap.addChild(nameLabel);
 
-        unitWrapById.set(u.id, { wrap, highlight, hpFill, cardRoot: card.root });
-        unitsLayer.addChild(wrap);
+        uv.container.addChildAt(highlight, 0);
+        uv.setHp(u.hp0, u.hp0);
+
+        unitVisualById.set(u.id, { uv, highlight });
+        director.register(uv);
+        unitsLayer.addChild(uv.container);
       }
 
       if (cancelled) {
         app.destroy(true);
         appRef.current = null;
+        directorRef.current = null;
         return;
       }
 
       const tick = () => {
         const now = performance.now();
+        const dt = Math.min(0.05, app.ticker.deltaMS / 1000);
+        director.update(dt);
+
         const frame = frameRef.current;
+        const prevFrameSnap = prevFrameRef.current;
+
+        if (frame && directorRef.current) {
+          const lt = lastAppliedTickRef.current;
+          if (lt !== frame.t) {
+            const pf = prevFrameSnap;
+            const steppedOneForward = lt !== null && frame.t === lt + 1;
+            const stepSequential =
+              steppedOneForward && pf !== null && pf.t === lt;
+            if (stepSequential) {
+              applyReplayTickToDirector(pf, frame, directorRef.current);
+            } else {
+              syncUnitsHard(frame, unitVisualById, slotToPos, units);
+            }
+            lastAppliedTickRef.current = frame.t;
+          }
+        }
+
         const bySlot = byId;
 
         linesG.clear();
 
         if (frame?.uiEvents?.length) {
-          const evs = frame.uiEvents.filter((e) => (e.kind === "hit" || e.kind === "ability") && e.src && e.dst).slice(0, 6);
+          const evs = frame.uiEvents.filter((e): e is Extract<(typeof frame.uiEvents)[number], { kind: "hit" | "ability" }> => {
+            return (e.kind === "hit" || e.kind === "ability") && Boolean(e.src) && Boolean((e as { dst?: string }).dst);
+          }).slice(0, 6);
           for (const e of evs) {
             const src = bySlot.get(e.src!);
             const dst = bySlot.get(e.dst!);
             if (!src || !dst) continue;
             const p1 = slotToPos.get(`${src.side}:${src.slot}`);
-            const p2 = slotToPos.get(`${dst.side}:${dst.slot}`);
+            let p2 = slotToPos.get(`${dst.side}:${dst.slot}`);
             if (!p1 || !p2) continue;
 
+            if (e.kind === "ability" && typeof e.text === "string" && e.text.includes("maneuver_")) {
+              const toward = src.side === "a" ? 1 : -1;
+              const lateral = src.slot % 2 === 0 ? 1 : -1;
+              let p2x = p2.x;
+              let p2y = p2.y;
+              if (e.text.includes("maneuver_take_cover")) {
+                p2x = p1.x - toward * 36;
+                p2y = p1.y + 12;
+              } else if (e.text.includes("maneuver_probe")) {
+                p2x = p1.x + toward * 44;
+                p2y = p1.y - 10;
+              } else {
+                p2x = p1.x + lateral * 32;
+                p2y = p1.y - 8;
+              }
+              p2 = { x: p2x, y: p2y };
+            }
+
             const isAbility = e.kind === "ability";
-            const pulse0 = isAbility ? 320 : e.crit ? 260 : 220;
+            const isCrit = e.kind === "hit" && Boolean(e.crit);
+            const pulse0 = isAbility ? 320 : isCrit ? 260 : 220;
             const pulseAt = isAbility
               ? abilityAtRef.current[`${src.id}|${dst.id}`]
-              : e.crit
+              : isCrit
                 ? critAtRef.current[src.id]
                 : hitAtRef.current[dst.id];
             const age = typeof pulseAt === "number" ? now - pulseAt : 9999;
@@ -335,44 +399,31 @@ export function PixiArena(props: {
               linesG.moveTo(p1.x, p1.y);
               linesG.lineTo(p2.x, p2.y);
               linesG.stroke({
-                width: e.crit ? 2 + 3 * a : 2 + 2 * a,
-                color: e.crit ? 0xffd740 : 0xff5c7c,
-                alpha: e.crit ? 0.22 + 0.45 * a : 0.12 + 0.28 * a
+                width: isCrit ? 2 + 3 * a : 2 + 2 * a,
+                color: isCrit ? 0xffd740 : 0xff5c7c,
+                alpha: isCrit ? 0.22 + 0.45 * a : 0.12 + 0.28 * a
               });
             }
           }
         }
 
         for (const u of units) {
-          const entry = unitWrapById.get(u.id);
+          const entry = unitVisualById.get(u.id);
           const p0 = slotToPos.get(`${u.side}:${u.slot}`);
           if (!entry || !p0) continue;
 
-          const alive = frame ? frame.alive[u.id] !== false : true;
-          const curHp = frame?.hp?.[u.id] ?? u.hp0;
-          const maxHp = frame?.maxHp?.[u.id] ?? u.hp0;
-          const hpPct = maxHp > 0 ? clamp(curHp / maxHp, 0, 1) : 0;
+          entry.uv.syncSlotPosition(p0.x, p0.y);
 
-          const tgt = frame?.tgtIds?.includes(u.id) ?? false;
-          const atk = frame?.atkIds?.includes(u.id) ?? false;
+          const fr = frame;
+          const aliveRec = fr ? fr.alive[u.id] !== false && (fr.hp[u.id] ?? 0) > 0 : true;
+          if (!aliveRec && !entry.uv.container.visible) continue;
 
-          let idSum = 0;
-          for (let i = 0; i < u.id.length; i++) idSum = (idSum + u.id.charCodeAt(i)) | 0;
-          const phase = (idSum % 1000) / 1000;
-
-          const cfg = resolveUnitVisualConfig({ archetypeId: u.archetypeId, role: u.role });
-          let bob = 0;
-          let pulseScale = 1;
-          if (cfg.idleAnimationPlaceholder.kind === "bob") {
-            bob = Math.sin(now / 520 + phase * Math.PI * 2) * cfg.idleAnimationPlaceholder.amplitudePx;
-          } else {
-            const sp = cfg.idleAnimationPlaceholder.speed;
-            pulseScale = 1 + Math.sin(now / (440 / sp) + phase * Math.PI * 2) * cfg.idleAnimationPlaceholder.scaleAmplitude;
-          }
+          const tgt = fr?.tgtIds?.includes(u.id) ?? false;
+          const atk = fr?.atkIds?.includes(u.id) ?? false;
 
           const deathAt = deathAtRef.current[u.id];
           const deadAge = typeof deathAt === "number" ? now - deathAt : 9999;
-          const fade = alive ? 1 : clamp(1 - easeOutCubic(deadAge / 700), 0, 1);
+          const fade = aliveRec ? 1 : clamp(1 - easeOutCubic(deadAge / 700), 0, 1);
 
           const critAt = critAtRef.current[u.id];
           const critAge = typeof critAt === "number" ? now - critAt : 9999;
@@ -382,15 +433,13 @@ export function PixiArena(props: {
           const hitAge = typeof hitAt === "number" ? now - hitAt : 9999;
           const hitPulse = clamp(1 - easeOutCubic(hitAge / 220), 0, 1);
 
-          const atkPulse = clamp(1 - easeOutCubic((typeof atkAtRef.current[u.id] === "number" ? now - atkAtRef.current[u.id]! : 9999) / 180), 0, 1);
+          const atkPulse = clamp(
+            1 - easeOutCubic((typeof atkAtRef.current[u.id] === "number" ? now - atkAtRef.current[u.id]! : 9999) / 180),
+            0,
+            1
+          );
 
-          const dir = u.side === "a" ? 1 : -1;
-          const baseX = p0.x + dir * (atkPulse * 7);
-          const baseY = p0.y + bob;
-
-          entry.wrap.position.set(baseX, baseY);
-          entry.wrap.alpha = fade;
-          entry.wrap.scale.set(pulseScale, pulseScale);
+          entry.uv.container.alpha = fade;
 
           entry.highlight.clear();
           const ringR = 22 + critPulse * 3;
@@ -401,14 +450,6 @@ export function PixiArena(props: {
           else if (tgt) ringColor = 0xff5c7c;
           else if (atk) ringColor = 0x35d07f;
           entry.highlight.stroke({ color: ringColor, alpha: ringA, width: 3 + hitPulse * 2 + critPulse * 1.5 });
-
-          const barY = -CARD_H / 2 - 12;
-          entry.hpFill.clear();
-          entry.hpFill.roundRect(-23, barY, Math.max(0, 46 * hpPct), 6, 2);
-          entry.hpFill.fill({ color: 0x35d07f, alpha: 0.65 + 0.2 * hitPulse });
-
-          entry.cardRoot.tint =
-            critPulse > 0.01 ? 0xfff4cc : hitPulse > 0.08 ? 0xe8ddff : 0xffffff;
         }
 
         if (frame?.uiEvents?.length) {
@@ -470,10 +511,8 @@ export function PixiArena(props: {
           vg.rect(0, 0, w, h);
           vg.fill({ color: 0x000000, alpha: 0.28 });
 
-          const washA =
-            winner === "a" ? 0x35d07f : winner === "draw" ? 0xffffff : 0xff5c7c;
-          const washB =
-            winner === "b" ? 0x35d07f : winner === "draw" ? 0xffffff : 0xff5c7c;
+          const washA = winner === "a" ? 0x35d07f : winner === "draw" ? 0xffffff : 0xff5c7c;
+          const washB = winner === "b" ? 0x35d07f : winner === "draw" ? 0xffffff : 0xff5c7c;
           const aA = winner === "a" ? 0.1 : winner === "draw" ? 0.06 : 0.08;
           const aB = winner === "b" ? 0.1 : winner === "draw" ? 0.06 : 0.08;
           vg.rect(0, 0, w / 2, h);
@@ -499,6 +538,8 @@ export function PixiArena(props: {
         }
       });
       floatsRef.current = [];
+      directorRef.current = null;
+      lastAppliedTickRef.current = null;
       const a = appRef.current;
       if (a) {
         try {

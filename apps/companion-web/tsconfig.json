@@ -10,13 +10,6 @@
     "noEmit": true,
     "types": ["vite/client"]
   },
-  "include": ["src/**/*"],
-  "exclude": [
-    "src/ui/visual/PixiArena.tsx",
-    "src/ui/visual/pixiSceneBackdrop.ts",
-    "src/ui/visual/pixiUnitCard.ts",
-    "src/ui/visual/proceduralSprites.ts",
-    "src/ui/visual/visualAssetPipeline.ts"
-  ]
+  "include": ["src/**/*"]
 }
 

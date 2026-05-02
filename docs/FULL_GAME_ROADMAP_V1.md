@@ -3,22 +3,23 @@ File:           docs/FULL_GAME_ROADMAP_V1.md
 Author:         USDTG GROUP TECHNOLOGY LLC
 Developer:      Irfan Gedik
 Created Date:   2026-04-30
-Last Update:    2026-04-30
-Version:        0.3.0
+Last Update:    2026-05-02
+Version:        0.3.1
 
 Description:
-  KINDRAIL’in web-first “tam oyun” (v1.0) seviyesine çıkması için uçtan uca roadmap.
+  NYRVEXIS’in web-first “tam oyun” (v1.0) seviyesine çıkması için uçtan uca roadmap.
 
 License:
   Proprietary. All rights reserved. See LICENSE in the repository root.
 ============================================================================= -->
 
-## KINDRAIL — Web-First Full Game Roadmap (v1 → v1.0)
+## NYRVEXIS — Web-First Full Game Roadmap (v1 → v1.0)
 
 Bu doküman `docs/ROADMAP.md` (Faz 0–7) ve `docs/ROADMAP_V1_FULL.md` (Faz 8–14) içeriklerini **tek bir v1.0 hedef çizgisine** indirger ve her faz için **deliverable + exit criteria + test plan + rollback** çerçevesi verir.
 
 ### v1.0 Tanımı (oyuncu “tam oyun” der)
 - Web client “tool” değil: **ikonlar, arena, animasyon/VFX, anlaşılır karar anları**.
+- **Sunum çubuğu:** gateway replay SSOT; web’de sürekli okunur hareket ve manevra hissi (`ArenaCanvas`); Unity paketinde aynı export ile **Idle / Advance / Attack / Hit / Death** içerik borusu (`docs/FULL_PRODUCT_PARITY_ROADMAP.md` R10).
 - “Daily run” ile başlar; **quest/streak/battle pass/season/event** döngüsüyle haftalarca retention.
 - Content sürümlenir, validate edilir, rollback edilir. Prod deploy + gözlemlenebilirlik hazırdır.
 
@@ -53,6 +54,7 @@ Bu doküman `docs/ROADMAP.md` (Faz 0–7) ve `docs/ROADMAP_V1_FULL.md` (Faz 8–
 - Deterministik sim + replay.
 - Web client battle setup + replay viewer + share.
 - Gateway: `health`, `daily-seed`, `sim/battle`.
+- İsteğe bağlı: battle export JSON → Unity golden sahne doğrulaması (`pnpm run unity:golden-export`).
 
 ### Exit criteria
 - Yeni kullanıcı < 2 dk’da daily run + share yapabiliyor.

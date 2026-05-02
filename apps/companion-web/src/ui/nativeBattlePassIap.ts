@@ -39,17 +39,17 @@ export function battlePassSkuForNativePlatform(): string | null {
   if (!plat) return null;
   if (plat === "ios") {
     return (
-      ((import.meta.env.VITE_IAP_BP_PRODUCT_IOS as string | undefined) ?? "").trim() || "kindrail_bp_premium_s0_ios"
+      ((import.meta.env.VITE_IAP_BP_PRODUCT_IOS as string | undefined) ?? "").trim() || "nyrvexis_bp_premium_s0_ios"
     );
   }
   return (
-    ((import.meta.env.VITE_IAP_BP_PRODUCT_ANDROID as string | undefined) ?? "").trim() || "kindrail_bp_premium_s0_android"
+    ((import.meta.env.VITE_IAP_BP_PRODUCT_ANDROID as string | undefined) ?? "").trim() || "nyrvexis_bp_premium_s0_android"
   );
 }
 
 /** Deterministic UUID-shaped token for StoreKit 2 (no PII). */
 export async function deterministicAppAccountUuid(userId: string): Promise<string> {
-  const data = new TextEncoder().encode(`kindrail:iacct:${userId}`);
+  const data = new TextEncoder().encode(`nyrvexis:iacct:${userId}`);
   const buf = await crypto.subtle.digest("SHA-256", data);
   const bytes = new Uint8Array(buf).slice(0, 16);
   bytes[6] = (bytes[6]! & 0x0f) | 0x50;

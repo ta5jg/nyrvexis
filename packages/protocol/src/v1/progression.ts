@@ -1,31 +1,31 @@
 import { z } from "zod";
 
-export const KrOwnedUnit = z
+export const NvOwnedUnit = z
   .object({
     archetype: z.string().min(1),
     level: z.number().int().min(0).max(200)
   })
   .strict();
-export type KrOwnedUnit = z.infer<typeof KrOwnedUnit>;
+export type NvOwnedUnit = z.infer<typeof NvOwnedUnit>;
 
-export const KrOwnedUnitsResponse = z
+export const NvOwnedUnitsResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    owned: z.array(KrOwnedUnit)
+    owned: z.array(NvOwnedUnit)
   })
   .strict();
-export type KrOwnedUnitsResponse = z.infer<typeof KrOwnedUnitsResponse>;
+export type NvOwnedUnitsResponse = z.infer<typeof NvOwnedUnitsResponse>;
 
-export const KrUpgradeUnitRequest = z
+export const NvUpgradeUnitRequest = z
   .object({
     v: z.literal(1),
     archetype: z.string().min(1)
   })
   .strict();
-export type KrUpgradeUnitRequest = z.infer<typeof KrUpgradeUnitRequest>;
+export type NvUpgradeUnitRequest = z.infer<typeof NvUpgradeUnitRequest>;
 
-export const KrUpgradeUnitResponse = z
+export const NvUpgradeUnitResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -37,5 +37,5 @@ export const KrUpgradeUnitResponse = z
     keys: z.number().int().nonnegative()
   })
   .strict();
-export type KrUpgradeUnitResponse = z.infer<typeof KrUpgradeUnitResponse>;
+export type NvUpgradeUnitResponse = z.infer<typeof NvUpgradeUnitResponse>;
 

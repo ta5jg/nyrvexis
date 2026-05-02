@@ -1,6 +1,6 @@
-import { type KrOffer } from "@kindrail/protocol";
+import { type NvOffer } from "@nyrvexis/protocol";
 
-export const OFFERS: KrOffer[] = [
+export const OFFERS: NvOffer[] = [
   {
     offerId: "starter_pack_v1",
     name: "Starter Pack",
@@ -14,7 +14,7 @@ export const OFFERS: KrOffer[] = [
   }
 ];
 
-export function getOffer(offerId: string): KrOffer | null {
+export function getOffer(offerId: string): NvOffer | null {
   return OFFERS.find((o) => o.offerId === offerId) ?? null;
 }
 

@@ -2,7 +2,7 @@
 
 Bu fazın amacı, web-first prototip kanıtlandıktan sonra **store dağıtımı** ve **native entegrasyonlar** (push, deep-link, offline cache) ile ürünü büyütmektir.
 
-KINDRAIL için en düşük riskli yaklaşım:
+NYRVEXIS için en düşük riskli yaklaşım:
 - **PWA** (installable) = “hemen” native hissi + offline cache + hızlı iterasyon
 - **Capacitor wrapper** = iOS/Android store’a giden köprü (tek web codebase)
 - Unity client (opsiyonel, sonra) = gerçek 3D/animasyon + farklı UX, ama maliyetli
@@ -19,8 +19,8 @@ PWA zaten devrede:
 Build:
 
 ```bash
-pnpm --filter @kindrail/companion-web build
-pnpm --filter @kindrail/companion-web preview
+pnpm --filter @nyrvexis/companion-web build
+pnpm --filter @nyrvexis/companion-web preview
 ```
 
 ---
@@ -32,27 +32,27 @@ pnpm --filter @kindrail/companion-web preview
 1) Build web
 
 ```bash
-pnpm --filter @kindrail/companion-mobile build:web
+pnpm --filter @nyrvexis/companion-mobile build:web
 ```
 
 2) Platform ekle (one-time)
 
 ```bash
-pnpm --filter @kindrail/companion-mobile exec cap add ios
-pnpm --filter @kindrail/companion-mobile exec cap add android
+pnpm --filter @nyrvexis/companion-mobile exec cap add ios
+pnpm --filter @nyrvexis/companion-mobile exec cap add android
 ```
 
 3) Sync
 
 ```bash
-pnpm --filter @kindrail/companion-mobile exec cap sync
+pnpm --filter @nyrvexis/companion-mobile exec cap sync
 ```
 
 4) Open
 
 ```bash
-pnpm --filter @kindrail/companion-mobile exec cap open ios
-pnpm --filter @kindrail/companion-mobile exec cap open android
+pnpm --filter @nyrvexis/companion-mobile exec cap open ios
+pnpm --filter @nyrvexis/companion-mobile exec cap open android
 ```
 
 ---
@@ -105,13 +105,13 @@ curl -sS -X POST "http://localhost:8787/internal/push/daily" \
 
 ### GitHub Actions
 
-Workflow: `.github/workflows/kindrail-push-daily.yml`
+Workflow: `.github/workflows/nyrvexis-push-daily.yml`
 
 Repository **Secrets**:
-- `KINDRAIL_GATEWAY_BASE_URL` — canlı gateway kökü (sonunda `/` yok), örn. `https://api.kindrail.example`
-- `KINDRAIL_INTERNAL_CRON_SECRET` — sunucudaki `KR_INTERNAL_CRON_SECRET` ile aynı
+- `NYRVEXIS_GATEWAY_BASE_URL` — canlı gateway kökü (sonunda `/` yok), örn. `https://api.nyrvexis.example`
+- `NYRVEXIS_INTERNAL_CRON_SECRET` — sunucudaki `KR_INTERNAL_CRON_SECRET` ile aynı
 
-Manuel tetik: Actions → **KINDRAIL daily web push** → **Run workflow** → isteğe bağlı `dry_run`.
+Manuel tetik: Actions → **NYRVEXIS daily web push** → **Run workflow** → isteğe bağlı `dry_run`.
 
 ### Prometheus
 

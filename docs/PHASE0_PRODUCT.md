@@ -1,11 +1,11 @@
-## Faz 0 — Ürün Tanımı + North Star (KINDRAIL)
+## Faz 0 — Ürün Tanımı + North Star (NYRVEXIS)
 
 Bu doküman Faz 0’ı **tamamlanmış** saymak için gerekli ürün tanımını ve net kararları tek yerde toplar.
 
 ---
 
 ### North Star (tek cümle)
-**KINDRAIL = ~5–7 dk oturum (sinematik replay + günlük deterministik savaş) + “paylaşılabilir replay” + “koleksiyon/progression”**
+**NYRVEXIS = ~5–7 dk oturum (sinematik replay + günlük deterministik savaş) + “paylaşılabilir replay” + “koleksiyon/progression”** — arena **operasyonel olarak canlı** okunur (statik sıra auto-battler anti-hedef); web `ArenaCanvas` gönderim, Unity altın sahne aynı JSON ile premium sunum.
 
 ---
 
@@ -53,6 +53,7 @@ Bu doküman Faz 0’ı **tamamlanmış** saymak için gerekli ürün tanımını
 - Unit level (gold sink)
 - Star rank (shard sink, koleksiyon hedefi)
 - Cosmetic (skin/badge/title)
+- **Planet hub:** 4×4 kozmetik ızgara (`slot: hub`), sunucu doğrulamalı yerleştirme (`GET/POST /hub/layout`); yeni hesaba başlangıç parçası + BP ile ek parçalar; **24 saatlik salt okunur paylaşım** (`POST /hub/share` → `?planet=` ile önizleme). Oyun gücünü değiştirmez.
 
 ---
 

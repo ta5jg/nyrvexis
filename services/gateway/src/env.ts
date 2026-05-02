@@ -30,7 +30,7 @@ const EnvRaw = z
     STRIPE_WEBHOOK_SECRET: z.string().optional(),
     KR_VAPID_PUBLIC_KEY: z.string().min(1).optional(),
     KR_VAPID_PRIVATE_KEY: z.string().min(1).optional(),
-    KR_PUSH_SUBJECT: z.string().min(3).default("mailto:ops@kindrail.local"),
+    KR_PUSH_SUBJECT: z.string().min(3).default("mailto:ops@nyrvexis.local"),
     KR_INTERNAL_CRON_SECRET: z.string().min(24).optional(),
     /** Google OAuth Web client ID (GIS); omit to disable `/auth/oauth/google`. */
     KR_GOOGLE_CLIENT_ID: z.string().min(8).optional(),

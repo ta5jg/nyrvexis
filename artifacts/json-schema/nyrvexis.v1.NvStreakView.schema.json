@@ -1,0 +1,34 @@
+{
+  "$ref": "#/definitions/NvStreakView",
+  "definitions": {
+    "NvStreakView": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "best": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lastActiveDateUtc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "catchUpTokens": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "current",
+        "best",
+        "lastActiveDateUtc",
+        "catchUpTokens"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

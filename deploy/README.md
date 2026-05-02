@@ -10,15 +10,15 @@ From repo root:
 docker compose -f deploy/docker-compose.yml up --build
 ```
 
-- Postgres: `localhost:5432` (user/db/password `kindrail` — **change before prod**).
+- Postgres: `localhost:5432` (user/db/password `nyrvexis` — **change before prod**).
 - Gateway: `http://localhost:8787` (`GET /health`, `GET /metrics`).
 - Migrations: `deploy/docker-entrypoint-gateway.sh` runs `services/gateway/migrations/*.sql` via `psql` when `KR_DATABASE_URL` is set.
 
 Local migrations without Docker:
 
 ```bash
-export KR_DATABASE_URL=postgres://kindrail:kindrail@localhost:5432/kindrail
-pnpm --filter @kindrail/gateway db:migrate
+export KR_DATABASE_URL=postgres://nyrvexis:nyrvexis@localhost:5432/nyrvexis
+pnpm --filter @nyrvexis/gateway db:migrate
 ```
 
 ## Production checklist
@@ -41,7 +41,7 @@ Example Prometheus scrape config:
 
 ```yaml
 scrape_configs:
-  - job_name: kindrail-gateway
+  - job_name: nyrvexis-gateway
     metrics_path: /metrics
     static_configs:
       - targets: ["gateway.internal:8787"]

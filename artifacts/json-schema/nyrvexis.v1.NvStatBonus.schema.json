@@ -1,0 +1,24 @@
+{
+  "$ref": "#/definitions/NvStatBonus",
+  "definitions": {
+    "NvStatBonus": {
+      "type": "object",
+      "properties": {
+        "hpFlat": {
+          "type": "integer"
+        },
+        "atkFlat": {
+          "type": "integer"
+        },
+        "defFlat": {
+          "type": "integer"
+        },
+        "spdFlat": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

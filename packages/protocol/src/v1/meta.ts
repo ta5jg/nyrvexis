@@ -14,10 +14,10 @@
  * ============================================================================= */
 
 import { z } from "zod";
-import { KrCosmeticDef } from "./cosmetics.js";
-import { KrContentVersion } from "./content.js";
+import { NvCosmeticDef } from "./cosmetics.js";
+import { NvContentVersion } from "./content.js";
 
-export const KrEconomyTuning = z
+export const NvEconomyTuning = z
   .object({
     dailyClaimGold: z.number().int().min(0).default(120),
     dailyClaimShards: z.number().int().min(0).default(8),
@@ -30,77 +30,77 @@ export const KrEconomyTuning = z
     battlePassXpDailyCap: z.number().int().min(0).default(500)
   })
   .strict();
-export type KrEconomyTuning = z.infer<typeof KrEconomyTuning>;
+export type NvEconomyTuning = z.infer<typeof NvEconomyTuning>;
 
-export const KrQuestScope = z.enum(["daily", "weekly"]);
-export type KrQuestScope = z.infer<typeof KrQuestScope>;
+export const NvQuestScope = z.enum(["daily", "weekly"]);
+export type NvQuestScope = z.infer<typeof NvQuestScope>;
 
-export const KrQuestTrack = z.enum(["daily_claim", "leaderboard_submit", "shop_buy"]);
-export type KrQuestTrack = z.infer<typeof KrQuestTrack>;
+export const NvQuestTrack = z.enum(["daily_claim", "leaderboard_submit", "shop_buy"]);
+export type NvQuestTrack = z.infer<typeof NvQuestTrack>;
 
-export const KrQuestReward = z
+export const NvQuestReward = z
   .object({
     gold: z.number().int().min(0).default(0),
     shards: z.number().int().min(0).default(0),
     keys: z.number().int().min(0).default(0),
     battlePassXp: z.number().int().min(0).default(0),
     catchUpTokens: z.number().int().min(0).default(0),
-    /** Kozmetik ödülü — id `KrMetaContent.cosmetics` içinde tanımlı olmalı. */
+    /** Kozmetik ödülü — id `NvMetaContent.cosmetics` içinde tanımlı olmalı. */
     cosmeticId: z.string().min(1).max(80).optional()
   })
   .strict();
-export type KrQuestReward = z.infer<typeof KrQuestReward>;
+export type NvQuestReward = z.infer<typeof NvQuestReward>;
 
-export const KrQuestDef = z
+export const NvQuestDef = z
   .object({
     id: z.string().min(1),
-    scope: KrQuestScope,
+    scope: NvQuestScope,
     title: z.string().min(1),
     target: z.number().int().min(1).max(999),
-    track: KrQuestTrack,
-    reward: KrQuestReward
+    track: NvQuestTrack,
+    reward: NvQuestReward
   })
   .strict();
-export type KrQuestDef = z.infer<typeof KrQuestDef>;
+export type NvQuestDef = z.infer<typeof NvQuestDef>;
 
-export const KrBattlePassTierDef = z
+export const NvBattlePassTierDef = z
   .object({
     tier: z.number().int().min(1).max(999),
     xpCumulative: z.number().int().min(0),
-    freeReward: KrQuestReward,
-    premiumReward: KrQuestReward.optional()
+    freeReward: NvQuestReward,
+    premiumReward: NvQuestReward.optional()
   })
   .strict();
-export type KrBattlePassTierDef = z.infer<typeof KrBattlePassTierDef>;
+export type NvBattlePassTierDef = z.infer<typeof NvBattlePassTierDef>;
 
-export const KrMetaContent = z
+export const NvMetaContent = z
   .object({
     v: z.literal(1),
-    contentVersion: KrContentVersion,
+    contentVersion: NvContentVersion,
     seasonId: z.string().min(1),
-    economyDefaults: KrEconomyTuning,
-    quests: z.array(KrQuestDef).min(1).max(64),
-    battlePassTiers: z.array(KrBattlePassTierDef).min(1).max(200),
-    cosmetics: z.array(KrCosmeticDef).max(64).default([])
+    economyDefaults: NvEconomyTuning,
+    quests: z.array(NvQuestDef).min(1).max(64),
+    battlePassTiers: z.array(NvBattlePassTierDef).min(1).max(200),
+    cosmetics: z.array(NvCosmeticDef).max(64).default([])
   })
   .strict();
-export type KrMetaContent = z.infer<typeof KrMetaContent>;
+export type NvMetaContent = z.infer<typeof NvMetaContent>;
 
-export const KrQuestProgressView = z
+export const NvQuestProgressView = z
   .object({
     id: z.string().min(1),
-    scope: KrQuestScope,
+    scope: NvQuestScope,
     title: z.string().min(1),
     target: z.number().int(),
     progress: z.number().int().nonnegative(),
     complete: z.boolean(),
     claimed: z.boolean(),
-    reward: KrQuestReward
+    reward: NvQuestReward
   })
   .strict();
-export type KrQuestProgressView = z.infer<typeof KrQuestProgressView>;
+export type NvQuestProgressView = z.infer<typeof NvQuestProgressView>;
 
-export const KrStreakView = z
+export const NvStreakView = z
   .object({
     current: z.number().int().nonnegative(),
     best: z.number().int().nonnegative(),
@@ -108,55 +108,55 @@ export const KrStreakView = z
     catchUpTokens: z.number().int().nonnegative()
   })
   .strict();
-export type KrStreakView = z.infer<typeof KrStreakView>;
+export type NvStreakView = z.infer<typeof NvStreakView>;
 
-export const KrBattlePassView = z
+export const NvBattlePassView = z
   .object({
     seasonId: z.string().min(1),
     xp: z.number().int().nonnegative(),
     claimedFreeTiers: z.array(z.number().int().min(1)).max(200),
     claimedPremiumTiers: z.array(z.number().int().min(1)).max(200).default([]),
     hasPremium: z.boolean(),
-    tiers: z.array(KrBattlePassTierDef).max(200)
+    tiers: z.array(NvBattlePassTierDef).max(200)
   })
   .strict();
-export type KrBattlePassView = z.infer<typeof KrBattlePassView>;
+export type NvBattlePassView = z.infer<typeof NvBattlePassView>;
 
-export const KrMetaProgressResponse = z
+export const NvMetaProgressResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     dateUtc: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     weekPeriodKey: z.string().min(1),
-    economy: KrEconomyTuning,
-    quests: z.array(KrQuestProgressView).max(64),
-    streak: KrStreakView,
-    battlePass: KrBattlePassView
+    economy: NvEconomyTuning,
+    quests: z.array(NvQuestProgressView).max(64),
+    streak: NvStreakView,
+    battlePass: NvBattlePassView
   })
   .strict();
-export type KrMetaProgressResponse = z.infer<typeof KrMetaProgressResponse>;
+export type NvMetaProgressResponse = z.infer<typeof NvMetaProgressResponse>;
 
-export const KrMetaQuestClaimRequest = z
+export const NvMetaQuestClaimRequest = z
   .object({
     v: z.literal(1),
     questId: z.string().min(1),
     idempotencyKey: z.string().min(8).max(80).optional()
   })
   .strict();
-export type KrMetaQuestClaimRequest = z.infer<typeof KrMetaQuestClaimRequest>;
+export type NvMetaQuestClaimRequest = z.infer<typeof NvMetaQuestClaimRequest>;
 
-export const KrMetaQuestClaimResponse = z
+export const NvMetaQuestClaimResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     questId: z.string().min(1),
-    granted: KrQuestReward,
+    granted: NvQuestReward,
     inventory: z.object({ gold: z.number().int(), shards: z.number().int(), keys: z.number().int() }).strict()
   })
   .strict();
-export type KrMetaQuestClaimResponse = z.infer<typeof KrMetaQuestClaimResponse>;
+export type NvMetaQuestClaimResponse = z.infer<typeof NvMetaQuestClaimResponse>;
 
-export const KrMetaBattlePassClaimRequest = z
+export const NvMetaBattlePassClaimRequest = z
   .object({
     v: z.literal(1),
     tier: z.number().int().min(1),
@@ -164,44 +164,44 @@ export const KrMetaBattlePassClaimRequest = z
     idempotencyKey: z.string().min(8).max(80).optional()
   })
   .strict();
-export type KrMetaBattlePassClaimRequest = z.infer<typeof KrMetaBattlePassClaimRequest>;
+export type NvMetaBattlePassClaimRequest = z.infer<typeof NvMetaBattlePassClaimRequest>;
 
-export const KrMetaBattlePassClaimResponse = z
+export const NvMetaBattlePassClaimResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     tier: z.number().int(),
     track: z.enum(["free", "premium"]),
-    granted: KrQuestReward,
+    granted: NvQuestReward,
     inventory: z.object({ gold: z.number().int(), shards: z.number().int(), keys: z.number().int() }).strict()
   })
   .strict();
-export type KrMetaBattlePassClaimResponse = z.infer<typeof KrMetaBattlePassClaimResponse>;
+export type NvMetaBattlePassClaimResponse = z.infer<typeof NvMetaBattlePassClaimResponse>;
 
-export const KrAdminBalanceGetResponse = z
+export const NvAdminBalanceGetResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    override: KrEconomyTuning.partial(),
-    effective: KrEconomyTuning
+    override: NvEconomyTuning.partial(),
+    effective: NvEconomyTuning
   })
   .strict();
-export type KrAdminBalanceGetResponse = z.infer<typeof KrAdminBalanceGetResponse>;
+export type NvAdminBalanceGetResponse = z.infer<typeof NvAdminBalanceGetResponse>;
 
-export const KrAdminBalanceSetRequest = z
+export const NvAdminBalanceSetRequest = z
   .object({
     v: z.literal(1),
-    patch: KrEconomyTuning.partial(),
+    patch: NvEconomyTuning.partial(),
     idempotencyKey: z.string().min(8).max(80).optional()
   })
   .strict();
-export type KrAdminBalanceSetRequest = z.infer<typeof KrAdminBalanceSetRequest>;
+export type NvAdminBalanceSetRequest = z.infer<typeof NvAdminBalanceSetRequest>;
 
-export const KrAdminBalanceSetResponse = z
+export const NvAdminBalanceSetResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    effective: KrEconomyTuning
+    effective: NvEconomyTuning
   })
   .strict();
-export type KrAdminBalanceSetResponse = z.infer<typeof KrAdminBalanceSetResponse>;
+export type NvAdminBalanceSetResponse = z.infer<typeof NvAdminBalanceSetResponse>;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const KrPushWebVapidResponse = z
+export const NvPushWebVapidResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -8,9 +8,9 @@ export const KrPushWebVapidResponse = z
     publicKey: z.string().min(1).optional()
   })
   .strict();
-export type KrPushWebVapidResponse = z.infer<typeof KrPushWebVapidResponse>;
+export type NvPushWebVapidResponse = z.infer<typeof NvPushWebVapidResponse>;
 
-export const KrPushWebSubscription = z
+export const NvPushWebSubscription = z
   .object({
     endpoint: z.string().url().min(10),
     keys: z
@@ -21,38 +21,38 @@ export const KrPushWebSubscription = z
       .strict()
   })
   .strict();
-export type KrPushWebSubscription = z.infer<typeof KrPushWebSubscription>;
+export type NvPushWebSubscription = z.infer<typeof NvPushWebSubscription>;
 
-export const KrPushWebSubscribeRequest = z
+export const NvPushWebSubscribeRequest = z
   .object({
     v: z.literal(1),
-    subscription: KrPushWebSubscription
+    subscription: NvPushWebSubscription
   })
   .strict();
-export type KrPushWebSubscribeRequest = z.infer<typeof KrPushWebSubscribeRequest>;
+export type NvPushWebSubscribeRequest = z.infer<typeof NvPushWebSubscribeRequest>;
 
-export const KrPushWebSubscribeResponse = z
+export const NvPushWebSubscribeResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     subscriptionId: z.string().min(1)
   })
   .strict();
-export type KrPushWebSubscribeResponse = z.infer<typeof KrPushWebSubscribeResponse>;
+export type NvPushWebSubscribeResponse = z.infer<typeof NvPushWebSubscribeResponse>;
 
-export const KrPushWebUnsubscribeRequest = z
+export const NvPushWebUnsubscribeRequest = z
   .object({
     v: z.literal(1),
     endpoint: z.string().min(10)
   })
   .strict();
-export type KrPushWebUnsubscribeRequest = z.infer<typeof KrPushWebUnsubscribeRequest>;
+export type NvPushWebUnsubscribeRequest = z.infer<typeof NvPushWebUnsubscribeRequest>;
 
-export const KrPushWebUnsubscribeResponse = z
+export const NvPushWebUnsubscribeResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     removed: z.boolean()
   })
   .strict();
-export type KrPushWebUnsubscribeResponse = z.infer<typeof KrPushWebUnsubscribeResponse>;
+export type NvPushWebUnsubscribeResponse = z.infer<typeof NvPushWebUnsubscribeResponse>;

@@ -1,79 +1,84 @@
 import {
   HealthResponse,
-  KrAuthGuestRequest,
-  KrAuthGuestResponse,
-  KrAuthRefreshRequest,
-  KrAuthRefreshResponse,
-  KrAuthLogoutRequest,
-  KrAuthLogoutResponse,
-  KrAuthRegisterEmailRequest,
-  KrAuthRegisterEmailResponse,
-  KrAuthLoginEmailRequest,
-  KrAuthLoginEmailResponse,
-  KrAuthLinkEmailRequest,
-  KrAuthLinkEmailResponse,
-  KrAuthGoogleRequest,
-  KrAuthGoogleResponse,
-  KrAuthLinkGoogleRequest,
-  KrAuthLinkGoogleResponse,
-  KrAuthSessionIssued,
-  KrBattleSimRequest,
-  KrBattleSimResult,
-  KrCatalogResponse,
-  KrDailyClaimResponse,
-  KrDailySeedResponse,
-  KrDailyShopResponse,
-  KrInventoryResponse,
-  KrMeResponse,
-  KrOwnedUnitsResponse,
-  KrShopBuyRequest,
-  KrShopBuyResponse,
-  KrUpgradeUnitRequest,
-  KrUpgradeUnitResponse,
-  KrLeaderboardMeResponse,
-  KrLeaderboardSubmitRequest,
-  KrLeaderboardSubmitResponse,
-  KrLeaderboardTopResponse,
-  KrReferralAcceptRequest,
-  KrReferralAcceptResponse,
-  KrReferralStatusResponse,
-  KrShareRedeemRequest,
-  KrShareRedeemResponse,
-  KrShareTicketCreateResponse,
-  KrCheckoutCreateRequest,
-  KrCheckoutCreateResponse,
-  KrOffersResponse,
-  KrPurchaseStatusResponse,
-  KrBattlePassIapVerifyRequest,
-  KrBattlePassIapVerifyResponseOk,
-  KrPushWebSubscribeRequest,
-  KrPushWebSubscribeResponse,
-  KrPushWebUnsubscribeRequest,
-  KrPushWebUnsubscribeResponse,
-  KrPushWebVapidResponse,
-  KrInternalPushDailyRequest,
-  KrInternalPushDailyResponse,
-  KrMetaProgressResponse,
-  KrMetaQuestClaimRequest,
-  KrMetaQuestClaimResponse,
-  KrMetaBattlePassClaimRequest,
-  KrMetaBattlePassClaimResponse,
-  KrSeasonViewResponse,
-  KrCosmeticsCatalogResponse,
-  KrCosmeticsMeResponse,
-  KrCosmeticsEquipRequest,
-  KrCosmeticsEquipResponse,
-  KrLegalPublicResponse,
-  KrAnalyticsEventRequest,
-  KrAnalyticsEventResponse
-} from "@kindrail/protocol";
+  NvAuthGuestRequest,
+  NvAuthGuestResponse,
+  NvAuthRefreshRequest,
+  NvAuthRefreshResponse,
+  NvAuthLogoutRequest,
+  NvAuthLogoutResponse,
+  NvAuthRegisterEmailRequest,
+  NvAuthRegisterEmailResponse,
+  NvAuthLoginEmailRequest,
+  NvAuthLoginEmailResponse,
+  NvAuthLinkEmailRequest,
+  NvAuthLinkEmailResponse,
+  NvAuthGoogleRequest,
+  NvAuthGoogleResponse,
+  NvAuthLinkGoogleRequest,
+  NvAuthLinkGoogleResponse,
+  NvAuthSessionIssued,
+  NvBattleSimRequest,
+  NvBattleSimResult,
+  NvCatalogResponse,
+  NvDailyClaimResponse,
+  NvDailySeedResponse,
+  NvDailyShopResponse,
+  NvInventoryResponse,
+  NvMeResponse,
+  NvOwnedUnitsResponse,
+  NvShopBuyRequest,
+  NvShopBuyResponse,
+  NvUpgradeUnitRequest,
+  NvUpgradeUnitResponse,
+  NvLeaderboardMeResponse,
+  NvLeaderboardSubmitRequest,
+  NvLeaderboardSubmitResponse,
+  NvLeaderboardTopResponse,
+  NvReferralAcceptRequest,
+  NvReferralAcceptResponse,
+  NvReferralStatusResponse,
+  NvShareRedeemRequest,
+  NvShareRedeemResponse,
+  NvShareTicketCreateResponse,
+  NvCheckoutCreateRequest,
+  NvCheckoutCreateResponse,
+  NvOffersResponse,
+  NvPurchaseStatusResponse,
+  NvBattlePassIapVerifyRequest,
+  NvBattlePassIapVerifyResponseOk,
+  NvPushWebSubscribeRequest,
+  NvPushWebSubscribeResponse,
+  NvPushWebUnsubscribeRequest,
+  NvPushWebUnsubscribeResponse,
+  NvPushWebVapidResponse,
+  NvInternalPushDailyRequest,
+  NvInternalPushDailyResponse,
+  NvMetaProgressResponse,
+  NvMetaQuestClaimRequest,
+  NvMetaQuestClaimResponse,
+  NvMetaBattlePassClaimRequest,
+  NvMetaBattlePassClaimResponse,
+  NvSeasonViewResponse,
+  NvCosmeticsCatalogResponse,
+  NvCosmeticsMeResponse,
+  NvCosmeticsEquipRequest,
+  NvCosmeticsEquipResponse,
+  NvHubLayoutPutRequest,
+  NvHubLayoutResponse,
+  NvHubShareCreateRequest,
+  NvHubShareCreateResponse,
+  NvHubSharePublicResponse,
+  NvLegalPublicResponse,
+  NvAnalyticsEventRequest,
+  NvAnalyticsEventResponse
+} from "@nyrvexis/protocol";
 
-export type KindrailSdkOptions = {
+export type NyrvexisSdkOptions = {
   baseUrl: string;
   fetchImpl?: typeof fetch;
 };
 
-export type KindrailInternalCronOptions = {
+export type NyrvexisInternalCronOptions = {
   /** Same value as gateway env KR_INTERNAL_CRON_SECRET */
   cronSecret: string;
 };
@@ -93,13 +98,13 @@ function errorFromGateway(json: unknown, fallback: string): string {
   return fallback;
 }
 
-export class KindrailSdk {
+export class NyrvexisSdk {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
   private token: string | null = null;
   private refreshToken: string | null = null;
 
-  constructor(opts: KindrailSdkOptions) {
+  constructor(opts: NyrvexisSdkOptions) {
     this.baseUrl = opts.baseUrl.replace(/\/+$/, "");
     this.fetchImpl = opts.fetchImpl ?? defaultFetch;
   }
@@ -112,7 +117,7 @@ export class KindrailSdk {
     this.refreshToken = token;
   }
 
-  private applyIssuedSession(out: KrAuthSessionIssued) {
+  private applyIssuedSession(out: NvAuthSessionIssued) {
     this.setToken(out.token);
     this.setRefreshToken(out.refreshToken);
   }
@@ -131,17 +136,17 @@ export class KindrailSdk {
     return HealthResponse.parse(json);
   }
 
-  async legalPublic(): Promise<KrLegalPublicResponse> {
+  async legalPublic(): Promise<NvLegalPublicResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/legal/public`, {
       method: "GET",
       headers: { accept: "application/json" }
     });
     if (!res.ok) throw new Error(`legalPublic failed: ${res.status}`);
     const json = await res.json();
-    return KrLegalPublicResponse.parse(json);
+    return NvLegalPublicResponse.parse(json);
   }
 
-  async analyticsEvent(req: KrAnalyticsEventRequest): Promise<KrAnalyticsEventResponse> {
+  async analyticsEvent(req: NvAnalyticsEventRequest): Promise<NvAnalyticsEventResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/analytics/event`, {
       method: "POST",
       headers: {
@@ -153,10 +158,10 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `analyticsEvent failed: ${res.status}`));
-    return KrAnalyticsEventResponse.parse(json);
+    return NvAnalyticsEventResponse.parse(json);
   }
 
-  async battleSim(req: KrBattleSimRequest): Promise<KrBattleSimResult> {
+  async battleSim(req: NvBattleSimRequest): Promise<NvBattleSimResult> {
     const res = await this.fetchImpl(`${this.baseUrl}/sim/battle`, {
       method: "POST",
       headers: {
@@ -167,20 +172,20 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`battleSim failed: ${res.status}`);
     const json = await res.json();
-    return KrBattleSimResult.parse(json);
+    return NvBattleSimResult.parse(json);
   }
 
-  async dailySeed(): Promise<KrDailySeedResponse> {
+  async dailySeed(): Promise<NvDailySeedResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/daily-seed`, {
       method: "GET",
       headers: { accept: "application/json" }
     });
     if (!res.ok) throw new Error(`dailySeed failed: ${res.status}`);
     const json = await res.json();
-    return KrDailySeedResponse.parse(json);
+    return NvDailySeedResponse.parse(json);
   }
 
-  async authGuest(req: KrAuthGuestRequest): Promise<KrAuthGuestResponse> {
+  async authGuest(req: NvAuthGuestRequest): Promise<NvAuthGuestResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/auth/guest`, {
       method: "POST",
       headers: {
@@ -191,12 +196,12 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authGuest failed: ${res.status}`));
-    const out = KrAuthGuestResponse.parse(json);
+    const out = NvAuthGuestResponse.parse(json);
     this.applyIssuedSession(out);
     return out;
   }
 
-  async authRefresh(req: KrAuthRefreshRequest): Promise<KrAuthRefreshResponse> {
+  async authRefresh(req: NvAuthRefreshRequest): Promise<NvAuthRefreshResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/auth/refresh`, {
       method: "POST",
       headers: {
@@ -207,14 +212,14 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authRefresh failed: ${res.status}`));
-    const out = KrAuthRefreshResponse.parse(json);
+    const out = NvAuthRefreshResponse.parse(json);
     this.setToken(out.token);
     this.setRefreshToken(out.refreshToken);
     return out;
   }
 
-  async authLogout(): Promise<KrAuthLogoutResponse> {
-    const body: KrAuthLogoutRequest = this.refreshToken
+  async authLogout(): Promise<NvAuthLogoutResponse> {
+    const body: NvAuthLogoutRequest = this.refreshToken
       ? { v: 1, refreshToken: this.refreshToken }
       : { v: 1 };
     const res = await this.fetchImpl(`${this.baseUrl}/auth/logout`, {
@@ -228,10 +233,10 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authLogout failed: ${res.status}`));
-    return KrAuthLogoutResponse.parse(json);
+    return NvAuthLogoutResponse.parse(json);
   }
 
-  async authRegisterEmail(req: KrAuthRegisterEmailRequest): Promise<KrAuthRegisterEmailResponse> {
+  async authRegisterEmail(req: NvAuthRegisterEmailRequest): Promise<NvAuthRegisterEmailResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/auth/register-email`, {
       method: "POST",
       headers: {
@@ -242,12 +247,12 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authRegisterEmail failed: ${res.status}`));
-    const out = KrAuthRegisterEmailResponse.parse(json);
+    const out = NvAuthRegisterEmailResponse.parse(json);
     this.applyIssuedSession(out);
     return out;
   }
 
-  async authLoginEmail(req: KrAuthLoginEmailRequest): Promise<KrAuthLoginEmailResponse> {
+  async authLoginEmail(req: NvAuthLoginEmailRequest): Promise<NvAuthLoginEmailResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/auth/login-email`, {
       method: "POST",
       headers: {
@@ -258,12 +263,12 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authLoginEmail failed: ${res.status}`));
-    const out = KrAuthLoginEmailResponse.parse(json);
+    const out = NvAuthLoginEmailResponse.parse(json);
     this.applyIssuedSession(out);
     return out;
   }
 
-  async authLinkEmail(req: KrAuthLinkEmailRequest): Promise<KrAuthLinkEmailResponse> {
+  async authLinkEmail(req: NvAuthLinkEmailRequest): Promise<NvAuthLinkEmailResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/auth/link-email`, {
       method: "POST",
       headers: {
@@ -275,12 +280,12 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authLinkEmail failed: ${res.status}`));
-    const out = KrAuthLinkEmailResponse.parse(json);
+    const out = NvAuthLinkEmailResponse.parse(json);
     this.applyIssuedSession(out);
     return out;
   }
 
-  async authGoogle(req: KrAuthGoogleRequest): Promise<KrAuthGoogleResponse> {
+  async authGoogle(req: NvAuthGoogleRequest): Promise<NvAuthGoogleResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/auth/oauth/google`, {
       method: "POST",
       headers: {
@@ -291,12 +296,12 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authGoogle failed: ${res.status}`));
-    const out = KrAuthGoogleResponse.parse(json);
+    const out = NvAuthGoogleResponse.parse(json);
     this.applyIssuedSession(out);
     return out;
   }
 
-  async authLinkGoogle(req: KrAuthLinkGoogleRequest): Promise<KrAuthLinkGoogleResponse> {
+  async authLinkGoogle(req: NvAuthLinkGoogleRequest): Promise<NvAuthLinkGoogleResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/auth/link-google`, {
       method: "POST",
       headers: {
@@ -308,62 +313,62 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `authLinkGoogle failed: ${res.status}`));
-    const out = KrAuthLinkGoogleResponse.parse(json);
+    const out = NvAuthLinkGoogleResponse.parse(json);
     this.applyIssuedSession(out);
     return out;
   }
 
-  async me(): Promise<KrMeResponse> {
+  async me(): Promise<NvMeResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/me`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`me failed: ${res.status}`);
     const json = await res.json();
-    return KrMeResponse.parse(json);
+    return NvMeResponse.parse(json);
   }
 
-  async inventory(): Promise<KrInventoryResponse> {
+  async inventory(): Promise<NvInventoryResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/inventory`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`inventory failed: ${res.status}`);
     const json = await res.json();
-    return KrInventoryResponse.parse(json);
+    return NvInventoryResponse.parse(json);
   }
 
-  async dailyClaim(): Promise<KrDailyClaimResponse> {
+  async dailyClaim(): Promise<NvDailyClaimResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/daily/claim`, {
       method: "POST",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`dailyClaim failed: ${res.status}`);
     const json = await res.json();
-    return KrDailyClaimResponse.parse(json);
+    return NvDailyClaimResponse.parse(json);
   }
 
-  async catalogUnits(): Promise<KrCatalogResponse> {
+  async catalogUnits(): Promise<NvCatalogResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/catalog/units`, {
       method: "GET",
       headers: { accept: "application/json" }
     });
     if (!res.ok) throw new Error(`catalogUnits failed: ${res.status}`);
     const json = await res.json();
-    return KrCatalogResponse.parse(json);
+    return NvCatalogResponse.parse(json);
   }
 
-  async shopDaily(): Promise<KrDailyShopResponse> {
+  async shopDaily(): Promise<NvDailyShopResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/shop/daily`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`shopDaily failed: ${res.status}`);
     const json = await res.json();
-    return KrDailyShopResponse.parse(json);
+    return NvDailyShopResponse.parse(json);
   }
 
-  async shopBuy(req: KrShopBuyRequest): Promise<KrShopBuyResponse> {
+  async shopBuy(req: NvShopBuyRequest): Promise<NvShopBuyResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/shop/buy`, {
       method: "POST",
       headers: {
@@ -375,20 +380,20 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`shopBuy failed: ${res.status}`);
     const json = await res.json();
-    return KrShopBuyResponse.parse(json);
+    return NvShopBuyResponse.parse(json);
   }
 
-  async ownedUnits(): Promise<KrOwnedUnitsResponse> {
+  async ownedUnits(): Promise<NvOwnedUnitsResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/units/owned`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`ownedUnits failed: ${res.status}`);
     const json = await res.json();
-    return KrOwnedUnitsResponse.parse(json);
+    return NvOwnedUnitsResponse.parse(json);
   }
 
-  async unitUpgrade(req: KrUpgradeUnitRequest): Promise<KrUpgradeUnitResponse> {
+  async unitUpgrade(req: NvUpgradeUnitRequest): Promise<NvUpgradeUnitResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/units/upgrade`, {
       method: "POST",
       headers: {
@@ -400,10 +405,10 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`unitUpgrade failed: ${res.status}`);
     const json = await res.json();
-    return KrUpgradeUnitResponse.parse(json);
+    return NvUpgradeUnitResponse.parse(json);
   }
 
-  async leaderboardSubmit(req: KrLeaderboardSubmitRequest): Promise<KrLeaderboardSubmitResponse> {
+  async leaderboardSubmit(req: NvLeaderboardSubmitRequest): Promise<NvLeaderboardSubmitResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/leaderboard/submit`, {
       method: "POST",
       headers: {
@@ -415,10 +420,10 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`leaderboardSubmit failed: ${res.status}`);
     const json = await res.json();
-    return KrLeaderboardSubmitResponse.parse(json);
+    return NvLeaderboardSubmitResponse.parse(json);
   }
 
-  async leaderboardDaily(dateUtc?: string, limit = 50): Promise<KrLeaderboardTopResponse> {
+  async leaderboardDaily(dateUtc?: string, limit = 50): Promise<NvLeaderboardTopResponse> {
     const url = new URL(`${this.baseUrl}/leaderboard/daily`);
     if (dateUtc) url.searchParams.set("date", dateUtc);
     url.searchParams.set("limit", String(limit));
@@ -428,10 +433,10 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`leaderboardDaily failed: ${res.status}`);
     const json = await res.json();
-    return KrLeaderboardTopResponse.parse(json);
+    return NvLeaderboardTopResponse.parse(json);
   }
 
-  async leaderboardMe(dateUtc?: string): Promise<KrLeaderboardMeResponse> {
+  async leaderboardMe(dateUtc?: string): Promise<NvLeaderboardMeResponse> {
     const url = new URL(`${this.baseUrl}/leaderboard/me`);
     if (dateUtc) url.searchParams.set("date", dateUtc);
     const res = await this.fetchImpl(url.toString(), {
@@ -440,10 +445,10 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`leaderboardMe failed: ${res.status}`);
     const json = await res.json();
-    return KrLeaderboardMeResponse.parse(json);
+    return NvLeaderboardMeResponse.parse(json);
   }
 
-  async referralAccept(req: KrReferralAcceptRequest): Promise<KrReferralAcceptResponse> {
+  async referralAccept(req: NvReferralAcceptRequest): Promise<NvReferralAcceptResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/referral/accept`, {
       method: "POST",
       headers: {
@@ -455,30 +460,30 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`referralAccept failed: ${res.status}`);
     const json = await res.json();
-    return KrReferralAcceptResponse.parse(json);
+    return NvReferralAcceptResponse.parse(json);
   }
 
-  async referralStatus(): Promise<KrReferralStatusResponse> {
+  async referralStatus(): Promise<NvReferralStatusResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/referral/status`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`referralStatus failed: ${res.status}`);
     const json = await res.json();
-    return KrReferralStatusResponse.parse(json);
+    return NvReferralStatusResponse.parse(json);
   }
 
-  async shareTicket(): Promise<KrShareTicketCreateResponse> {
+  async shareTicket(): Promise<NvShareTicketCreateResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/share/ticket`, {
       method: "POST",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`shareTicket failed: ${res.status}`);
     const json = await res.json();
-    return KrShareTicketCreateResponse.parse(json);
+    return NvShareTicketCreateResponse.parse(json);
   }
 
-  async shareRedeem(req: KrShareRedeemRequest): Promise<KrShareRedeemResponse> {
+  async shareRedeem(req: NvShareRedeemRequest): Promise<NvShareRedeemResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/share/redeem`, {
       method: "POST",
       headers: {
@@ -490,20 +495,20 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`shareRedeem failed: ${res.status}`);
     const json = await res.json();
-    return KrShareRedeemResponse.parse(json);
+    return NvShareRedeemResponse.parse(json);
   }
 
-  async offers(): Promise<KrOffersResponse> {
+  async offers(): Promise<NvOffersResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/offers`, {
       method: "GET",
       headers: { accept: "application/json" }
     });
     if (!res.ok) throw new Error(`offers failed: ${res.status}`);
     const json = await res.json();
-    return KrOffersResponse.parse(json);
+    return NvOffersResponse.parse(json);
   }
 
-  async checkoutCreate(req: KrCheckoutCreateRequest): Promise<KrCheckoutCreateResponse> {
+  async checkoutCreate(req: NvCheckoutCreateRequest): Promise<NvCheckoutCreateResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/checkout/create`, {
       method: "POST",
       headers: {
@@ -524,40 +529,40 @@ export class KindrailSdk {
       throw new Error(`checkoutCreate failed: ${suffix}`);
     }
     const json = await res.json();
-    return KrCheckoutCreateResponse.parse(json);
+    return NvCheckoutCreateResponse.parse(json);
   }
 
-  async purchaseStatus(): Promise<KrPurchaseStatusResponse> {
+  async purchaseStatus(): Promise<NvPurchaseStatusResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/purchase/status`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`purchaseStatus failed: ${res.status}`);
     const json = await res.json();
-    return KrPurchaseStatusResponse.parse(json);
+    return NvPurchaseStatusResponse.parse(json);
   }
 
-  async seasonView(): Promise<KrSeasonViewResponse> {
+  async seasonView(): Promise<NvSeasonViewResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/season/view`, {
       method: "GET",
       headers: { accept: "application/json" }
     });
     if (!res.ok) throw new Error(`seasonView failed: ${res.status}`);
     const json = await res.json();
-    return KrSeasonViewResponse.parse(json);
+    return NvSeasonViewResponse.parse(json);
   }
 
-  async metaProgress(): Promise<KrMetaProgressResponse> {
+  async metaProgress(): Promise<NvMetaProgressResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/meta/progress`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`metaProgress failed: ${res.status}`);
     const json = await res.json();
-    return KrMetaProgressResponse.parse(json);
+    return NvMetaProgressResponse.parse(json);
   }
 
-  async metaQuestClaim(req: KrMetaQuestClaimRequest): Promise<KrMetaQuestClaimResponse> {
+  async metaQuestClaim(req: NvMetaQuestClaimRequest): Promise<NvMetaQuestClaimResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/meta/quest/claim`, {
       method: "POST",
       headers: {
@@ -569,10 +574,10 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`metaQuestClaim failed: ${res.status}`);
     const json = await res.json();
-    return KrMetaQuestClaimResponse.parse(json);
+    return NvMetaQuestClaimResponse.parse(json);
   }
 
-  async metaBattlePassClaim(req: KrMetaBattlePassClaimRequest): Promise<KrMetaBattlePassClaimResponse> {
+  async metaBattlePassClaim(req: NvMetaBattlePassClaimRequest): Promise<NvMetaBattlePassClaimResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/meta/battle-pass/claim`, {
       method: "POST",
       headers: {
@@ -584,30 +589,30 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`metaBattlePassClaim failed: ${res.status}`);
     const json = await res.json();
-    return KrMetaBattlePassClaimResponse.parse(json);
+    return NvMetaBattlePassClaimResponse.parse(json);
   }
 
-  async cosmeticsCatalog(): Promise<KrCosmeticsCatalogResponse> {
+  async cosmeticsCatalog(): Promise<NvCosmeticsCatalogResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/cosmetics/catalog`, {
       method: "GET",
       headers: { accept: "application/json" }
     });
     if (!res.ok) throw new Error(`cosmeticsCatalog failed: ${res.status}`);
     const json = await res.json();
-    return KrCosmeticsCatalogResponse.parse(json);
+    return NvCosmeticsCatalogResponse.parse(json);
   }
 
-  async cosmeticsMe(): Promise<KrCosmeticsMeResponse> {
+  async cosmeticsMe(): Promise<NvCosmeticsMeResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/cosmetics/me`, {
       method: "GET",
       headers: { accept: "application/json", ...this.authHeaders() }
     });
     if (!res.ok) throw new Error(`cosmeticsMe failed: ${res.status}`);
     const json = await res.json();
-    return KrCosmeticsMeResponse.parse(json);
+    return NvCosmeticsMeResponse.parse(json);
   }
 
-  async cosmeticsEquip(req: KrCosmeticsEquipRequest): Promise<KrCosmeticsEquipResponse> {
+  async cosmeticsEquip(req: NvCosmeticsEquipRequest): Promise<NvCosmeticsEquipResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/cosmetics/equip`, {
       method: "POST",
       headers: {
@@ -619,11 +624,63 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`cosmeticsEquip failed: ${res.status}`);
     const json = await res.json();
-    return KrCosmeticsEquipResponse.parse(json);
+    return NvCosmeticsEquipResponse.parse(json);
+  }
+
+  async hubLayout(): Promise<NvHubLayoutResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/hub/layout`, {
+      method: "GET",
+      headers: { accept: "application/json", ...this.authHeaders() }
+    });
+    if (!res.ok) throw new Error(`hubLayout failed: ${res.status}`);
+    const json = await res.json();
+    return NvHubLayoutResponse.parse(json);
+  }
+
+  async hubLayoutPut(req: NvHubLayoutPutRequest): Promise<NvHubLayoutResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/hub/layout`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`hubLayoutPut failed: ${res.status}`);
+    const json = await res.json();
+    return NvHubLayoutResponse.parse(json);
+  }
+
+  async hubShareCreate(req: NvHubShareCreateRequest): Promise<NvHubShareCreateResponse> {
+    const res = await this.fetchImpl(`${this.baseUrl}/hub/share`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    if (!res.ok) throw new Error(`hubShareCreate failed: ${res.status}`);
+    const json = await res.json();
+    return NvHubShareCreateResponse.parse(json);
+  }
+
+  /** Public snapshot (no auth). */
+  async hubSharePublic(ticketId: string): Promise<NvHubSharePublicResponse> {
+    const enc = encodeURIComponent(ticketId);
+    const res = await this.fetchImpl(`${this.baseUrl}/hub/share/${enc}`, {
+      method: "GET",
+      headers: { accept: "application/json" }
+    });
+    if (!res.ok) throw new Error(`hubSharePublic failed: ${res.status}`);
+    const json = await res.json();
+    return NvHubSharePublicResponse.parse(json);
   }
 
   /** R7 — Premium Battle Pass (Apple verifyReceipt veya Play ürün token). */
-  async iapBattlePassVerify(req: KrBattlePassIapVerifyRequest): Promise<KrBattlePassIapVerifyResponseOk> {
+  async iapBattlePassVerify(req: NvBattlePassIapVerifyRequest): Promise<NvBattlePassIapVerifyResponseOk> {
     const res = await this.fetchImpl(`${this.baseUrl}/iap/battle-pass/verify`, {
       method: "POST",
       headers: {
@@ -635,20 +692,20 @@ export class KindrailSdk {
     });
     const json = await res.json();
     if (!res.ok) throw new Error(errorFromGateway(json, `iapBattlePassVerify failed: ${res.status}`));
-    return KrBattlePassIapVerifyResponseOk.parse(json);
+    return NvBattlePassIapVerifyResponseOk.parse(json);
   }
 
-  async pushWebVapidPublic(): Promise<KrPushWebVapidResponse> {
+  async pushWebVapidPublic(): Promise<NvPushWebVapidResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/push/web/vapid-public`, {
       method: "GET",
       headers: { accept: "application/json" }
     });
     if (!res.ok) throw new Error(`pushWebVapidPublic failed: ${res.status}`);
     const json = await res.json();
-    return KrPushWebVapidResponse.parse(json);
+    return NvPushWebVapidResponse.parse(json);
   }
 
-  async pushWebSubscribe(req: KrPushWebSubscribeRequest): Promise<KrPushWebSubscribeResponse> {
+  async pushWebSubscribe(req: NvPushWebSubscribeRequest): Promise<NvPushWebSubscribeResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/push/web/subscribe`, {
       method: "POST",
       headers: {
@@ -660,10 +717,10 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`pushWebSubscribe failed: ${res.status}`);
     const json = await res.json();
-    return KrPushWebSubscribeResponse.parse(json);
+    return NvPushWebSubscribeResponse.parse(json);
   }
 
-  async pushWebUnsubscribe(req: KrPushWebUnsubscribeRequest): Promise<KrPushWebUnsubscribeResponse> {
+  async pushWebUnsubscribe(req: NvPushWebUnsubscribeRequest): Promise<NvPushWebUnsubscribeResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/push/web/unsubscribe`, {
       method: "POST",
       headers: {
@@ -675,14 +732,14 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`pushWebUnsubscribe failed: ${res.status}`);
     const json = await res.json();
-    return KrPushWebUnsubscribeResponse.parse(json);
+    return NvPushWebUnsubscribeResponse.parse(json);
   }
 
   /** Operator/cron: requires gateway `KR_INTERNAL_CRON_SECRET` (not the user JWT). */
   async internalPushDaily(
-    req: KrInternalPushDailyRequest,
-    cron: KindrailInternalCronOptions
-  ): Promise<KrInternalPushDailyResponse> {
+    req: NvInternalPushDailyRequest,
+    cron: NyrvexisInternalCronOptions
+  ): Promise<NvInternalPushDailyResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/internal/push/daily`, {
       method: "POST",
       headers: {
@@ -694,6 +751,6 @@ export class KindrailSdk {
     });
     if (!res.ok) throw new Error(`internalPushDaily failed: ${res.status}`);
     const json = await res.json();
-    return KrInternalPushDailyResponse.parse(json);
+    return NvInternalPushDailyResponse.parse(json);
   }
 }

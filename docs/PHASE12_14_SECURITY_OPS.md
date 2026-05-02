@@ -113,7 +113,7 @@ Detay: `docs/PHASE13_PRODUCTION.md`
 Detay: `docs/PHASE14_SEASONS_LIVEOPS.md`
 
 ### 4.1 Content gates
-- `pnpm --filter @kindrail/gateway content:validate` **yeşil**
+- `pnpm --filter @nyrvexis/gateway content:validate` **yeşil**
 - Season/meta `seasonId` tutarlılığı
 - Event time-window doğruluğu
 

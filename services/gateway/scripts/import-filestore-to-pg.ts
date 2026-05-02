@@ -15,7 +15,7 @@
 
 /**
  * One-shot: copy .kr-data/store.json into Postgres gateway_state row.
- * Usage: KR_DATABASE_URL=... KR_STORE_DIR=.kr-data pnpm --filter @kindrail/gateway db:import-filestore
+ * Usage: KR_DATABASE_URL=... KR_STORE_DIR=.kr-data pnpm --filter @nyrvexis/gateway db:import-filestore
  */
 import fs from "node:fs";
 import path from "node:path";

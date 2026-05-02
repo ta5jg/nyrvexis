@@ -1,0 +1,39 @@
+{
+  "request": {
+    "v": 1,
+    "seed": { "seed": "unity-sample" },
+    "a": {
+      "name": "Alpha",
+      "units": [
+        { "id": "a_r", "archetype": "rogue", "hp": 40, "atk": 8, "def": 2, "spd": 12, "slot": 0 },
+        { "id": "a_b", "archetype": "brute", "hp": 80, "atk": 6, "def": 6, "spd": 8, "slot": 1 }
+      ]
+    },
+    "b": {
+      "name": "Bravo",
+      "units": [
+        { "id": "b_b", "archetype": "brute", "hp": 80, "atk": 6, "def": 6, "spd": 8, "slot": 0 },
+        { "id": "b_r", "archetype": "rogue", "hp": 40, "atk": 8, "def": 2, "spd": 12, "slot": 1 }
+      ]
+    },
+    "maxTicks": 500
+  },
+  "result": {
+    "v": 1,
+    "seed": { "seed": "unity-sample" },
+    "outcome": "b",
+    "ticks": 14,
+    "remaining": {
+      "a": { "a_r": 12, "a_b": 44 },
+      "b": { "b_b": 62, "b_r": 28 }
+    },
+    "events": [
+      { "t": 1, "kind": "ability", "src": "a_r", "dst": "a_r", "abilityId": "maneuver_probe" },
+      { "t": 4, "kind": "hit", "src": "a_r", "dst": "b_b", "dmg": 2, "crit": false },
+      { "t": 6, "kind": "ability", "src": "b_b", "dst": "b_b", "abilityId": "maneuver_take_cover" },
+      { "t": 8, "kind": "hit", "src": "b_r", "dst": "a_b", "dmg": 3, "crit": false },
+      { "t": 10, "kind": "ability", "src": "a_b", "dst": "a_b", "abilityId": "maneuver_bound" },
+      { "t": 14, "kind": "end" }
+    ]
+  }
+}

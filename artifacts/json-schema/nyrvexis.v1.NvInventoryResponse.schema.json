@@ -1,0 +1,68 @@
+{
+  "$ref": "#/definitions/NvInventoryResponse",
+  "definitions": {
+    "NvInventoryResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "inventory": {
+          "type": "object",
+          "properties": {
+            "v": {
+              "type": "number",
+              "const": 1
+            },
+            "userId": {
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 80
+            },
+            "currency": {
+              "type": "object",
+              "properties": {
+                "gold": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "shards": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "keys": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "gold",
+                "shards",
+                "keys"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "v",
+            "userId",
+            "currency"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "inventory"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

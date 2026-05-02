@@ -9,11 +9,11 @@ export type UserRow = {
   emailNorm?: string;
   passwordSalt?: string;
   passwordHash?: string;
-  /** Stable Google `sub` when this Kindrail user is linked to Google Sign-In. */
+  /** Stable Google `sub` when this Nyrvexis user is linked to Google Sign-In. */
   googleSub?: string;
 };
 
-/** Refresh JWT `jti` -> owning Kindrail user (multi-device: several jtis per user). */
+/** Refresh JWT `jti` -> owning Nyrvexis user (multi-device: several jtis per user). */
 export type RefreshSessionRow = {
   userId: string;
   createdAtMs: number;
@@ -127,10 +127,23 @@ export type StoreState = {
   idempotencyKeys: Record<string, number>;
   cosmeticOwned: Record<string, Record<string, true>>;
   cosmeticEquipped: Record<string, Partial<Record<string, string>>>;
+  /** Meta hub “planet” grid: userId → cellId → placed hub cosmetic or empty. */
+  hubLayout: Record<string, Record<string, string | null>>;
   /** SHA256(platform+product+receipt) → Premium BP doğrulaması (R7). */
   iapGrants: Record<
     string,
     { userId: string; seasonId: string; atMs: number; platform: "ios" | "android" | "stub"; productId: string }
+  >;
+  /** Read-only planet previews (`hp_*` tickets). */
+  hubShareSnapshots: Record<
+    string,
+    {
+      ticketId: string;
+      issuerUserId: string;
+      cells: Record<string, string | null>;
+      createdAtMs: number;
+      expiresAtMs: number;
+    }
   >;
 };
 
@@ -157,7 +170,9 @@ const DEFAULT_STATE: StoreState = {
   idempotencyKeys: {},
   cosmeticOwned: {},
   cosmeticEquipped: {},
-  iapGrants: {}
+  hubLayout: {},
+  iapGrants: {},
+  hubShareSnapshots: {}
 };
 
 /** Merge persisted JSON into full {@link StoreState} (shared by {@link FileStore} and {@link PgStore}). */
@@ -188,7 +203,9 @@ export function normalizePartialStoreState(parsed: Partial<StoreState> | undefin
     idempotencyKeys: parsed.idempotencyKeys ?? {},
     cosmeticOwned: parsed.cosmeticOwned ?? {},
     cosmeticEquipped: parsed.cosmeticEquipped ?? {},
-    iapGrants: parsed.iapGrants ?? {}
+    hubLayout: parsed.hubLayout ?? {},
+    iapGrants: parsed.iapGrants ?? {},
+    hubShareSnapshots: parsed.hubShareSnapshots ?? {}
   } as StoreState;
 }
 

@@ -3,6 +3,7 @@ export * from "./v1/ids.js";
 export * from "./v1/health.js";
 export * from "./v1/legal.js";
 export * from "./v1/battle.js";
+export * from "./v1/battlePacing.js";
 export * from "./v1/daily.js";
 export * from "./v1/account.js";
 export * from "./v1/inventory.js";
@@ -16,6 +17,8 @@ export * from "./v1/internal.js";
 export * from "./v1/registry.js";
 export * from "./v1/meta.js";
 export * from "./v1/season.js";
+export * from "./v1/event.js";
 export * from "./v1/cosmetics.js";
+export * from "./v1/hub.js";
 export * from "./v1/analytics.js";
 

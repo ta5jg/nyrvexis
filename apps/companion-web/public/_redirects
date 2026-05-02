@@ -1,0 +1,3 @@
+# Cloudflare Pages SPA fallback — every unmatched route serves index.html.
+# Required so deep links (?ticket=, ?squad=, /any-path) hit the React router.
+/*    /index.html   200

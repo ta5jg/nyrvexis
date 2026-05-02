@@ -1,0 +1,47 @@
+{
+  "$ref": "#/definitions/NvOwnedUnitsResponse",
+  "definitions": {
+    "NvOwnedUnitsResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "owned": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "archetype": {
+                "type": "string",
+                "minLength": 1
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 200
+              }
+            },
+            "required": [
+              "archetype",
+              "level"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "owned"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

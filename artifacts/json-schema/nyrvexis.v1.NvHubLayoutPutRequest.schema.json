@@ -1,0 +1,67 @@
+{
+  "$ref": "#/definitions/NvHubLayoutPutRequest",
+  "definitions": {
+    "NvHubLayoutPutRequest": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "placements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cellId": {
+                "type": "string",
+                "enum": [
+                  "c0",
+                  "c1",
+                  "c2",
+                  "c3",
+                  "c4",
+                  "c5",
+                  "c6",
+                  "c7",
+                  "c8",
+                  "c9",
+                  "c10",
+                  "c11",
+                  "c12",
+                  "c13",
+                  "c14",
+                  "c15"
+                ]
+              },
+              "cosmeticId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "cellId",
+              "cosmeticId"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "v",
+        "placements"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

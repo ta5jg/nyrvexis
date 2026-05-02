@@ -1,0 +1,44 @@
+# Calls the deployed gateway POST /internal/push/daily (UTC).
+# Repository secrets (Settings → Secrets → Actions):
+#   NYRVEXIS_GATEWAY_BASE_URL  e.g. https://api.example.com  (no trailing slash)
+#   NYRVEXIS_INTERNAL_CRON_SECRET  must match server env KR_INTERNAL_CRON_SECRET
+
+name: NYRVEXIS daily web push
+
+on:
+  schedule:
+    # 00:12 UTC daily (slight offset from midnight jobs)
+    - cron: "12 0 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "If true, gateway only scans (dryRun, no sends)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  push-daily:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST /internal/push/daily
+        env:
+          BASE_URL: ${{ secrets.NYRVEXIS_GATEWAY_BASE_URL }}
+          SECRET: ${{ secrets.NYRVEXIS_INTERNAL_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BASE_URL:-}" ] || [ -z "${SECRET:-}" ]; then
+            echo "::error::Set repository secrets NYRVEXIS_GATEWAY_BASE_URL and NYRVEXIS_INTERNAL_CRON_SECRET"
+            exit 1
+          fi
+          BODY='{"v":1}'
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" = "true" ]; then
+            BODY='{"v":1,"dryRun":true}'
+          fi
+          echo "Calling ${BASE_URL}/internal/push/daily …"
+          curl -sS -f -X POST "${BASE_URL}/internal/push/daily" \
+            -H "content-type: application/json" \
+            -H "x-kr-internal-cron-secret: ${SECRET}" \
+            -d "${BODY}" | tee response.json
+          echo
+          echo "Done."

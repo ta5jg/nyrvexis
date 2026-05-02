@@ -15,7 +15,7 @@
 
 /**
  * Applies SQL files in services/gateway/migrations/*.sql in lexical order.
- * Usage: KR_DATABASE_URL=postgres://... pnpm --filter @kindrail/gateway db:migrate
+ * Usage: KR_DATABASE_URL=postgres://... pnpm --filter @nyrvexis/gateway db:migrate
  */
 import fs from "node:fs";
 import path from "node:path";

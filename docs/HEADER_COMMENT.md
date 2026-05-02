@@ -13,7 +13,7 @@ License:
   Proprietary. All rights reserved. See LICENSE in the repository root.
 ============================================================================= -->
 
-# Header Comment Standard (Kindrail)
+# Header Comment Standard (Nyrvexis)
 
 Referans format: `Nyrvexa/tools/SimRunner/BiomeJsonNet.cs`.
 

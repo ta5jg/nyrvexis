@@ -27,7 +27,7 @@ Bu fazın hedefi: oyun döngüsünü **sezon** kavramı ile ürünleştirmek ve 
 Doğrulama:
 
 ```bash
-pnpm --filter @kindrail/gateway content:validate
+pnpm --filter @nyrvexis/gateway content:validate
 ```
 
 ## 2) Season rollover (ops)
@@ -50,7 +50,7 @@ Bu repo “restart/deploy ile rollover” yaklaşımını kullanır:
 ## 4) Content factory checklist
 
 - [ ] `content:validate` yeşil
-- [ ] JSON schema emission (`pnpm --filter @kindrail/protocol schema:json`) yeşil
+- [ ] JSON schema emission (`pnpm --filter @nyrvexis/protocol schema:json`) yeşil
 - [ ] Canary deploy + hızlı rollback planı
 - [ ] KPI dashboard: daily active, claim rate, leaderboard submit rate
 

@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "notes": "Store-facing copy SSOT draft. KrOffer grants stay authoritative in gateway code (services/gateway/src/monetization/offers.ts) until offers load from JSON.",
+  "notes": "Store-facing copy SSOT draft. NvOffer grants stay authoritative in gateway code (services/gateway/src/monetization/offers.ts) until offers load from JSON.",
   "bundles": [
     {
       "offerId": "starter_pack_v1",

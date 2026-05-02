@@ -76,7 +76,7 @@ export class Metrics {
     };
   }
 
-  renderPrometheus(service = "kindrail-gateway"): string {
+  renderPrometheus(service = "nyrvexis-gateway"): string {
     const lines: string[] = [];
     const up = 1;
     lines.push(`# HELP kr_up Service is up`);

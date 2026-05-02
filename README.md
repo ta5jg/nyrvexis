@@ -1,4 +1,4 @@
-## KINDRAIL
+## NYRVEXIS
 
 Fast-growing, session-based **async auto-battler + collection meta**.
 
@@ -8,9 +8,9 @@ This repo is a monorepo:
 - `packages/sdk-ts`: TypeScript SDK used by web/mobile companion apps
 - `apps/companion-web`: web-first companion client (shareable battle replays)
 - `apps/companion-mobile`: Capacitor shells (**iOS + Android**) wrapping `companion-web` (`pnpm run mobile:sync`)
-- `apps/game-unity`: (future) Unity client (WebGL/iOS/Android)
+- `apps/game-unity`: **Unity replay bridge** — drop-in `UnityPackage/` + golden JSON (`pnpm run unity:golden-export`); kurulum: [`apps/game-unity/UNITY_SETUP.md`](apps/game-unity/UNITY_SETUP.md)
 
-Release roadmap (**SSOT**): [`docs/KINDRAIL_RELEASE_ROADMAP.md`](docs/KINDRAIL_RELEASE_ROADMAP.md).
+Release roadmap (**SSOT**): [`docs/NYRVEXIS_RELEASE_ROADMAP.md`](docs/NYRVEXIS_RELEASE_ROADMAP.md).
 
 ### Mobile (Capacitor — R1)
 
@@ -23,11 +23,18 @@ pnpm run mobile:sync
 Requires native projects added once — see [`apps/companion-mobile/README.md`](apps/companion-mobile/README.md). Then:
 
 ```bash
-pnpm --filter @kindrail/companion-mobile exec cap open ios
-pnpm --filter @kindrail/companion-mobile exec cap open android
+pnpm --filter @nyrvexis/companion-mobile exec cap open ios
+pnpm --filter @nyrvexis/companion-mobile exec cap open android
 ```
 
-CI runs **companion-web build + gateway typecheck** on `main` and PRs (`.github/workflows/kindrail-ci.yml`). TestFlight / Play Internal uploads are done locally after sync.
+CI runs **companion-web build + gateway typecheck/test + Playwright smoke + analytics Postgres** on `main` and PRs (`.github/workflows/nyrvexis-ci.yml`). TestFlight / Play Internal uploads are done locally after sync.
+
+### Tests
+
+```bash
+pnpm test            # gateway vitest suite (sim, RNG, leaderboard guard, Stripe webhook)
+pnpm test:e2e:smoke  # Playwright browser smoke against built gateway + companion-web
+```
 
 ### Quick start (play on localhost)
 
@@ -47,7 +54,7 @@ pnpm run play:local
 Equivalent manual steps:
 
 ```bash
-pnpm --filter @kindrail/protocol build && pnpm --filter @kindrail/sdk-ts build
+pnpm --filter @nyrvexis/protocol build && pnpm --filter @nyrvexis/sdk-ts build
 pnpm run dev:full
 ```
 
@@ -68,8 +75,8 @@ Or two terminals: `pnpm dev` (gateway) then `pnpm run dev:companion` (web).
 ```bash
 docker compose -f deploy/docker-compose.yml up -d db
 cp .env.example .env   # if you do not have .env yet
-# Set KR_DATABASE_URL=postgres://kindrail:kindrail@127.0.0.1:5432/kindrail in .env
-pnpm --filter @kindrail/gateway db:migrate
+# Set KR_DATABASE_URL=postgres://nyrvexis:nyrvexis@127.0.0.1:5432/nyrvexis in .env
+pnpm --filter @nyrvexis/gateway db:migrate
 pnpm run play:local
 ```
 

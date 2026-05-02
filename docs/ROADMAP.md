@@ -3,8 +3,8 @@ File:           docs/ROADMAP.md
 Author:         USDTG GROUP TECHNOLOGY LLC
 Developer:      Irfan Gedik
 Created Date:   2026-04-30
-Last Update:    2026-05-01
-Version:        0.3.1
+Last Update:    2026-05-02
+Version:        0.3.2
 
 Description:
   
@@ -13,13 +13,15 @@ License:
   Proprietary. All rights reserved. See LICENSE in the repository root.
 ============================================================================= -->
 
-## KINDRAIL Roadmap (v0)
+## NYRVEXIS Roadmap (v0)
 
-Release phases (web + Capacitor → store): **`docs/KINDRAIL_RELEASE_ROADMAP.md`**.
+Release phases (web + Capacitor → store): **`docs/NYRVEXIS_RELEASE_ROADMAP.md`**.  
+Rakip seviyesi combat + ekosistem parity özeti: **`docs/FULL_PRODUCT_PARITY_ROADMAP.md`**.  
+Final teslimat sırası (checklist): **`docs/NYRVEXIS_FINAL_SHIP_STEPS.md`**.
 
 **Ticari model ve satılabilir MVP checklist** (Battle Pass + kozmetik IAP + opsiyonel rewarded ads + bundle; şans/kumar yok): aynı dosyada *Ticari model (SSOT)* ve *Ticari MVP checklist* bölümleri.
 
-Bu doküman “KINDRAIL’i hızlı büyüyen ve para kazanan bir ürüne” dönüştürmek için fazları, alt kırılımları ve teknik adımları tanımlar.
+Bu doküman “NYRVEXIS’i hızlı büyüyen ve para kazanan bir ürüne” dönüştürmek için fazları, alt kırılımları ve teknik adımları tanımlar.
 
 ### Prensipler
 - **Web-first**: en hızlı iterasyon ve paylaşılabilirlik.
@@ -27,6 +29,11 @@ Bu doküman “KINDRAIL’i hızlı büyüyen ve para kazanan bir ürüne” dö
 - **Determinism**: aynı input + seed ⇒ aynı battle sonucu (replay/share için kritik).
 - **Growth önce**: friction düşük, paylaşım kolay, günlük hedef net.
 - **Security & anti-abuse**: para ve ödül girince sıkılaşır (kademeli).
+
+### Sunum omurgası (revize)
+- **Gateway** deterministik sim + olay akışı tek SSOT.
+- **Web** (`ArenaCanvas`): gönderilebilir, hafif, okunaklı operasyonel sahne (hareket + manevra + vuruş geri bildirimi).
+- **Unity** (`apps/game-unity`): aynı battle export JSON → altın sahne; **Idle / Advance / Attack / Hit / Death** Animator sözleşmesi; mobil/WebGL opsiyonel (`pnpm run unity:golden-export`).
 
 ---
 
@@ -205,17 +212,17 @@ See: `docs/PHASE4_GROWTH.md`
 
 ---
 
-## Faz 7 — Native client (opsiyonel)
+## Faz 7 — Native / Unity sunumu (opsiyonel, web ile paralel)
 
 ### Hedef
-- Web’de kanıtlandıktan sonra native kalite + store dağıtımı.
+- Web + Capacitor mağaza gönderimi **birincil** kalırken, **Unity** ile aynı protokol üzerinden **yüksek çubuklu arena** (rig + VFX) üretmek; “heykel gibi ateş” algısını kırmak.
 
 ### Alt sistemler
-- Unity/Native client (aynı `@kindrail/protocol`)
-- Push notifications
-- Offline-friendly UI
+- Unity paketi: replay SSOT JSON → `NyrvexisReplayDirector` + beş durum Animator (`apps/game-unity`)
+- İsteğe bağlı: Unity WebGL veya mağaza ikilisi — gateway/API değişmez
+- Native mobil özellikleri: push, offline-friendly UI — Capacitor ile örtüşür veya Faz N’de genişler
 
-See: `docs/PHASE7_NATIVE.md`
+See: `docs/PHASE7_NATIVE.md`, `docs/FULL_PRODUCT_PARITY_ROADMAP.md` (R10)
 
 ---
 
@@ -232,4 +239,5 @@ See: `docs/ROADMAP_V1_FULL.md`
 2) Faz 2 “guest auth + inventory minimal” (daily claim) ✅
 3) Faz 5 “starter pack” (ilk gelir) ✅
 4) Faz 4 “leaderboard + referral” (büyüme) ✅
+5) **R10** Unity altın sahne: **rig + gerçek clip’ler (P5)** kaldı; companion export (P6 ✅); presentation SSOT (P7 ✅)
 

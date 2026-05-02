@@ -1,0 +1,146 @@
+# =============================================================================
+# CI gate: protocol/sdk/companion-web builds + gateway typecheck/build +
+# Playwright smoke (R6.1). Postgres job: analytics migrations + HTTP ingest.
+# Native store uploads remain local after cap sync.
+# =============================================================================
+
+name: NYRVEXIS CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: nyrvexis-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  companion-web-and-gateway:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build protocol + sdk-ts (workspace consumers)
+        run: pnpm --filter @nyrvexis/protocol build && pnpm --filter @nyrvexis/sdk-ts build
+
+      - name: Build companion-web (Capacitor web bundle)
+        run: pnpm --filter @nyrvexis/companion-web build
+
+      - name: Gateway typecheck
+        run: pnpm --filter @nyrvexis/gateway typecheck
+
+      - name: Gateway unit tests (vitest)
+        run: pnpm --filter @nyrvexis/gateway test
+
+      - name: Companion-web unit tests (vitest)
+        run: pnpm --filter @nyrvexis/companion-web test
+
+      - name: Gateway production build (E2E smoke)
+        run: pnpm --filter @nyrvexis/gateway build
+
+      - name: Validate Docker Compose (deploy/docker-compose.yml)
+        run: docker compose -f deploy/docker-compose.yml config
+
+      - name: Install Playwright (Chromium + system deps)
+        working-directory: apps/companion-web
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: E2E smoke — gateway + preview + Playwright
+        env:
+          KR_E2E_SKIP_BUILD: "1"
+        run: bash scripts/ci-e2e-smoke.sh
+
+  analytics-postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nyrvexis
+          POSTGRES_PASSWORD: nyrvexis
+          POSTGRES_DB: nyrvexis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nyrvexis -d nyrvexis"
+          --health-interval 4s
+          --health-timeout 5s
+          --health-retries 15
+    env:
+      KR_DATABASE_URL: postgres://nyrvexis:nyrvexis@postgres:5432/nyrvexis
+      KR_AUTH_SECRET: ci-nyrvexis-gateway-auth-secret-not-for-production-x
+      KR_HOST: 127.0.0.1
+      KR_PORT: "8798"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build protocol + sdk-ts + gateway
+        run: |
+          pnpm --filter @nyrvexis/protocol build
+          pnpm --filter @nyrvexis/sdk-ts build
+          pnpm --filter @nyrvexis/gateway build
+
+      - name: Analytics DB — migrate + insert/select smoke
+        run: pnpm --filter @nyrvexis/gateway db:verify-analytics-db
+
+      - name: Install psql (row assertion)
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Analytics HTTP — gateway POST /analytics/event + DB row
+        working-directory: services/gateway
+        run: |
+          set -euo pipefail
+          node dist/index.js &
+          GW_PID=$!
+          trap 'kill "${GW_PID}" 2>/dev/null || true' EXIT
+          for _ in $(seq 1 120); do
+            if curl -sf "http://127.0.0.1:${KR_PORT}/health" >/dev/null; then
+              break
+            fi
+            sleep 0.5
+          done
+          curl -sf "http://127.0.0.1:${KR_PORT}/health" >/dev/null
+          EVENT_NAME="ci.analytics.http.${GITHUB_RUN_ID}"
+          BODY=$(printf '{"v":1,"name":"%s","props":{"ci":true}}' "${EVENT_NAME}")
+          RESP=$(curl -sS -w "\n%{http_code}" -X POST "http://127.0.0.1:${KR_PORT}/analytics/event" \
+            -H "content-type: application/json" \
+            -d "${BODY}")
+          HTTP=$(echo "${RESP}" | tail -n 1)
+          JSON=$(echo "${RESP}" | sed '$d')
+          if [[ "${HTTP}" != "200" ]]; then
+            echo "unexpected HTTP ${HTTP} body: ${JSON}" >&2
+            exit 1
+          fi
+          echo "${JSON}" | grep -q '"ok":true'
+          COUNT=$(PGPASSWORD=nyrvexis psql -h postgres -U nyrvexis -d nyrvexis -tAc \
+            "SELECT count(*)::text FROM analytics_events WHERE name='${EVENT_NAME}'")
+          COUNT_TRIM=$(echo "${COUNT}" | tr -d '[:space:]')
+          if [[ "${COUNT_TRIM}" != "1" ]]; then
+            echo "expected 1 analytics_events row for ${EVENT_NAME}, got '${COUNT_TRIM}'" >&2
+            exit 1
+          fi
+

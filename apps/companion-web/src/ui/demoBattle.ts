@@ -1,4 +1,4 @@
-import type { KrBattleSimRequest, KrTeam } from "@kindrail/protocol";
+import type { NvBattleSimRequest, NvTeam } from "@nyrvexis/protocol";
 
 function unit(
   id: string,
@@ -14,7 +14,7 @@ function unit(
   return { id, archetype, hp, atk, def, spd, slot, critPct, critMulPct };
 }
 
-export function makeDemoTeams(): { a: KrTeam; b: KrTeam } {
+export function makeDemoTeams(): { a: NvTeam; b: NvTeam } {
   return {
     a: {
       name: "RAIL",
@@ -33,7 +33,7 @@ export function makeDemoTeams(): { a: KrTeam; b: KrTeam } {
   };
 }
 
-export function makeRequest(seed: string, maxTicks = 12000): KrBattleSimRequest {
+export function makeRequest(seed: string, maxTicks = 12000): NvBattleSimRequest {
   const { a, b } = makeDemoTeams();
   return {
     v: 1,

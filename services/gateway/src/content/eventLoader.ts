@@ -16,13 +16,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { KrEventDef } from "@kindrail/protocol";
+import { NvEventDef } from "@nyrvexis/protocol";
 
-export async function loadEventDef(version = "v0.1.0"): Promise<KrEventDef> {
+export async function loadEventDef(version = "v0.1.0"): Promise<NvEventDef> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const p = path.join(__dirname, "catalogs", `event.${version}.json`);
   const raw = await fs.readFile(p, "utf8");
-  return KrEventDef.parse(JSON.parse(raw));
+  return NvEventDef.parse(JSON.parse(raw));
 }
 

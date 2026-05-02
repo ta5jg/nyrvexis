@@ -1,11 +1,11 @@
 {
-  "name": "@kindrail/companion-mobile",
+  "name": "@nyrvexis/companion-mobile",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev:web": "pnpm --filter @kindrail/companion-web dev",
-    "build:web": "pnpm --filter @kindrail/companion-web build",
+    "dev:web": "pnpm --filter @nyrvexis/companion-web dev",
+    "build:web": "pnpm --filter @nyrvexis/companion-web build",
     "cap:sync": "cap sync",
     "cap:open:ios": "cap open ios",
     "cap:open:android": "cap open android"

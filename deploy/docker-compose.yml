@@ -19,15 +19,15 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: kindrail
-      POSTGRES_PASSWORD: kindrail
-      POSTGRES_DB: kindrail
+      POSTGRES_USER: nyrvexis
+      POSTGRES_PASSWORD: nyrvexis
+      POSTGRES_DB: nyrvexis
     volumes:
       - kr_pg_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kindrail -d kindrail"]
+      test: ["CMD-SHELL", "pg_isready -U nyrvexis -d nyrvexis"]
       interval: 3s
       timeout: 5s
       retries: 10
@@ -57,7 +57,7 @@ services:
       NODE_ENV: production
       KR_HOST: "0.0.0.0"
       KR_PORT: "8787"
-      KR_DATABASE_URL: postgres://kindrail:kindrail@db:5432/kindrail
+      KR_DATABASE_URL: postgres://nyrvexis:nyrvexis@db:5432/nyrvexis
       KR_AUTH_SECRET: ${KR_AUTH_SECRET:-dev-only-change-me-please-CHANGE-THIS-123456}
       KR_CORS_ORIGIN: "*"
       KR_STORE_DIR: /tmp/kr-data

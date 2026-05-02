@@ -15,21 +15,21 @@
 
 import fs from "node:fs/promises";
 import path from "node:path";
-import { KrEconomyTuning } from "@kindrail/protocol";
+import { NvEconomyTuning } from "@nyrvexis/protocol";
 
 const NAME = "balance.json";
 
-export async function loadBalanceOverride(storeDir: string): Promise<Partial<KrEconomyTuning>> {
+export async function loadBalanceOverride(storeDir: string): Promise<Partial<NvEconomyTuning>> {
   const p = path.join(storeDir, NAME);
   try {
     const raw = await fs.readFile(p, "utf8");
-    return KrEconomyTuning.partial().parse(JSON.parse(raw));
+    return NvEconomyTuning.partial().parse(JSON.parse(raw));
   } catch {
     return {};
   }
 }
 
-export async function saveBalanceOverride(storeDir: string, patch: Partial<KrEconomyTuning>): Promise<void> {
+export async function saveBalanceOverride(storeDir: string, patch: Partial<NvEconomyTuning>): Promise<void> {
   await fs.mkdir(storeDir, { recursive: true });
   const p = path.join(storeDir, NAME);
   const tmp = `${p}.tmp`;

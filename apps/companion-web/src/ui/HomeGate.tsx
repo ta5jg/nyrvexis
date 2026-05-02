@@ -14,6 +14,8 @@
  * ============================================================================= */
 
 import React from "react";
+import { useTranslation } from "../i18n";
+import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
 
 export function HomeGate(props: {
   gatewayOk: boolean | null;
@@ -21,28 +23,36 @@ export function HomeGate(props: {
   runtimeEnvLabel?: string;
   onEnterBattle: () => void;
 }) {
+  const { t } = useTranslation();
   const status =
-    props.gatewayOk === null ? "Checking…" : props.gatewayOk ? "Connected" : "Unavailable";
+    props.gatewayOk === null
+      ? t("home.statusChecking")
+      : props.gatewayOk
+        ? t("home.statusConnected")
+        : t("home.statusUnavailable");
   const statusClass =
     props.gatewayOk === null ? "" : props.gatewayOk ? "gameGateStatusOk" : "gameGateStatusBad";
 
   return (
-    <main className="gameGate" aria-label="Kindrail home">
+    <main className="gameGate" aria-label={t("app.brand")}>
       <div className="gameGateCard">
-        <div className="gameGateBrand">KINDRAIL</div>
-        <p className="gameGateTagline">Async tactical squad battles — web &amp; mobile.</p>
+        <div className="gameGateBrand">{t("app.brand")}</div>
+        <p className="gameGateTagline">{t("app.tagline")}</p>
         <button type="button" className="gameGateCta" onClick={props.onEnterBattle}>
-          Enter battle
+          {t("home.enterBattle")}
         </button>
         <p className={`gameGateStatus ${statusClass}`}>
-          Gateway: <strong>{status}</strong>
+          {t("home.gatewayLabel")} <strong>{status}</strong>
           {props.gatewayInfo ? <span className="gameGateStatusMeta"> · {props.gatewayInfo}</span> : null}
         </p>
-        <p className="gameGateHint">Progression, shop, and meta panels load after you enter.</p>
+        <p className="gameGateHint">{t("home.panelsHint")}</p>
         <p className="gameGateMeta">
           {props.runtimeEnvLabel ? `${props.runtimeEnvLabel} · ` : null}
-          Same client ships on web and in-store shells (Capacitor).
+          {t("app.sameClientNote")}
         </p>
+        <div className="gameGateLangRow">
+          <LanguageSwitcher />
+        </div>
       </div>
     </main>
   );

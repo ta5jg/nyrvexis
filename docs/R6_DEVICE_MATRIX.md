@@ -13,9 +13,9 @@ License:
   Proprietary. All rights reserved. See LICENSE in the repository root.
 ============================================================================= -->
 
-## KINDRAIL — Cihaz / OS matrisi (R6.2)
+## NYRVEXIS — Cihaz / OS matrisi (R6.2)
 
-**SSOT otomasyon:** `apps/companion-web/e2e/smoke.spec.ts` + GitHub Actions `kindrail-ci.yml` altında **Chromium / ubuntu-latest** headless smoke.
+**SSOT otomasyon:** `apps/companion-web/e2e/smoke.spec.ts` + GitHub Actions `nyrvexis-ci.yml` altında **Chromium / ubuntu-latest** headless smoke.
 
 | Ortam | Minimum bar | Otomasyon | Not |
 |--------|-------------|-----------|-----|

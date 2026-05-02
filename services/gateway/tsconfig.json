@@ -13,10 +13,6 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "src/content/eventLoader.ts",
-    "src/store/pgStore.ts",
-    "src/security/**/*"
-  ]
+  "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }
 

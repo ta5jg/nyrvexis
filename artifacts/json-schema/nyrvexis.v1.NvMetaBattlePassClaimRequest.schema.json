@@ -1,0 +1,37 @@
+{
+  "$ref": "#/definitions/NvMetaBattlePassClaimRequest",
+  "definitions": {
+    "NvMetaBattlePassClaimRequest": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "tier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "track": {
+          "type": "string",
+          "enum": [
+            "free",
+            "premium"
+          ]
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "v",
+        "tier",
+        "track"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

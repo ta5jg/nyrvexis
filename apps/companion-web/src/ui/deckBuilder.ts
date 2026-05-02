@@ -1,4 +1,4 @@
-import type { KrBattleSimRequest, KrTeam, KrUnit, KrUnitArchetypeDef } from "@kindrail/protocol";
+import type { NvBattleSimRequest, NvTeam, NvUnit, NvUnitArchetypeDef } from "@nyrvexis/protocol";
 import { makeDemoTeams } from "./demoBattle";
 
 export type EnemyPreset = "demo" | "mirror";
@@ -11,8 +11,8 @@ function defaultCrit(archetypeId: string): { critPct: number; critMulPct: number
   return { critPct: 0, critMulPct: 150 };
 }
 
-export function picksToTeam(name: string, picks: SlotPick[], defs: Map<string, KrUnitArchetypeDef>): KrTeam {
-  const units: KrUnit[] = [];
+export function picksToTeam(name: string, picks: SlotPick[], defs: Map<string, NvUnitArchetypeDef>): NvTeam {
+  const units: NvUnit[] = [];
   let n = 0;
   for (const p of picks) {
     if (!p.archetypeId) continue;
@@ -61,16 +61,16 @@ export function picksToTeam(name: string, picks: SlotPick[], defs: Map<string, K
 export function buildBattleRequest(opts: {
   seed: string;
   maxTicks: number;
-  catalogDefs: KrUnitArchetypeDef[];
+  catalogDefs: NvUnitArchetypeDef[];
   playerSlots: Array<string | null>;
   enemyPreset: EnemyPreset;
-}): KrBattleSimRequest {
+}): NvBattleSimRequest {
   const map = new Map(opts.catalogDefs.map((u) => [u.id, u]));
   const slots = [0, 1, 6, 7] as const;
   const picks: SlotPick[] = slots.map((slot, i) => ({ slot, archetypeId: opts.playerSlots[i] ?? null }));
   const a = picksToTeam("RAIL", picks, map);
 
-  let b: KrTeam;
+  let b: NvTeam;
   if (opts.enemyPreset === "demo") {
     b = makeDemoTeams().b;
   } else {

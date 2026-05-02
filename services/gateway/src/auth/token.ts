@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
 
-export type KrTokenTyp = "access" | "refresh";
+export type NvTokenTyp = "access" | "refresh";
 
 export type TokenPayload = {
   v: 1;
   /** Missing on legacy tokens; treated as access in middleware. */
-  typ?: KrTokenTyp;
+  typ?: NvTokenTyp;
   userId: string;
   iatMs: number;
   expMs: number;

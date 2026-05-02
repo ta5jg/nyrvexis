@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const KrDailySeedResponse = z
+export const NvDailySeedResponse = z
   .object({
     ok: z.literal(true),
     // YYYY-MM-DD in UTC
@@ -9,5 +9,5 @@ export const KrDailySeedResponse = z
   })
   .strict();
 
-export type KrDailySeedResponse = z.infer<typeof KrDailySeedResponse>;
+export type NvDailySeedResponse = z.infer<typeof NvDailySeedResponse>;
 

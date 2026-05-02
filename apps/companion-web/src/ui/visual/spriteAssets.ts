@@ -89,10 +89,34 @@ export const SPRITE_FRAMES = {
   }
 } as const;
 
+type UnitSpritePack = { idle: readonly string[]; attack: readonly string[]; death: readonly string[] };
+
+function unitPack(iconId?: string | null): UnitSpritePack | null {
+  if (!iconId) return null;
+  const u = (SPRITE_FRAMES as { units?: Record<string, UnitSpritePack> }).units?.[iconId];
+  return u ?? null;
+}
+
 /** Idle animation URLs for a catalog `iconId` (e.g. `unit_soldier_v1`), else generic hero loop. */
 export function idleFrameUrlsForUnit(iconId?: string | null): readonly string[] {
-  if (!iconId) return SPRITE_FRAMES.idle;
-  const u = (SPRITE_FRAMES as { units?: Record<string, { idle: readonly string[] }> }).units?.[iconId];
-  return u?.idle ?? SPRITE_FRAMES.idle;
+  return unitPack(iconId)?.idle ?? SPRITE_FRAMES.idle;
+}
+
+/** Attack burst frames (synced to `atkIds` / lunge window in ArenaCanvas). */
+export function attackFrameUrlsForUnit(iconId?: string | null): readonly string[] {
+  return unitPack(iconId)?.attack ?? SPRITE_FRAMES.attack;
+}
+
+/** Death pose (held while fade-out runs). */
+export function deathFrameUrlsForUnit(iconId?: string | null): readonly string[] {
+  return unitPack(iconId)?.death ?? SPRITE_FRAMES.death;
+}
+
+/** All sprite URLs for a unit (preload). */
+export function allSpriteUrlsForUnit(iconId?: string | null): string[] {
+  const idle = [...idleFrameUrlsForUnit(iconId)];
+  const atk = [...attackFrameUrlsForUnit(iconId)];
+  const die = [...deathFrameUrlsForUnit(iconId)];
+  return [...new Set([...idle, ...atk, ...die])];
 }
 

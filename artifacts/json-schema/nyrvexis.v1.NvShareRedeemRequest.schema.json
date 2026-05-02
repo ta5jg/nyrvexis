@@ -1,0 +1,24 @@
+{
+  "$ref": "#/definitions/NvShareRedeemRequest",
+  "definitions": {
+    "NvShareRedeemRequest": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ticketId": {
+          "type": "string",
+          "minLength": 8
+        }
+      },
+      "required": [
+        "v",
+        "ticketId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

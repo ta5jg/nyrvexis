@@ -1,4 +1,4 @@
-## KINDRAIL — “Full Game” Roadmap (v1)
+## NYRVEXIS — “Full Game” Roadmap (v1)
 
 Bu doküman, Faz 0–7’nin üstüne “oyuncunun **tam oyun** diyeceği” seviyeye gelmek için gerekli fazları tanımlar.
 

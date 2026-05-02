@@ -1,80 +1,81 @@
 import { z } from "zod";
-import { KrV1Envelope } from "./envelope.js";
+import { NvV1Envelope } from "./envelope.js";
 import { HealthResponse } from "./health.js";
-import { KrLegalPublicResponse } from "./legal.js";
-import { KrBattleSimRequest, KrBattleSimResult } from "./battle.js";
-import { KrDailySeedResponse } from "./daily.js";
+import { NvLegalPublicResponse } from "./legal.js";
+import { NvBattleSimRequest, NvBattleSimResult } from "./battle.js";
+import { NvDailySeedResponse } from "./daily.js";
 import {
-  KrAuthGuestRequest,
-  KrAuthGuestResponse,
-  KrAuthRefreshRequest,
-  KrAuthRefreshResponse,
-  KrAuthLogoutRequest,
-  KrAuthLogoutResponse,
-  KrAuthRegisterEmailRequest,
-  KrAuthRegisterEmailResponse,
-  KrAuthLoginEmailRequest,
-  KrAuthLoginEmailResponse,
-  KrAuthLinkEmailRequest,
-  KrAuthLinkEmailResponse,
-  KrAuthGoogleRequest,
-  KrAuthGoogleResponse,
-  KrAuthLinkGoogleRequest,
-  KrAuthLinkGoogleResponse,
-  KrMeResponse,
-  KrAuthSessionIssued
+  NvAuthGuestRequest,
+  NvAuthGuestResponse,
+  NvAuthRefreshRequest,
+  NvAuthRefreshResponse,
+  NvAuthLogoutRequest,
+  NvAuthLogoutResponse,
+  NvAuthRegisterEmailRequest,
+  NvAuthRegisterEmailResponse,
+  NvAuthLoginEmailRequest,
+  NvAuthLoginEmailResponse,
+  NvAuthLinkEmailRequest,
+  NvAuthLinkEmailResponse,
+  NvAuthGoogleRequest,
+  NvAuthGoogleResponse,
+  NvAuthLinkGoogleRequest,
+  NvAuthLinkGoogleResponse,
+  NvMeResponse,
+  NvAuthSessionIssued
 } from "./account.js";
-import { KrDailyClaimResponse, KrInventoryResponse } from "./inventory.js";
-import { KrCatalogResponse } from "./content.js";
-import { KrDailyShopResponse, KrShopBuyRequest, KrShopBuyResponse } from "./shop.js";
-import { KrOwnedUnitsResponse, KrUpgradeUnitRequest, KrUpgradeUnitResponse } from "./progression.js";
+import { NvDailyClaimResponse, NvInventoryResponse } from "./inventory.js";
+import { NvCatalogResponse } from "./content.js";
+import { NvDailyShopResponse, NvShopBuyRequest, NvShopBuyResponse } from "./shop.js";
+import { NvOwnedUnitsResponse, NvUpgradeUnitRequest, NvUpgradeUnitResponse } from "./progression.js";
 import {
-  KrLeaderboardMeResponse,
-  KrLeaderboardSubmitRequest,
-  KrLeaderboardSubmitResponse,
-  KrLeaderboardTopResponse,
-  KrReferralAcceptRequest,
-  KrReferralAcceptResponse,
-  KrReferralStatusResponse,
-  KrShareRedeemRequest,
-  KrShareRedeemResponse,
-  KrShareTicketCreateResponse
+  NvLeaderboardMeResponse,
+  NvLeaderboardSubmitRequest,
+  NvLeaderboardSubmitResponse,
+  NvLeaderboardTopResponse,
+  NvReferralAcceptRequest,
+  NvReferralAcceptResponse,
+  NvReferralStatusResponse,
+  NvShareRedeemRequest,
+  NvShareRedeemResponse,
+  NvShareTicketCreateResponse
 } from "./growth.js";
 import {
-  KrCheckoutCreateRequest,
-  KrCheckoutCreateResponse,
-  KrOffersResponse,
-  KrPurchaseStatusResponse,
-  KrBattlePassIapVerifyRequest,
-  KrBattlePassIapVerifyResponseOk
+  NvCheckoutCreateRequest,
+  NvCheckoutCreateResponse,
+  NvOffersResponse,
+  NvPurchaseStatusResponse,
+  NvBattlePassIapVerifyRequest,
+  NvBattlePassIapVerifyResponseOk
 } from "./monetization.js";
 import {
-  KrPushWebSubscribeRequest,
-  KrPushWebSubscribeResponse,
-  KrPushWebUnsubscribeRequest,
-  KrPushWebUnsubscribeResponse,
-  KrPushWebVapidResponse
+  NvPushWebSubscribeRequest,
+  NvPushWebSubscribeResponse,
+  NvPushWebUnsubscribeRequest,
+  NvPushWebUnsubscribeResponse,
+  NvPushWebVapidResponse
 } from "./push.js";
-import { KrInternalPushDailyRequest, KrInternalPushDailyResponse } from "./internal.js";
+import { NvInternalPushDailyRequest, NvInternalPushDailyResponse } from "./internal.js";
 import {
-  KrAdminBalanceGetResponse,
-  KrAdminBalanceSetRequest,
-  KrAdminBalanceSetResponse,
-  KrMetaBattlePassClaimRequest,
-  KrMetaBattlePassClaimResponse,
-  KrMetaContent,
-  KrMetaProgressResponse,
-  KrMetaQuestClaimRequest,
-  KrMetaQuestClaimResponse
+  NvAdminBalanceGetResponse,
+  NvAdminBalanceSetRequest,
+  NvAdminBalanceSetResponse,
+  NvMetaBattlePassClaimRequest,
+  NvMetaBattlePassClaimResponse,
+  NvMetaContent,
+  NvMetaProgressResponse,
+  NvMetaQuestClaimRequest,
+  NvMetaQuestClaimResponse
 } from "./meta.js";
-import { KrSeasonDef, KrSeasonViewResponse } from "./season.js";
+import { NvSeasonDef, NvSeasonViewResponse } from "./season.js";
 import {
-  KrCosmeticsCatalogResponse,
-  KrCosmeticsEquipRequest,
-  KrCosmeticsEquipResponse,
-  KrCosmeticsMeResponse
+  NvCosmeticsCatalogResponse,
+  NvCosmeticsEquipRequest,
+  NvCosmeticsEquipResponse,
+  NvCosmeticsMeResponse
 } from "./cosmetics.js";
-import { KrAnalyticsEventRequest, KrAnalyticsEventResponse } from "./analytics.js";
+import { NvHubLayoutPutRequest, NvHubLayoutResponse, NvHubShareCreateRequest, NvHubShareCreateResponse, NvHubSharePublicResponse } from "./hub.js";
+import { NvAnalyticsEventRequest, NvAnalyticsEventResponse } from "./analytics.js";
 
 /**
  * Central schema registry for:
@@ -82,79 +83,84 @@ import { KrAnalyticsEventRequest, KrAnalyticsEventResponse } from "./analytics.j
  * - docs
  * - future C# DTO generation
  */
-export const KrV1Schemas = {
-  KrV1Envelope,
+export const NvV1Schemas = {
+  NvV1Envelope,
   HealthResponse,
-  KrLegalPublicResponse,
-  KrBattleSimRequest,
-  KrBattleSimResult,
-  KrDailySeedResponse,
-  KrAuthGuestRequest,
-  KrAuthGuestResponse,
-  KrAuthRefreshRequest,
-  KrAuthRefreshResponse,
-  KrAuthLogoutRequest,
-  KrAuthLogoutResponse,
-  KrAuthRegisterEmailRequest,
-  KrAuthRegisterEmailResponse,
-  KrAuthLoginEmailRequest,
-  KrAuthLoginEmailResponse,
-  KrAuthLinkEmailRequest,
-  KrAuthLinkEmailResponse,
-  KrAuthGoogleRequest,
-  KrAuthGoogleResponse,
-  KrAuthLinkGoogleRequest,
-  KrAuthLinkGoogleResponse,
-  KrAuthSessionIssued,
-  KrMeResponse,
-  KrInventoryResponse,
-  KrDailyClaimResponse,
-  KrCatalogResponse,
-  KrDailyShopResponse,
-  KrShopBuyRequest,
-  KrShopBuyResponse,
-  KrOwnedUnitsResponse,
-  KrUpgradeUnitRequest,
-  KrUpgradeUnitResponse,
-  KrLeaderboardSubmitRequest,
-  KrLeaderboardSubmitResponse,
-  KrLeaderboardTopResponse,
-  KrLeaderboardMeResponse,
-  KrReferralAcceptRequest,
-  KrReferralAcceptResponse,
-  KrReferralStatusResponse,
-  KrShareTicketCreateResponse,
-  KrShareRedeemRequest,
-  KrShareRedeemResponse,
-  KrOffersResponse,
-  KrCheckoutCreateRequest,
-  KrCheckoutCreateResponse,
-  KrPurchaseStatusResponse,
-  KrBattlePassIapVerifyRequest,
-  KrBattlePassIapVerifyResponseOk,
-  KrPushWebVapidResponse,
-  KrPushWebSubscribeRequest,
-  KrPushWebSubscribeResponse,
-  KrPushWebUnsubscribeRequest,
-  KrPushWebUnsubscribeResponse,
-  KrInternalPushDailyRequest,
-  KrInternalPushDailyResponse,
-  KrMetaContent,
-  KrMetaProgressResponse,
-  KrMetaQuestClaimRequest,
-  KrMetaQuestClaimResponse,
-  KrMetaBattlePassClaimRequest,
-  KrMetaBattlePassClaimResponse,
-  KrAdminBalanceGetResponse,
-  KrAdminBalanceSetRequest,
-  KrAdminBalanceSetResponse,
-  KrSeasonDef,
-  KrSeasonViewResponse,
-  KrCosmeticsCatalogResponse,
-  KrCosmeticsMeResponse,
-  KrCosmeticsEquipRequest,
-  KrCosmeticsEquipResponse,
-  KrAnalyticsEventRequest,
-  KrAnalyticsEventResponse
+  NvLegalPublicResponse,
+  NvBattleSimRequest,
+  NvBattleSimResult,
+  NvDailySeedResponse,
+  NvAuthGuestRequest,
+  NvAuthGuestResponse,
+  NvAuthRefreshRequest,
+  NvAuthRefreshResponse,
+  NvAuthLogoutRequest,
+  NvAuthLogoutResponse,
+  NvAuthRegisterEmailRequest,
+  NvAuthRegisterEmailResponse,
+  NvAuthLoginEmailRequest,
+  NvAuthLoginEmailResponse,
+  NvAuthLinkEmailRequest,
+  NvAuthLinkEmailResponse,
+  NvAuthGoogleRequest,
+  NvAuthGoogleResponse,
+  NvAuthLinkGoogleRequest,
+  NvAuthLinkGoogleResponse,
+  NvAuthSessionIssued,
+  NvMeResponse,
+  NvInventoryResponse,
+  NvDailyClaimResponse,
+  NvCatalogResponse,
+  NvDailyShopResponse,
+  NvShopBuyRequest,
+  NvShopBuyResponse,
+  NvOwnedUnitsResponse,
+  NvUpgradeUnitRequest,
+  NvUpgradeUnitResponse,
+  NvLeaderboardSubmitRequest,
+  NvLeaderboardSubmitResponse,
+  NvLeaderboardTopResponse,
+  NvLeaderboardMeResponse,
+  NvReferralAcceptRequest,
+  NvReferralAcceptResponse,
+  NvReferralStatusResponse,
+  NvShareTicketCreateResponse,
+  NvShareRedeemRequest,
+  NvShareRedeemResponse,
+  NvOffersResponse,
+  NvCheckoutCreateRequest,
+  NvCheckoutCreateResponse,
+  NvPurchaseStatusResponse,
+  NvBattlePassIapVerifyRequest,
+  NvBattlePassIapVerifyResponseOk,
+  NvPushWebVapidResponse,
+  NvPushWebSubscribeRequest,
+  NvPushWebSubscribeResponse,
+  NvPushWebUnsubscribeRequest,
+  NvPushWebUnsubscribeResponse,
+  NvInternalPushDailyRequest,
+  NvInternalPushDailyResponse,
+  NvMetaContent,
+  NvMetaProgressResponse,
+  NvMetaQuestClaimRequest,
+  NvMetaQuestClaimResponse,
+  NvMetaBattlePassClaimRequest,
+  NvMetaBattlePassClaimResponse,
+  NvAdminBalanceGetResponse,
+  NvAdminBalanceSetRequest,
+  NvAdminBalanceSetResponse,
+  NvSeasonDef,
+  NvSeasonViewResponse,
+  NvCosmeticsCatalogResponse,
+  NvCosmeticsMeResponse,
+  NvCosmeticsEquipRequest,
+  NvCosmeticsEquipResponse,
+  NvHubLayoutResponse,
+  NvHubLayoutPutRequest,
+  NvHubShareCreateRequest,
+  NvHubShareCreateResponse,
+  NvHubSharePublicResponse,
+  NvAnalyticsEventRequest,
+  NvAnalyticsEventResponse
 } satisfies Record<string, z.ZodTypeAny>;
 

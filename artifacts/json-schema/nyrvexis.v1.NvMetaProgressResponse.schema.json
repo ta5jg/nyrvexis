@@ -1,0 +1,341 @@
+{
+  "$ref": "#/definitions/NvMetaProgressResponse",
+  "definitions": {
+    "NvMetaProgressResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "dateUtc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "weekPeriodKey": {
+          "type": "string",
+          "minLength": 1
+        },
+        "economy": {
+          "type": "object",
+          "properties": {
+            "dailyClaimGold": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 120
+            },
+            "dailyClaimShards": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 8
+            },
+            "dailyClaimKeys": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "shopGoldMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "upgradeGoldMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "upgradeShardMulPct": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 500,
+              "default": 100
+            },
+            "battlePassXpPerDailyClaim": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 40
+            },
+            "battlePassXpPerLeaderboard": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 35
+            },
+            "battlePassXpDailyCap": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 500
+            }
+          },
+          "additionalProperties": false
+        },
+        "quests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "scope": {
+                "type": "string",
+                "enum": [
+                  "daily",
+                  "weekly"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target": {
+                "type": "integer"
+              },
+              "progress": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "complete": {
+                "type": "boolean"
+              },
+              "claimed": {
+                "type": "boolean"
+              },
+              "reward": {
+                "type": "object",
+                "properties": {
+                  "gold": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                  },
+                  "shards": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                  },
+                  "keys": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                  },
+                  "battlePassXp": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                  },
+                  "catchUpTokens": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 0
+                  },
+                  "cosmeticId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "scope",
+              "title",
+              "target",
+              "progress",
+              "complete",
+              "claimed",
+              "reward"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 64
+        },
+        "streak": {
+          "type": "object",
+          "properties": {
+            "current": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "best": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "lastActiveDateUtc": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "catchUpTokens": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "current",
+            "best",
+            "lastActiveDateUtc",
+            "catchUpTokens"
+          ],
+          "additionalProperties": false
+        },
+        "battlePass": {
+          "type": "object",
+          "properties": {
+            "seasonId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "xp": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "claimedFreeTiers": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "maxItems": 200
+            },
+            "claimedPremiumTiers": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "maxItems": 200,
+              "default": []
+            },
+            "hasPremium": {
+              "type": "boolean"
+            },
+            "tiers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "tier": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 999
+                  },
+                  "xpCumulative": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "freeReward": {
+                    "type": "object",
+                    "properties": {
+                      "gold": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "shards": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "keys": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "battlePassXp": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "catchUpTokens": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "cosmeticId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "premiumReward": {
+                    "type": "object",
+                    "properties": {
+                      "gold": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "shards": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "keys": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "battlePassXp": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "catchUpTokens": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0
+                      },
+                      "cosmeticId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "tier",
+                  "xpCumulative",
+                  "freeReward"
+                ],
+                "additionalProperties": false
+              },
+              "maxItems": 200
+            }
+          },
+          "required": [
+            "seasonId",
+            "xp",
+            "claimedFreeTiers",
+            "hasPremium",
+            "tiers"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "dateUtc",
+        "weekPeriodKey",
+        "economy",
+        "quests",
+        "streak",
+        "battlePass"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

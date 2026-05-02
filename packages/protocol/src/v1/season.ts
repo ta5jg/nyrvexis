@@ -17,7 +17,7 @@ import { z } from "zod";
 
 const IsoUtc = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
 
-export const KrSeasonDef = z
+export const NvSeasonDef = z
   .object({
     v: z.literal(1),
     seasonId: z.string().min(1).max(64),
@@ -26,14 +26,14 @@ export const KrSeasonDef = z
     endsAtUtc: IsoUtc
   })
   .strict();
-export type KrSeasonDef = z.infer<typeof KrSeasonDef>;
+export type NvSeasonDef = z.infer<typeof NvSeasonDef>;
 
-export const KrSeasonViewResponse = z
+export const NvSeasonViewResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    season: KrSeasonDef
+    season: NvSeasonDef
   })
   .strict();
-export type KrSeasonViewResponse = z.infer<typeof KrSeasonViewResponse>;
+export type NvSeasonViewResponse = z.infer<typeof NvSeasonViewResponse>;
 

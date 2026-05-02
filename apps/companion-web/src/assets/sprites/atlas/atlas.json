@@ -51,7 +51,7 @@
     "unit_knight_v1/death/0": { "frame": { "x": 704, "y": 128, "w": 64, "h": 64 }, "rotated": false, "trimmed": false, "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 }, "sourceSize": { "w": 64, "h": 64 } }
   },
   "meta": {
-    "app": "kindrail-atlas-svg",
+    "app": "nyrvexis-atlas-svg",
     "version": "0.1",
     "image": "atlas.svg",
     "format": "RGBA8888",

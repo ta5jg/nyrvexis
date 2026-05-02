@@ -27,8 +27,8 @@ Bu fazın hedefi: **deploy edilebilir yığın**, **Postgres kalıcılığı**, 
 SQL dosyaları: `services/gateway/migrations/*.sql` (sırayla uygulanır).
 
 ```bash
-export KR_DATABASE_URL=postgres://user:pass@localhost:5432/kindrail
-pnpm --filter @kindrail/gateway db:migrate
+export KR_DATABASE_URL=postgres://user:pass@localhost:5432/nyrvexis
+pnpm --filter @nyrvexis/gateway db:migrate
 ```
 
 ### FileStore → Postgres tek sefer
@@ -36,7 +36,7 @@ pnpm --filter @kindrail/gateway db:migrate
 ```bash
 export KR_DATABASE_URL=...
 export KR_STORE_DIR=.kr-data   # store.json burada
-pnpm --filter @kindrail/gateway db:import-filestore
+pnpm --filter @nyrvexis/gateway db:import-filestore
 ```
 
 ## 2) Docker (minimum IaC)
@@ -45,11 +45,11 @@ pnpm --filter @kindrail/gateway db:import-filestore
 docker compose -f deploy/docker-compose.yml up --build
 ```
 
-- **db:** Postgres 16, kullanıcı/DB `kindrail`.
+- **db:** Postgres 16, kullanıcı/DB `nyrvexis`.
 - **gateway:** imaj build + container start öncesi **`psql -f`** ile migrasyonlar.
 - Üretimde `KR_AUTH_SECRET` ve DB şifrelerini **secret store** ile verin; compose içindeki varsayılanları kullanmayın.
 
-Companion-web statik dağıtım: `pnpm --filter @kindrail/companion-web build` → `apps/companion-web/dist` (CDN / nginx / object storage). `VITE_GATEWAY_URL` ile prod API adresini verin.
+Companion-web statik dağıtım: `pnpm --filter @nyrvexis/companion-web build` → `apps/companion-web/dist` (CDN / nginx / object storage). `VITE_GATEWAY_URL` ile prod API adresini verin.
 
 ## 3) Yedek ve restore
 
@@ -107,5 +107,5 @@ Sonraki adım: **Faz 14** (sezon + LiveOps içerik fabrikası) — Postgres ve d
 
 - Sezon tanımı: `services/gateway/src/content/catalogs/season.<KR_META_VERSION>.json`
 - Meta içindeki `seasonId` ile season dosyasındaki `seasonId` **eşleşmeli**.
-- Doğrulama: `pnpm --filter @kindrail/gateway content:validate`
+- Doğrulama: `pnpm --filter @nyrvexis/gateway content:validate`
 - Event tanımı: `services/gateway/src/content/catalogs/event.<KR_META_VERSION>.json` (MVP tek event)

@@ -13,13 +13,13 @@
  *   Proprietary. All rights reserved. See LICENSE in the repository root.
  * ============================================================================= */
 
-import type { KrBattleSimRequest } from "@kindrail/protocol";
+import type { NvBattleSimRequest } from "@nyrvexis/protocol";
 
 export function expectedDailyLeaderboardSeed(dateUtc: string): string {
   return `daily:${dateUtc}`;
 }
 
-export function assertOfficialDailySeed(battleRequest: KrBattleSimRequest, dateUtc: string): void {
+export function assertOfficialDailySeed(battleRequest: NvBattleSimRequest, dateUtc: string): void {
   if (battleRequest.seed.seed !== expectedDailyLeaderboardSeed(dateUtc)) {
     throw new Error("LEADERBOARD_SEED_MISMATCH");
   }

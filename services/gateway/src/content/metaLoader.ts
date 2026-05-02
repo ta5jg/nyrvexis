@@ -16,12 +16,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { KrMetaContent } from "@kindrail/protocol";
+import { NvMetaContent } from "@nyrvexis/protocol";
 
-export async function loadMetaContent(version = "v0.1.0"): Promise<KrMetaContent> {
+export async function loadMetaContent(version = "v0.1.0"): Promise<NvMetaContent> {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const p = path.join(__dirname, "catalogs", `meta.${version}.json`);
   const raw = await fs.readFile(p, "utf8");
-  return KrMetaContent.parse(JSON.parse(raw));
+  return NvMetaContent.parse(JSON.parse(raw));
 }

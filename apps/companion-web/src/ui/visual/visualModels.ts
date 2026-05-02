@@ -51,12 +51,23 @@ export type ArenaVisualVariant = {
   crop?: VisualCropRect;
 };
 
+/** Arena-wide canvas tuning (presentation only; sim SSOT değişmez). */
+export type ArenaPresentationConfig = {
+  /**
+   * 0–1 outer ink ring + cel outline around clipped portrait / sheet body.
+   * `0` = grounded look (no “fanus” halo); `1` = legacy thick ring read.
+   */
+  portraitRingStrength: number;
+};
+
 export type ArenaVisualConfig = {
   id: string;
   style: "dark-fantasy-sci-fi";
   image: string;
   defaultVariant: string;
   variants: readonly ArenaVisualVariant[];
+  /** Partial merge over `DEFAULT_ARENA_PRESENTATION` in `visualConfigs.ts`. */
+  presentation?: Partial<ArenaPresentationConfig>;
 };
 
 export type RarityVisualConfig = {

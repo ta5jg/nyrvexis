@@ -1,0 +1,35 @@
+{
+  "$ref": "#/definitions/NvCosmeticsEquipRequest",
+  "definitions": {
+    "NvCosmeticsEquipRequest": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "slot": {
+          "type": "string",
+          "enum": [
+            "frame",
+            "arena",
+            "title",
+            "hub"
+          ]
+        },
+        "cosmeticId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "v",
+        "slot",
+        "cosmeticId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

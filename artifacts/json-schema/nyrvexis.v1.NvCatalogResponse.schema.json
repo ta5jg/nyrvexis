@@ -1,0 +1,105 @@
+{
+  "$ref": "#/definitions/NvCatalogResponse",
+  "definitions": {
+    "NvCatalogResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "catalog": {
+          "type": "object",
+          "properties": {
+            "v": {
+              "type": "number",
+              "const": 1
+            },
+            "contentVersion": {
+              "type": "string",
+              "minLength": 1
+            },
+            "units": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "tank",
+                      "dps",
+                      "support",
+                      "control"
+                    ]
+                  },
+                  "base": {
+                    "type": "object",
+                    "properties": {
+                      "hp": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "atk": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "def": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "spd": {
+                        "type": "integer",
+                        "minimum": 1
+                      }
+                    },
+                    "required": [
+                      "hp",
+                      "atk",
+                      "def",
+                      "spd"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "role",
+                  "base"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "v",
+            "contentVersion",
+            "units"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "catalog"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

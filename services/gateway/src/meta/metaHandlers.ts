@@ -13,11 +13,11 @@
  *   Proprietary. All rights reserved. See LICENSE in the repository root.
  * ============================================================================= */
 
-import type { KrCosmeticDef, KrEconomyTuning, KrMetaContent, KrQuestDef, KrQuestReward } from "@kindrail/protocol";
+import type { NvCosmeticDef, NvEconomyTuning, NvMetaContent, NvQuestDef, NvQuestReward } from "@nyrvexis/protocol";
 import { addUtcDays, daysBetweenUtc, weekKeyFromDateUtc } from "../time.js";
 import type { MetaBpRow, MetaQuestRow, MetaStreakRow, StoreState } from "../store/store.js";
 
-export function effectiveEconomy(meta: KrMetaContent, override: Partial<KrEconomyTuning>): KrEconomyTuning {
+export function effectiveEconomy(meta: NvMetaContent, override: Partial<NvEconomyTuning>): NvEconomyTuning {
   return { ...meta.economyDefaults, ...override };
 }
 
@@ -25,7 +25,7 @@ function mqKey(userId: string, questId: string, periodKey: string): string {
   return `mq:${userId}:${questId}:${periodKey}`;
 }
 
-function questPeriodKey(q: KrQuestDef, dateUtc: string, weekKey: string): string {
+function questPeriodKey(q: NvQuestDef, dateUtc: string, weekKey: string): string {
   return q.scope === "daily" ? `d:${dateUtc}` : weekKey;
 }
 
@@ -91,9 +91,9 @@ function bumpQuestTrack(
   userId: string,
   dateUtc: string,
   weekKey: string,
-  track: KrQuestDef["track"],
+  track: NvQuestDef["track"],
   delta: number,
-  defs: KrQuestDef[]
+  defs: NvQuestDef[]
 ): void {
   for (const q of defs) {
     if (q.track !== track) continue;
@@ -107,8 +107,8 @@ function bumpQuestTrack(
 
 export function onDailyClaimSuccess(
   s: StoreState,
-  meta: KrMetaContent,
-  econ: KrEconomyTuning,
+  meta: NvMetaContent,
+  econ: NvEconomyTuning,
   userId: string,
   dateUtc: string
 ): void {
@@ -120,8 +120,8 @@ export function onDailyClaimSuccess(
 
 export function onLeaderboardSubmit(
   s: StoreState,
-  meta: KrMetaContent,
-  econ: KrEconomyTuning,
+  meta: NvMetaContent,
+  econ: NvEconomyTuning,
   userId: string,
   dateUtc: string,
   grantBpFromSubmit: boolean
@@ -134,19 +134,19 @@ export function onLeaderboardSubmit(
   }
 }
 
-export function onShopBuy(s: StoreState, meta: KrMetaContent, userId: string, dateUtc: string): void {
+export function onShopBuy(s: StoreState, meta: NvMetaContent, userId: string, dateUtc: string): void {
   const wk = weekKeyFromDateUtc(dateUtc);
   bumpQuestTrack(s, userId, dateUtc, wk, "shop_buy", 1, meta.quests);
 }
 
-function grantCosmetic(s: StoreState, userId: string, cosmeticId: string | undefined, defs: KrCosmeticDef[]): void {
+function grantCosmetic(s: StoreState, userId: string, cosmeticId: string | undefined, defs: NvCosmeticDef[]): void {
   if (!cosmeticId) return;
   if (!defs.some((d) => d.id === cosmeticId)) return;
   const bag = (s.cosmeticOwned[userId] ??= {});
   bag[cosmeticId] = true;
 }
 
-function applyRewardToInventory(s: StoreState, userId: string, r: KrQuestReward, defs: KrCosmeticDef[]): void {
+function applyRewardToInventory(s: StoreState, userId: string, r: NvQuestReward, defs: NvCosmeticDef[]): void {
   const inv = s.inventory[userId];
   if (!inv) return;
   inv.gold = (inv.gold + (r.gold | 0)) | 0;
@@ -168,12 +168,12 @@ export function tryConsumeIdempotency(s: StoreState, key: string): boolean {
 
 export function claimQuestReward(
   s: StoreState,
-  meta: KrMetaContent,
+  meta: NvMetaContent,
   userId: string,
   dateUtc: string,
   questId: string,
   idempotencyKey?: string
-): { ok: true; granted: KrQuestReward } | { ok: false; error: string } {
+): { ok: true; granted: NvQuestReward } | { ok: false; error: string } {
   const wk = weekKeyFromDateUtc(dateUtc);
   const q = meta.quests.find((x) => x.id === questId);
   if (!q) return { ok: false, error: "NOT_FOUND" };
@@ -198,13 +198,13 @@ export function claimQuestReward(
 
 export function claimBattlePassTier(
   s: StoreState,
-  meta: KrMetaContent,
+  meta: NvMetaContent,
   userId: string,
   _dateUtc: string,
   tier: number,
   track: "free" | "premium",
   idempotencyKey?: string
-): { ok: true; granted: KrQuestReward } | { ok: false; error: string } {
+): { ok: true; granted: NvQuestReward } | { ok: false; error: string } {
   const def = meta.battlePassTiers.find((t) => t.tier === tier);
   if (!def) return { ok: false, error: "NOT_FOUND" };
   const bp = ensureBp(s, userId, meta.seasonId);
@@ -240,8 +240,8 @@ export function setUserBattlePassPremium(s: StoreState, userId: string, seasonId
 
 export function buildMetaProgressView(
   s: StoreState,
-  meta: KrMetaContent,
-  econ: KrEconomyTuning,
+  meta: NvMetaContent,
+  econ: NvEconomyTuning,
   userId: string,
   dateUtc: string
 ) {

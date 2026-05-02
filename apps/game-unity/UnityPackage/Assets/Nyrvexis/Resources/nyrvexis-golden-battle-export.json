@@ -1,0 +1,43 @@
+{
+  "request": {
+    "v": 1,
+    "seed": { "seed": "golden-scene-v1" },
+    "a": {
+      "name": "RAIL",
+      "units": [
+        { "id": "a1", "archetype": "soldier", "hp": 30, "atk": 8, "def": 2, "spd": 10, "slot": 0, "critPct": 10, "critMulPct": 150 },
+        { "id": "a2", "archetype": "archer", "hp": 18, "atk": 10, "def": 1, "spd": 12, "slot": 6, "critPct": 5, "critMulPct": 175 }
+      ]
+    },
+    "b": {
+      "name": "RIFT",
+      "units": [
+        { "id": "b1", "archetype": "brute", "hp": 40, "atk": 7, "def": 3, "spd": 8, "slot": 0, "critPct": 0, "critMulPct": 150 },
+        { "id": "b2", "archetype": "rogue", "hp": 20, "atk": 9, "def": 1, "spd": 14, "slot": 6, "critPct": 15, "critMulPct": 160 }
+      ]
+    },
+    "maxTicks": 8000
+  },
+  "result": {
+    "v": 1,
+    "seed": { "seed": "golden-scene-v1" },
+    "outcome": "a",
+    "ticks": 18,
+    "remaining": {
+      "a": { "a1": 18, "a2": 6 },
+      "b": { "b1": 0, "b2": 4 }
+    },
+    "events": [
+      { "t": 1, "kind": "ability", "src": "a1", "dst": "a1", "abilityId": "shield_self" },
+      { "t": 2, "kind": "ability", "src": "b2", "dst": "b2", "abilityId": "maneuver_probe" },
+      { "t": 4, "kind": "hit", "src": "a2", "dst": "b1", "dmg": 5, "crit": false },
+      { "t": 6, "kind": "hit", "src": "b2", "dst": "a1", "dmg": 4, "crit": false },
+      { "t": 8, "kind": "ability", "src": "b1", "dst": "b1", "abilityId": "maneuver_take_cover" },
+      { "t": 10, "kind": "hit", "src": "a1", "dst": "b2", "dmg": 6, "crit": true },
+      { "t": 12, "kind": "ability", "src": "a2", "dst": "a2", "abilityId": "maneuver_bound" },
+      { "t": 14, "kind": "hit", "src": "b1", "dst": "a2", "dmg": 3, "crit": false },
+      { "t": 16, "kind": "death", "src": "a2", "dst": "b1" },
+      { "t": 18, "kind": "end" }
+    ]
+  }
+}

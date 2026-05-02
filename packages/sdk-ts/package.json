@@ -1,5 +1,5 @@
 {
-  "name": "@kindrail/sdk-ts",
+  "name": "@nyrvexis/sdk-ts",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@kindrail/protocol": "workspace:*"
+    "@nyrvexis/protocol": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",

@@ -15,11 +15,11 @@ Runs `companion-web` production build then `cap sync`.
 First-time only, add native platforms (often not committed in minimal clones):
 
 ```bash
-pnpm --filter @kindrail/companion-mobile exec cap add ios
-pnpm --filter @kindrail/companion-mobile exec cap add android
+pnpm --filter @nyrvexis/companion-mobile exec cap add ios
+pnpm --filter @nyrvexis/companion-mobile exec cap add android
 ```
 
-Then run `pnpm run mobile:sync` again from root (or `pnpm --filter @kindrail/companion-mobile exec cap sync`).
+Then run `pnpm run mobile:sync` again from root (or `pnpm --filter @nyrvexis/companion-mobile exec cap sync`).
 
 ### In-app purchases (R7.M1)
 
@@ -40,8 +40,8 @@ Sandbox / internal testing: use Apple Sandbox testers and Play internal testing 
 Open Xcode / Android Studio:
 
 ```bash
-pnpm --filter @kindrail/companion-mobile exec cap open ios
-pnpm --filter @kindrail/companion-mobile exec cap open android
+pnpm --filter @nyrvexis/companion-mobile exec cap open ios
+pnpm --filter @nyrvexis/companion-mobile exec cap open android
 ```
 
 ### Deep links (HTTPS)

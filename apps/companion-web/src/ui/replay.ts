@@ -1,4 +1,4 @@
-import type { KrBattleSimRequest, KrBattleSimResult } from "@kindrail/protocol";
+import { scaledMatchHp, type NvBattleSimRequest, type NvBattleSimResult } from "@nyrvexis/protocol";
 
 /** Derived UI feed for canvas/Pixi layers (optional on frames). */
 export type ReplayUiEvent =
@@ -24,19 +24,21 @@ export type ReplayFrame = {
  * Deterministic forward replay from events + initial request stats.
  * Events must be stable-sorted by (tick, original index).
  */
-export function buildReplayFrames(req: KrBattleSimRequest, result: KrBattleSimResult): ReplayFrame[] {
+export function buildReplayFrames(req: NvBattleSimRequest, result: NvBattleSimResult): ReplayFrame[] {
   const hp: Record<string, number> = {};
   const maxHp: Record<string, number> = {};
   const alive: Record<string, boolean> = {};
 
   for (const u of req.a.units) {
-    hp[u.id] = u.hp | 0;
-    maxHp[u.id] = u.hp | 0;
+    const sh = scaledMatchHp(u);
+    hp[u.id] = sh;
+    maxHp[u.id] = sh;
     alive[u.id] = true;
   }
   for (const u of req.b.units) {
-    hp[u.id] = u.hp | 0;
-    maxHp[u.id] = u.hp | 0;
+    const sh = scaledMatchHp(u);
+    hp[u.id] = sh;
+    maxHp[u.id] = sh;
     alive[u.id] = true;
   }
 
@@ -65,11 +67,13 @@ export function buildReplayFrames(req: KrBattleSimRequest, result: KrBattleSimRe
           const line = `${e.src ?? "?"} → ${e.dst}  MISS`;
           log.push(line);
           uiEvents.push({ kind: "hit", src: e.src, dst: e.dst, text: line, crit: Boolean(e.crit) });
+          if (e.src) atkIds.push(e.src);
           continue;
         }
         const cur = hp[e.dst] ?? 0;
         const next = Math.max(0, (cur - dmgRaw) | 0);
         hp[e.dst] = next;
+        if (next <= 0) alive[e.dst] = false;
         flashIds.push(e.dst);
         const line = `${e.src ?? "?"} → ${e.dst}  dmg=${e.dmg}${e.crit ? " CRIT" : ""}`;
         log.push(line);

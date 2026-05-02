@@ -1,15 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { KindrailSdk } from "@kindrail/sdk-ts";
-import type {
-  KrBattleSimRequest,
-  KrBattleSimResult,
-  KrCosmeticsMeResponse,
-  KrLegalPublicResponse,
-  KrMetaProgressResponse,
-  KrSeasonViewResponse,
-  KrUnitArchetypeDef
-} from "@kindrail/protocol";
-import { decodeJsonFromUrlParam, encodeJsonToUrlParam, copyToClipboard } from "./share";
+import { NyrvexisSdk } from "@nyrvexis/sdk-ts";
+import {
+  scaledMatchHp,
+  KR_HUB_CELL_IDS,
+  type NvBattleSimRequest,
+  type NvBattleSimResult,
+  type NvCosmeticsMeResponse,
+  type NvHubSharePublicResponse,
+  type NvHubLayoutResponse,
+  type NvLegalPublicResponse,
+  type NvMetaProgressResponse,
+  type NvSeasonViewResponse,
+  type NvUnitArchetypeDef
+} from "@nyrvexis/protocol";
+import { decodeJsonFromUrlParam, encodeJsonToUrlParam, copyToClipboard, downloadJsonFile } from "./share";
 import { makeRequest } from "./demoBattle";
 import { exportElementToPng } from "./exportPng";
 import { buildReplayFrames } from "./replay";
@@ -19,6 +23,7 @@ import { urlBase64ToUint8Array } from "./push";
 import { buildBattleRequest, type EnemyPreset } from "./deckBuilder";
 import { readInitialSquadFromUrl } from "./initialSquad";
 import { isOnboardingDone, setOnboardingDone } from "./onboarding";
+import { NYRVEXIS_FIRST_BATTLE_SEED } from "./firstBattle";
 import {
   getSfxMuted,
   primeAudio,
@@ -40,11 +45,14 @@ import {
   type StoreProductSummary
 } from "./nativeBattlePassIap";
 import { ArenaCanvas } from "./visual/ArenaCanvas";
+import { iconUrl } from "./visual/iconRegistry";
+import { useTranslation } from "../i18n";
+import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
 
 type LoadState =
   | { kind: "idle" }
   | { kind: "loading" }
-  | { kind: "ok"; result: KrBattleSimResult; request: KrBattleSimRequest }
+  | { kind: "ok"; result: NvBattleSimResult; request: NvBattleSimRequest }
   | { kind: "err"; message: string };
 
 function nowSeed(): string {
@@ -55,7 +63,13 @@ function nowSeed(): string {
   )}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}`;
 }
 
-function summarize(result: KrBattleSimResult): string {
+/** Last scrub index so arena HP/outcome match the battle result panel (not tick 0). */
+function finalReplayTickIndex(req: NvBattleSimRequest, res: NvBattleSimResult): number {
+  const fr = buildReplayFrames(req, res);
+  return Math.max(0, fr.length - 1);
+}
+
+function summarize(result: NvBattleSimResult): string {
   const a = result.remaining.a;
   const b = result.remaining.b;
   const aAlive = Object.values(a).filter((hp): hp is number => typeof hp === "number" && hp > 0).length;
@@ -63,13 +77,13 @@ function summarize(result: KrBattleSimResult): string {
   return `Outcome: ${result.outcome.toUpperCase()} | ticks=${result.ticks} | alive: A=${aAlive} B=${bAlive}`;
 }
 
-function squadDisplayLine(units: KrBattleSimRequest["a"]["units"], defs: Map<string, KrUnitArchetypeDef>): string {
+function squadDisplayLine(units: NvBattleSimRequest["a"]["units"], defs: Map<string, NvUnitArchetypeDef>): string {
   if (!units?.length) return "—";
   return units.map((u) => defs.get(u.archetype)?.name ?? u.archetype).join(" · ");
 }
 
-/** Target wall-clock (ms) for a full Auto-play at speed 1× (~5–7 min session design target). */
-const TARGET_AUTOPLAY_MS = 5.5 * 60 * 1000;
+/** Target wall-clock (ms) for full Auto-play at 1× — shorter = snappier watch (R9 parity). */
+const TARGET_AUTOPLAY_MS = 4 * 60 * 1000;
 
 function gatewayBaseUrl(): string {
   const raw = import.meta.env.VITE_GATEWAY_URL?.trim();
@@ -100,9 +114,10 @@ function loadGoogleIdentityScript(): Promise<void> {
 }
 
 export function App() {
+  const { t } = useTranslation();
   const gatewayUrl = useMemo(() => gatewayBaseUrl(), []);
   const googleClientId = useMemo(() => (import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "").trim(), []);
-  const sdk = useMemo(() => new KindrailSdk({ baseUrl: gatewayUrl }), [gatewayUrl]);
+  const sdk = useMemo(() => new NyrvexisSdk({ baseUrl: gatewayUrl }), [gatewayUrl]);
   const googleSignInDivRef = useRef<HTMLDivElement | null>(null);
 
   const [gatewayOk, setGatewayOk] = useState<boolean | null>(null);
@@ -115,7 +130,7 @@ export function App() {
   const [authBusy, setAuthBusy] = useState(false);
   const [currency, setCurrency] = useState<{ gold: number; shards: number; keys: number } | null>(null);
   const [catalogNameById, setCatalogNameById] = useState<Record<string, string>>({});
-  const [catalogDefs, setCatalogDefs] = useState<KrUnitArchetypeDef[]>([]);
+  const [catalogDefs, setCatalogDefs] = useState<NvUnitArchetypeDef[]>([]);
   const [playerSlots, setPlayerSlots] = useState<Array<string | null>>(() => readInitialSquadFromUrl());
   const [enemyPreset, setEnemyPreset] = useState<EnemyPreset>("demo");
   const [showAdvancedJson, setShowAdvancedJson] = useState(false);
@@ -132,25 +147,29 @@ export function App() {
   const [offers, setOffers] = useState<Array<{ offerId: string; name: string; priceCents: number; currency: string }>>(
     []
   );
-  const [metaProgress, setMetaProgress] = useState<KrMetaProgressResponse | null>(null);
-  const [seasonInfo, setSeasonInfo] = useState<KrSeasonViewResponse | null>(null);
-  const [cosmeticsState, setCosmeticsState] = useState<KrCosmeticsMeResponse | null>(null);
-  const [cosmeticCatalog, setCosmeticCatalog] = useState<Array<{ id: string; title: string; slot: string }>>([]);
+  const [metaProgress, setMetaProgress] = useState<NvMetaProgressResponse | null>(null);
+  const [seasonInfo, setSeasonInfo] = useState<NvSeasonViewResponse | null>(null);
+  const [cosmeticsState, setCosmeticsState] = useState<NvCosmeticsMeResponse | null>(null);
+  const [cosmeticCatalog, setCosmeticCatalog] = useState<
+    Array<{ id: string; title: string; slot: string; iconId?: string }>
+  >([]);
+  const [hubCells, setHubCells] = useState<NvHubLayoutResponse["cells"] | null>(null);
+  const [planetVisit, setPlanetVisit] = useState<NvHubSharePublicResponse | null>(null);
   const [iapPlatform, setIapPlatform] = useState<"ios" | "android">("ios");
   const [iapProductId, setIapProductId] = useState(() => {
     const raw = import.meta.env.VITE_IAP_BP_PRODUCT_IOS as string | undefined;
-    return raw?.trim() || "kindrail_bp_premium_s0_ios";
+    return raw?.trim() || "nyrvexis_bp_premium_s0_ios";
   });
   const [iapReceipt, setIapReceipt] = useState("STUB_PREMIUM");
   const [iapBusy, setIapBusy] = useState(false);
   const autoRunConsumed = useRef(false);
-  /** Play win/loss fanfare once when replay reaches the final tick (Run battle starts at tick 0). */
+  /** Play win/loss fanfare when replay reaches the final tick (battle loads there by default). */
   const outcomeFanfareBattleKeyRef = useRef<string | null>(null);
 
   const persistShellPhase = useCallback((phase: "gate" | "play") => {
     try {
-      if (phase === "play") sessionStorage.setItem("kindrail_shell_phase", "play");
-      else sessionStorage.removeItem("kindrail_shell_phase");
+      if (phase === "play") sessionStorage.setItem("nyrvexis_shell_phase", "play");
+      else sessionStorage.removeItem("nyrvexis_shell_phase");
     } catch {
       /* private mode / quota */
     }
@@ -164,14 +183,14 @@ export function App() {
     if (parseRunFlag(url)) return "play";
     if (parseView(url)) return "play";
     try {
-      if (sessionStorage.getItem("kindrail_shell_phase") === "play") return "play";
+      if (sessionStorage.getItem("nyrvexis_shell_phase") === "play") return "play";
     } catch {
       /* ignore */
     }
     return "gate";
   });
 
-  const runtimeEnvLabel = import.meta.env.DEV ? "Development build" : "Production build";
+  const runtimeEnvLabel = import.meta.env.DEV ? t("ui.developmentBuild") : t("ui.productionBuild");
 
   const [seed, setSeed] = useState<string>(() => {
     const url = new URL(window.location.href);
@@ -190,7 +209,7 @@ export function App() {
     const q = url.searchParams.get("q");
     if (q) {
       try {
-        const req = decodeJsonFromUrlParam<KrBattleSimRequest>(q);
+        const req = decodeJsonFromUrlParam<NvBattleSimRequest>(q);
         return JSON.stringify(req, null, 2);
       } catch {
         // fallthrough
@@ -203,7 +222,7 @@ export function App() {
   const [tick, setTick] = useState<number>(0);
   const [gatewayProbe, setGatewayProbe] = useState(0);
   const [sfxEnabled, setSfxEnabled] = useState(() => !getSfxMuted());
-  const [legalPublic, setLegalPublic] = useState<KrLegalPublicResponse | null>(null);
+  const [legalPublic, setLegalPublic] = useState<NvLegalPublicResponse | null>(null);
   const [nativeBpProduct, setNativeBpProduct] = useState<StoreProductSummary | null>(null);
 
   useEffect(() => {
@@ -292,6 +311,11 @@ export function App() {
           setSeasonInfo(null);
         }
         try {
+          setHubCells((await sdk.hubLayout()).cells);
+        } catch {
+          setHubCells(null);
+        }
+        try {
           setCosmeticsState(await sdk.cosmeticsMe());
         } catch {
           setCosmeticsState(null);
@@ -378,9 +402,9 @@ export function App() {
   }, [catalogDefs, playerSlots, enemyPreset, seed, maxTicks]);
 
   useEffect(() => {
-    const ios = ((import.meta.env.VITE_IAP_BP_PRODUCT_IOS as string | undefined) ?? "").trim() || "kindrail_bp_premium_s0_ios";
+    const ios = ((import.meta.env.VITE_IAP_BP_PRODUCT_IOS as string | undefined) ?? "").trim() || "nyrvexis_bp_premium_s0_ios";
     const and =
-      ((import.meta.env.VITE_IAP_BP_PRODUCT_ANDROID as string | undefined) ?? "").trim() || "kindrail_bp_premium_s0_android";
+      ((import.meta.env.VITE_IAP_BP_PRODUCT_ANDROID as string | undefined) ?? "").trim() || "nyrvexis_bp_premium_s0_android";
     setIapProductId(iapPlatform === "ios" ? ios : and);
   }, [iapPlatform]);
 
@@ -465,7 +489,7 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  function syncUrlFromReq(req: KrBattleSimRequest) {
+  function syncUrlFromReq(req: NvBattleSimRequest) {
     const url = new URL(window.location.href);
     url.searchParams.set("q", encodeJsonToUrlParam(req));
     url.searchParams.set("seed", req.seed.seed);
@@ -486,18 +510,48 @@ export function App() {
     try {
       const req = catalogDefs.length
         ? buildBattleRequest({ seed, maxTicks, catalogDefs, playerSlots, enemyPreset })
-        : (JSON.parse(requestText) as KrBattleSimRequest);
+        : (JSON.parse(requestText) as NvBattleSimRequest);
       setRequestText(JSON.stringify(req, null, 2));
       syncUrlFromReq(req);
       const res = await sdk.battleSim(req);
       setState({ kind: "ok", result: res, request: req });
-      setTick(0);
+      setTick(finalReplayTickIndex(req, res));
       focusResultSection();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
       setState({ kind: "err", message: msg });
     }
   }, [sdk, requestText, catalogDefs, playerSlots, enemyPreset, seed, maxTicks]);
+
+  const runTutorialBattle = useCallback(async () => {
+    primeAudio();
+    const tutorialSeed = NYRVEXIS_FIRST_BATTLE_SEED;
+    setSeed(tutorialSeed);
+    setEnemyPreset("demo");
+    setOnboardingDone();
+    setOnboardingOpen(false);
+    setState({ kind: "loading" });
+    try {
+      const req = catalogDefs.length
+        ? buildBattleRequest({
+            seed: tutorialSeed,
+            maxTicks,
+            catalogDefs,
+            playerSlots,
+            enemyPreset: "demo"
+          })
+        : makeRequest(tutorialSeed, maxTicks);
+      setRequestText(JSON.stringify(req, null, 2));
+      syncUrlFromReq(req);
+      const res = await sdk.battleSim(req);
+      setState({ kind: "ok", result: res, request: req });
+      setTick(finalReplayTickIndex(req, res));
+      focusResultSection();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown error";
+      setState({ kind: "err", message: msg });
+    }
+  }, [sdk, catalogDefs, playerSlots, maxTicks]);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -514,13 +568,13 @@ export function App() {
 
   async function copySocialText() {
     if (state.kind !== "ok") return;
-    const text = `KINDRAIL battle\n${summarize(state.result)}\n${window.location.href}`;
+    const text = `NYRVEXIS battle\n${summarize(state.result)}\n${window.location.href}`;
     await copyToClipboard(text);
   }
 
   function xShareUrl(): string {
     if (state.kind !== "ok") return "https://x.com/intent/tweet";
-    const text = `KINDRAIL battle — ${summarize(state.result)}`;
+    const text = `NYRVEXIS battle — ${summarize(state.result)}`;
     const url = window.location.href;
     const intent = new URL("https://x.com/intent/tweet");
     intent.searchParams.set("text", text);
@@ -532,7 +586,39 @@ export function App() {
     if (state.kind !== "ok") return;
     const el = document.getElementById("kr-share-card");
     if (!el) return;
-    await exportElementToPng(el, `kindrail-battle-${state.kind === "ok" ? state.request.seed.seed : seed}.png`);
+    await exportElementToPng(el, `nyrvexis-battle-${state.kind === "ok" ? state.request.seed.seed : seed}.png`);
+  }
+
+  /** Same bundle as `scripts/export-golden-unity-battle.mjs` → Unity `Resources/*.json`. */
+  function exportUnityBattleJson() {
+    if (state.kind !== "ok") return;
+    const safe = state.request.seed.seed.replace(/[^\w.-]+/g, "_").slice(0, 96);
+    downloadJsonFile(`nyrvexis-unity-export-${safe || "battle"}.json`, {
+      request: state.request,
+      result: state.result
+    });
+  }
+
+  async function copyPlanetShareLink() {
+    if (!userId) return;
+    try {
+      const r = await sdk.hubShareCreate({ v: 1 });
+      const u = new URL(window.location.href);
+      u.searchParams.set("planet", r.ticketId);
+      await copyToClipboard(u.toString());
+    } catch (e) {
+      setState({
+        kind: "err",
+        message: e instanceof Error ? e.message : "planet share failed"
+      });
+    }
+  }
+
+  async function exportPlanetPngHub() {
+    const el = document.getElementById("kr-hub-share-export");
+    if (!el) return;
+    const safe = userId ? userId.replace(/[^\w.-]+/g, "_").slice(0, 48) : "guest";
+    await exportElementToPng(el, `nyrvexis-planet-${safe}.png`);
   }
 
   async function useDailySeed() {
@@ -548,7 +634,7 @@ export function App() {
       syncUrlFromReq(req);
       const res = await sdk.battleSim(req);
       setState({ kind: "ok", result: res, request: req });
-      setTick(0);
+      setTick(finalReplayTickIndex(req, res));
       focusResultSection();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
@@ -572,6 +658,7 @@ export function App() {
       setSeasonInfo(null);
       setCosmeticsState(null);
       setCosmeticCatalog([]);
+      setHubCells(null);
       return;
     }
     try {
@@ -592,6 +679,11 @@ export function App() {
         setSeasonInfo(null);
       }
       try {
+        setHubCells((await sdk.hubLayout()).cells);
+      } catch {
+        setHubCells(null);
+      }
+      try {
         setCosmeticsState(await sdk.cosmeticsMe());
       } catch {
         setCosmeticsState(null);
@@ -604,6 +696,27 @@ export function App() {
     } catch {
       // ignore
     }
+  }, [sdk]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const ticket = url.searchParams.get("planet");
+    if (!ticket || ticket.length < 8) {
+      setPlanetVisit(null);
+      return;
+    }
+    let cancelled = false;
+    void sdk.hubSharePublic(ticket).then(
+      (r) => {
+        if (!cancelled) setPlanetVisit(r);
+      },
+      () => {
+        if (!cancelled) setPlanetVisit(null);
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
   }, [sdk]);
 
   const applyIssuedSession = useCallback(
@@ -644,7 +757,7 @@ export function App() {
       await applyIssuedSession(g);
       setAuthPassword("");
     } catch (e) {
-      setAuthErr(e instanceof Error ? e.message : "Sign-out failed");
+      setAuthErr(e instanceof Error ? e.message : t("errors.signOutFailed"));
     } finally {
       setAuthBusy(false);
     }
@@ -664,7 +777,7 @@ export function App() {
       await applyIssuedSession(r);
       setAuthPassword("");
     } catch (e) {
-      setAuthErr(e instanceof Error ? e.message : "Register failed");
+      setAuthErr(e instanceof Error ? e.message : t("errors.registerFailed"));
     } finally {
       setAuthBusy(false);
     }
@@ -684,7 +797,7 @@ export function App() {
       await applyIssuedSession(r);
       setAuthPassword("");
     } catch (e) {
-      setAuthErr(e instanceof Error ? e.message : "Login failed");
+      setAuthErr(e instanceof Error ? e.message : t("errors.loginFailed"));
     } finally {
       setAuthBusy(false);
     }
@@ -702,7 +815,7 @@ export function App() {
       await applyIssuedSession(r);
       setAuthPassword("");
     } catch (e) {
-      setAuthErr(e instanceof Error ? e.message : "Link failed");
+      setAuthErr(e instanceof Error ? e.message : t("errors.linkFailed"));
     } finally {
       setAuthBusy(false);
     }
@@ -742,7 +855,7 @@ export function App() {
                 await applyIssuedSession(out);
               }
             } catch (e) {
-              setAuthErr(e instanceof Error ? e.message : "Google sign-in failed");
+              setAuthErr(e instanceof Error ? e.message : t("errors.googleSignInFailed"));
             } finally {
               setAuthBusy(false);
             }
@@ -814,7 +927,7 @@ export function App() {
       setRequestText(JSON.stringify(req, null, 2));
       const sim = await sdk.battleSim(req);
       setState({ kind: "ok", result: sim, request: req });
-      setTick(0);
+      setTick(finalReplayTickIndex(req, sim));
       focusResultSection();
 
       const submit = await sdk.leaderboardSubmit({ v: 1, dateUtc: d.dateUtc, battleRequest: req });
@@ -846,7 +959,7 @@ export function App() {
         setState({
           kind: "err",
           message:
-            "Link email/Google or register before checkout — real-money purchases must tie to a restorable account (guest IAP blocked)."
+            t("errors.guestIapBlocked")
         });
         return;
       }
@@ -880,11 +993,11 @@ export function App() {
     try {
       const v = await sdk.pushWebVapidPublic();
       if (!v.enabled || !v.publicKey) {
-        setPushNote("Push is off until the gateway has KR_VAPID_PUBLIC_KEY + KR_VAPID_PRIVATE_KEY.");
+        setPushNote(t("pushNotes.keysMissing"));
         return;
       }
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
-        setPushNote("Push not supported in this browser.");
+        setPushNote(t("pushNotes.notSupported"));
         return;
       }
       const reg = await navigator.serviceWorker.ready;
@@ -900,7 +1013,7 @@ export function App() {
         keys?: { p256dh?: string; auth?: string };
       };
       if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
-        setPushNote("Subscription payload incomplete.");
+        setPushNote(t("pushNotes.payloadIncomplete"));
         return;
       }
       await sdk.pushWebSubscribe({
@@ -910,9 +1023,9 @@ export function App() {
           keys: { p256dh: json.keys.p256dh, auth: json.keys.auth }
         }
       });
-      setPushNote("Subscribed. Server can send daily reminders (admin/cron).");
+      setPushNote(t("pushNotes.subscribed"));
     } catch (e) {
-      setPushNote(e instanceof Error ? e.message : "Push failed.");
+      setPushNote(e instanceof Error ? e.message : t("errors.pushFailed"));
     } finally {
       setPushBusy(false);
     }
@@ -922,7 +1035,7 @@ export function App() {
     sdk
       .pushWebVapidPublic()
       .then((r) => {
-        setPushNote((prev) => prev || (r.enabled ? "" : "Push: optional — configure VAPID keys on gateway to enable."));
+        setPushNote((prev) => prev || (r.enabled ? "" : t("pushNotes.optional")));
       })
       .catch(() => {});
   }, [sdk]);
@@ -1050,9 +1163,9 @@ export function App() {
 
   const defsByMap = useMemo(() => new Map(catalogDefs.map((d) => [d.id, d])), [catalogDefs]);
 
-  const arenaReq = useMemo((): KrBattleSimRequest | null => {
+  const arenaReq = useMemo((): NvBattleSimRequest | null => {
     try {
-      const q = JSON.parse(requestText) as KrBattleSimRequest;
+      const q = JSON.parse(requestText) as NvBattleSimRequest;
       if (!q?.a?.units?.length || !q?.b?.units?.length) return null;
       return q;
     } catch {
@@ -1060,7 +1173,7 @@ export function App() {
     }
   }, [requestText]);
 
-  function renderFormation(req: KrBattleSimRequest) {
+  function renderFormation(req: NvBattleSimRequest) {
     const aSlots = Array.from({ length: 12 }, () => null as null | { id: string; archetype: string });
     const bSlots = Array.from({ length: 12 }, () => null as null | { id: string; archetype: string });
     for (const u of req.a.units) aSlots[u.slot ?? 0] = { id: u.id, archetype: u.archetype };
@@ -1082,7 +1195,7 @@ export function App() {
     return (
       <div className="row" style={{ marginTop: 10 }}>
         <div className="field">
-          <label>Formation A (slots 0–5 front, 6–11 back)</label>
+          <label>{t("battle.formationA")}</label>
           <div className="miniGrid">
             {aSlots.slice(0, 6).map((v, i) => (
               <Slot key={`aF${i}`} v={v} />
@@ -1093,7 +1206,7 @@ export function App() {
           </div>
         </div>
         <div className="field">
-          <label>Formation B</label>
+          <label>{t("battle.formationB")}</label>
           <div className="miniGrid">
             {bSlots.slice(0, 6).map((v, i) => (
               <Slot key={`bF${i}`} v={v} />
@@ -1107,10 +1220,70 @@ export function App() {
     );
   }
 
+  const planetVisitEl =
+    planetVisit ? (
+      <div className="card" id="kr-section-planet-visit" style={{ marginBottom: 14 }}>
+        <h2>{t("share.sharedPlanet")}</h2>
+        <div className="sub" style={{ fontSize: 12 }}>
+          {t("notes.snapshotPreviewExpires", { when: new Date(planetVisit.expiresAtMs).toLocaleString() })}
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gap: 6,
+            maxWidth: 440,
+            marginTop: 10
+          }}
+        >
+          {KR_HUB_CELL_IDS.map((cid) => {
+            const cell = planetVisit.cells[cid];
+            const title = cell?.title ?? "—";
+            const iu = iconUrl(cell?.iconId ?? null);
+            return (
+              <div
+                key={cid}
+                className="pill"
+                style={{
+                  fontSize: 11,
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "6px 4px"
+                }}
+              >
+                {iu ? (
+                  <img src={iu} alt="" width={22} height={22} style={{ display: "block", flexShrink: 0 }} />
+                ) : (
+                  <span style={{ width: 22, height: 22, flexShrink: 0 }} aria-hidden />
+                )}
+                <span style={{ lineHeight: 1.2 }}>{title}</span>
+              </div>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          className="btn btnGhost"
+          style={{ marginTop: 12 }}
+          onClick={() => {
+            const url = new URL(window.location.href);
+            stripDeepLinkParams(url, ["planet"]);
+            setPlanetVisit(null);
+          }}
+        >
+          {t("notes.dismiss")}
+        </button>
+      </div>
+    ) : null;
+
   if (gamePhase === "gate") {
     return (
       <div className="wrapGate">
         <div className="wrapGateCenter">
+          {planetVisitEl}
           <HomeGate
             gatewayOk={gatewayOk}
             gatewayInfo={gatewayInfo}
@@ -1126,13 +1299,29 @@ export function App() {
     );
   }
 
+  const cosmeticTitle = (id: string): string => {
+    const key = `cosmetics.${id}`;
+    const v = t(key);
+    if (v !== key) return v;
+    const def = cosmeticCatalog.find((c) => c.id === id);
+    return def?.title ?? id;
+  };
+
+  const slotLabelFor = (slot: string): string => {
+    if (slot === "frame") return t("ui.slotFrame");
+    if (slot === "arena") return t("ui.slotArena");
+    if (slot === "title") return t("ui.slotTitle");
+    return slot;
+  };
+
   return (
     <div className="wrap">
+      {planetVisitEl}
       <div className="top">
         <div className="brand">
-          <h1>KINDRAIL</h1>
+          <h1>{t("app.brand")}</h1>
           <div className="sub">
-            Phase 11 • legal/links gate • squad • replay • daily loop
+            {t("notes.productionTagline")}
           </div>
         </div>
         <div className="row">
@@ -1144,22 +1333,22 @@ export function App() {
               setGamePhase("gate");
             }}
           >
-            Home
+            {t("notes.home")}
           </button>
           <div className="pill">
             <strong className={gatewayOk ? "ok" : gatewayOk === false ? "bad" : ""}>
-              {gatewayOk === null ? "…" : gatewayOk ? "OK" : "DOWN"}
+              {gatewayOk === null ? "…" : gatewayOk ? t("notes.statusOk") : t("notes.statusDown")}
             </strong>
             <span>{gatewayInfo}</span>
           </div>
           <button
             type="button"
             className="btn btnGhost"
-            title="Retry gateway health check"
+            title={t("ui.retryGatewayHealthCheck")}
             disabled={gatewayOk === null}
             onClick={() => setGatewayProbe((n) => n + 1)}
           >
-            Reconnect
+            {t("ui.reconnect")}
           </button>
           <label className="inlineLab sfxToggleLab">
             <input
@@ -1172,10 +1361,10 @@ export function App() {
                 if (on) primeAudio();
               }}
             />
-            Sound
+            {t("ui.sound")}
           </label>
           <div className="pill">
-            <strong>USER</strong>
+            <strong>{t("section.user")}</strong>
             <span className="mono">{userId ? userId : "—"}</span>
             {accountEmail ? (
               <span className="mono" style={{ opacity: 0.88 }}>
@@ -1183,7 +1372,7 @@ export function App() {
                 · {accountEmail}
               </span>
             ) : userId ? (
-              <span style={{ opacity: 0.65 }}> · guest</span>
+              <span style={{ opacity: 0.65 }}> · {t("notes.guest")}</span>
             ) : null}
           </div>
           <div className="pill">
@@ -1195,18 +1384,19 @@ export function App() {
             <span className="mono">{currency ? currency.keys : "—"}</span>
           </div>
           <button className="btn" onClick={claimDaily} disabled={!userId}>
-            Claim daily
+            {t("ui.claimDaily")}
           </button>
           <button className="btn" onClick={() => void refreshMeta()} disabled={!getToken()}>
-            Refresh
+            {t("ui.refresh")}
           </button>
+          <LanguageSwitcher />
           <details style={{ alignSelf: "center" }}>
             <summary className="btn btnGhost" style={{ cursor: "pointer", listStyle: "none" }}>
-              Account
+              {t("ui.account")}
             </summary>
             <div className="card" style={{ marginTop: 8, padding: 12, minWidth: 280, maxWidth: 360, boxSizing: "border-box" }}>
               <div className="field">
-                <label htmlFor="kr-auth-email">Email</label>
+                <label htmlFor="kr-auth-email">{t("auth.email")}</label>
                 <input
                   id="kr-auth-email"
                   type="email"
@@ -1217,7 +1407,7 @@ export function App() {
                 />
               </div>
               <div className="field">
-                <label htmlFor="kr-auth-password">Password</label>
+                <label htmlFor="kr-auth-password">{t("auth.password")}</label>
                 <input
                   id="kr-auth-password"
                   type="password"
@@ -1235,8 +1425,7 @@ export function App() {
               {googleClientId ? (
                 <>
                   <div className="sub" style={{ marginBottom: 8 }}>
-                    Sign in with Google (set <span className="mono">KR_GOOGLE_CLIENT_ID</span> on gateway with the same
-                    Web Client ID).
+                    {t("authUi.googleSetupHint")}
                   </div>
                   <div ref={googleSignInDivRef} style={{ minHeight: 42 }} />
                   {accountEmail === null && userId ? (
@@ -1250,37 +1439,37 @@ export function App() {
                           sessionStorage.setItem(KR_GOOGLE_INTENT_KEY, "link");
                           window.google?.accounts.id.prompt();
                         } catch {
-                          setAuthErr("Google One Tap unavailable in this browser.");
+                          setAuthErr(t("errors.googleOneTapUnavailable"));
                         }
                       }}
                     >
-                      Link Google to this guest (One Tap)
+                      {t("authUi.linkGoogleToGuest")}
                     </button>
                   ) : null}
                 </>
               ) : (
                 <div className="sub" style={{ marginBottom: 8 }}>
-                  Optional: add <span className="mono">VITE_GOOGLE_CLIENT_ID</span> for Google Sign-In on web.
+                  {t("authUi.googleOptionalHint")}
                 </div>
               )}
               <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
                 <button type="button" className="btn primary" disabled={authBusy} onClick={() => void submitLogin()}>
-                  Log in
+                  {t("authUi.login")}
                 </button>
                 <button type="button" className="btn" disabled={authBusy} onClick={() => void submitRegister()}>
-                  New account
+                  {t("authUi.newAccount")}
                 </button>
                 {accountEmail === null && userId ? (
                   <button type="button" className="btn" disabled={authBusy} onClick={() => void submitLinkEmail()}>
-                    Link guest → email
+                    {t("authUi.linkGuestToEmail")}
                   </button>
                 ) : null}
                 <button type="button" className="btn btnGhost" disabled={authBusy} onClick={() => void signOutToGuest()}>
-                  Sign out
+                  {t("authUi.signOutBtn")}
                 </button>
               </div>
               <div className="sub" style={{ marginTop: 10 }}>
-                New account starts a fresh profile. Link keeps this session&apos;s inventory on your email.
+                {t("authUi.newAccountHint")}
               </div>
             </div>
           </details>
@@ -1288,32 +1477,34 @@ export function App() {
       </div>
 
       <div className="battleShell">
-        <div className="matchFlowRail" role="navigation" aria-label="Match steps">
+        <div className="matchFlowRail" role="navigation" aria-label={t("ui.matchSteps")}>
           <div className={`matchFlowStep ${state.kind === "idle" || state.kind === "err" ? "active" : ""}`}>
-            1 · Prepare
+            {t("match.step1Prepare")}
           </div>
           <span className="matchFlowArrow" aria-hidden>
             →
           </span>
-          <div className={`matchFlowStep ${state.kind === "loading" ? "active" : ""}`}>2 · Fight</div>
+          <div className={`matchFlowStep ${state.kind === "loading" ? "active" : ""}`}>{t("match.step2Fight")}</div>
           <span className="matchFlowArrow" aria-hidden>
             →
           </span>
-          <div className={`matchFlowStep ${state.kind === "ok" ? "active" : ""}`}>3 · Result</div>
+          <div className={`matchFlowStep ${state.kind === "ok" ? "active" : ""}`}>{t("match.step3Result")}</div>
         </div>
 
         {arenaReq ? (
           <div className="card arenaStage" id="kr-section-arena">
-            <h2>Arena</h2>
+            <h2>{t("section.arena")}</h2>
             <div className="sub arenaStageHint">
               {state.kind === "ok"
-                ? "Replay matches the scrubber and HP bars — same tick."
-                : "Formation preview — run a battle to animate combat on the arena."}
+                ? t("ui.scrubAfterBattleHint")
+                : t("ui.formationPreviewHint")}
             </div>
             <div className="arenaCanvasWrap">
               <ArenaCanvas
                 req={state.kind === "ok" ? state.request : arenaReq}
                 frame={state.kind === "ok" ? frame : null}
+                replayFrames={state.kind === "ok" ? frames ?? null : null}
+                replayTickIndex={state.kind === "ok" ? tick : undefined}
                 defsById={defsByMap}
                 outcome={state.kind === "ok" ? state.result.outcome : undefined}
                 width={680}
@@ -1324,21 +1515,20 @@ export function App() {
 
         <div className="grid">
           <div className="card" id="kr-section-battle">
-            <h2>Battle</h2>
+            <h2>{t("section.battle")}</h2>
             <div className="sub" style={{ marginBottom: 10 }}>
-              Pick four slots, choose an opponent preset, then <strong>Run battle</strong> or{" "}
-              <strong>Daily battle</strong>.
+              {t("battle.pickFourHint")}
             </div>
 
             {arenaReq ? (
               <div className="matchPrepBanner">
                 <div className="side">
-                  <div className="lab">Your squad (A)</div>
+                  <div className="lab">{t("battle.yourSquadA")}</div>
                   <div className="line">{squadDisplayLine(arenaReq.a.units, defsByMap)}</div>
                 </div>
                 <div className="vs">VS</div>
                 <div className="side">
-                  <div className="lab">{enemyPreset === "mirror" ? "Mirror (B)" : "Opponent (B)"}</div>
+                  <div className="lab">{enemyPreset === "mirror" ? t("ui.mirrorB") : t("ui.opponentB")}</div>
                   <div className="line">{squadDisplayLine(arenaReq.b.units, defsByMap)}</div>
                 </div>
               </div>
@@ -1346,11 +1536,11 @@ export function App() {
 
           <div className="row">
             <div className="field">
-              <label>seed</label>
+              <label>{t("notes.seed")}</label>
               <input value={seed} onChange={(e) => setSeed(e.target.value)} />
             </div>
             <div className="field">
-              <label>maxTicks</label>
+              <label>{t("notes.maxTicks")}</label>
               <input
                 value={String(maxTicks)}
                 onChange={(e) => {
@@ -1362,11 +1552,11 @@ export function App() {
           </div>
 
           <div className="deckPanel">
-            <div className="deckTitle">Your squad</div>
+            <div className="deckTitle">{t("battle.yourSquad")}</div>
             <div className="squadRow">
-              {(["Front L", "Front R", "Back L", "Back R"] as const).map((label, i) => (
-                <div className="squadSlot" key={label}>
-                  <div className="slotLabel">{label}</div>
+              {(["frontL", "frontR", "backL", "backR"] as const).map((labelKey, i) => (
+                <div className="squadSlot" key={labelKey}>
+                  <div className="slotLabel">{t(`ui.${labelKey}`)}</div>
                   <select
                     className="select"
                     value={playerSlots[i] ?? ""}
@@ -1377,7 +1567,7 @@ export function App() {
                       setPlayerSlots(next);
                     }}
                   >
-                    <option value="">— empty —</option>
+                    <option value="">{t("ui.emptySlot")}</option>
                     {catalogDefs.map((d) => (
                       <option key={d.id} value={d.id}>
                         {d.name}
@@ -1389,32 +1579,32 @@ export function App() {
             </div>
             <div className="row" style={{ marginTop: 12, alignItems: "center" }}>
               <div className="field" style={{ minWidth: 200 }}>
-                <label>Enemy</label>
+                <label>{t("battle.enemy")}</label>
                 <select
                   className="select"
                   value={enemyPreset}
                   onChange={(e) => setEnemyPreset(e.target.value as EnemyPreset)}
                 >
-                  <option value="demo">Demo team (RIFT)</option>
-                  <option value="mirror">Mirror your squad</option>
+                  <option value="demo">{t("battle.enemyDemo")}</option>
+                  <option value="mirror">{t("battle.enemyMirror")}</option>
                 </select>
               </div>
               <button type="button" className="btn" onClick={() => setShowAdvancedJson((v) => !v)}>
-                {showAdvancedJson ? "Hide" : "Show"} advanced JSON
+                {showAdvancedJson ? t("ui.hide") : t("ui.show")} {t("ui.advancedJsonSuffix")}
               </button>
             </div>
           </div>
 
           {showAdvancedJson ? (
             <div className="field" style={{ marginTop: 10 }}>
-              <label>SSOT JSON (power users)</label>
+              <label>{t("battle.ssotJsonLabel")}</label>
               <textarea value={requestText} onChange={(e) => setRequestText(e.target.value)} />
             </div>
           ) : null}
 
           {(() => {
             try {
-              const req = JSON.parse(requestText) as KrBattleSimRequest;
+              const req = JSON.parse(requestText) as NvBattleSimRequest;
               return renderFormation(req);
             } catch {
               return null;
@@ -1423,10 +1613,34 @@ export function App() {
 
           <div className="btnbar">
             <button className="btn primary" onClick={runSim} disabled={state.kind === "loading"}>
-              {state.kind === "loading" ? "Running…" : "Run battle"}
+              {state.kind === "loading" ? "…" : t("battle.runBattle")}
             </button>
             <button className="btn" onClick={useDailySeed} disabled={state.kind === "loading"}>
-              Daily battle
+              {t("battle.dailyBattle")}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              title={`Deterministic intro (${NYRVEXIS_FIRST_BATTLE_SEED})`}
+              onClick={() => {
+                const tutorialSeed = NYRVEXIS_FIRST_BATTLE_SEED;
+                setSeed(tutorialSeed);
+                setEnemyPreset("demo");
+                if (catalogDefs.length) {
+                  const req = buildBattleRequest({
+                    seed: tutorialSeed,
+                    maxTicks,
+                    catalogDefs,
+                    playerSlots,
+                    enemyPreset: "demo"
+                  });
+                  setRequestText(JSON.stringify(req, null, 2));
+                } else {
+                  setRequestText(JSON.stringify(makeRequest(tutorialSeed, maxTicks), null, 2));
+                }
+              }}
+            >
+              {t("ui.tutorialSeed")}
             </button>
             <button
               className="btn"
@@ -1441,28 +1655,37 @@ export function App() {
                 }
               }}
             >
-              New demo
+              {t("ui.newDemo")}
             </button>
             <button className="btn" onClick={copyShareLink}>
-              Copy share link
+              {t("ui.copyShareLink")}
             </button>
             <button className="btn" onClick={copySocialText} disabled={state.kind !== "ok"}>
-              Copy social text
+              {t("ui.copySocialText")}
             </button>
             <button className="btn" onClick={exportPng} disabled={state.kind !== "ok"}>
-              Export PNG
+              {t("ui.exportPng")}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={exportUnityBattleJson}
+              disabled={state.kind !== "ok"}
+              title="NyrvexisBattleExportDto for Unity (drop into UnityPackage/Assets/Nyrvexis/Resources/)"
+            >
+              {t("ui.exportUnityJson")}
             </button>
             <a className="btn" href={xShareUrl()} target="_blank" rel="noreferrer">
-              Share to X
+              {t("ui.shareToX")}
             </a>
           </div>
         </div>
 
         <div className="card" id="kr-section-result">
-          <h2>Result</h2>
+          <h2>{t("section.result")}</h2>
 
-          {state.kind === "idle" && <div className="log">Run a battle to see output.</div>}
-          {state.kind === "loading" && <div className="log">Simulating…</div>}
+          {state.kind === "idle" && <div className="log">{t("ui.runABattleToSeeOutput")}</div>}
+          {state.kind === "loading" && <div className="log">{t("ui.simulating")}</div>}
           {state.kind === "err" && <div className="log bad">{state.message}</div>}
           {state.kind === "ok" && (
             <>
@@ -1473,12 +1696,54 @@ export function App() {
               >
                 <div className="outcomeHeroTitle">
                   {state.result.outcome === "a"
-                    ? "Victory"
+                    ? t("match.victory")
                     : state.result.outcome === "b"
-                      ? "Defeat"
-                      : "Draw"}
+                      ? t("match.defeat")
+                      : t("match.draw")}
                 </div>
-                <div className="outcomeHeroSub">You play side A · Opponent is side B</div>
+                <div className="outcomeHeroSub">{t("battle.youPlaySideA")}</div>
+              </div>
+              <div className="btnbar" style={{ marginTop: 12, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="btn primary"
+                  onClick={() => {
+                    primeAudio();
+                    setTick(0);
+                    document.getElementById("kr-section-arena")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                  }}
+                >
+                  {t("ui.replayFromStart")}
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    primeAudio();
+                    setTick(maxTick);
+                  }}
+                >
+                  {t("ui.jumpToEnd")}
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => {
+                    void runSim();
+                  }}
+                >
+                  {t("ui.battleAgain")}
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => document.getElementById("kr-section-meta")?.scrollIntoView({ behavior: "smooth", block: "nearest" })}
+                >
+                  {t("ui.battlePassAndQuests")}
+                </button>
+                <button type="button" className="btn" onClick={exportUnityBattleJson} title="NyrvexisBattleExportDto — Unity Resources">
+                  {t("ui.exportUnityJson")}
+                </button>
               </div>
               <div className="pill" style={{ marginBottom: 10 }}>
                 <strong className={state.result.outcome === "a" ? "ok" : state.result.outcome === "b" ? "bad" : ""}>
@@ -1488,7 +1753,7 @@ export function App() {
               </div>
               <div id="kr-share-card" className="shareCard">
                 <div className="shareCardTitle">
-                  <div className="k">KINDRAIL</div>
+                  <div className="k">NYRVEXIS</div>
                   <div className="meta mono">{state.kind === "ok" ? state.request.seed.seed : seed}</div>
                 </div>
                 <div className="log">{summarize(state.result)}</div>
@@ -1499,11 +1764,11 @@ export function App() {
 
               <div className="unitHpGrid">
                 {[...state.request.a.units, ...state.request.b.units].map((u) => {
-                  const curHp = frame?.hp[u.id] ?? u.hp;
-                  const mx = frame?.maxHp[u.id] ?? u.hp;
+                  const curHp = frame?.hp[u.id] ?? scaledMatchHp(u);
+                  const mx = frame?.maxHp[u.id] ?? scaledMatchHp(u);
                   const pct = mx > 0 ? Math.min(100, Math.round((curHp / mx) * 100)) : 0;
                   const dead = frame ? frame.alive[u.id] === false : false;
-                  const flash = frame?.flashIds.includes(u.id) ?? false;
+                  const flash = frame?.flashIds?.includes(u.id) ?? false;
                   const critFlash = frame?.critIds?.includes(u.id) ?? false;
                   const side = state.request.a.units.some((x) => x.id === u.id) ? "A" : "B";
                   return (
@@ -1527,7 +1792,7 @@ export function App() {
 
               <div className="timeline">
                 <div className="pill">
-                  <strong>Replay</strong>
+                  <strong>{t("replay.title")}</strong>
                   <span className="mono">
                     tick {tick}/{maxTick}
                   </span>
@@ -1542,10 +1807,10 @@ export function App() {
                         setAutoReplay(e.target.checked);
                       }}
                     />{" "}
-                    Auto-play
+                    {t("replay.autoPlay")}
                   </label>
                   <div className="field" style={{ minWidth: 140, flex: "0 0 auto" }}>
-                    <label>Speed</label>
+                    <label>{t("replay.speed")}</label>
                     <select
                       className="select"
                       value={replaySpeed}
@@ -1558,7 +1823,7 @@ export function App() {
                   </div>
                 </div>
                 <div className="sub" style={{ marginTop: 6, opacity: 0.85 }}>
-                  Full Auto-play at 1× is paced toward a ~5–7 minute watch — uncheck to scrub manually from tick 0.
+                  {t("notes.autoPlayDuration")}
                 </div>
                 <input
                   type="range"
@@ -1572,15 +1837,13 @@ export function App() {
                   }}
                 />
                 <div className="sub" style={{ marginTop: 8, opacity: 0.78 }}>
-                  HP bars follow the scrubber; each run starts at <strong>tick 0</strong>. Scrub right or enable{" "}
-                  <strong>Auto-play</strong> to watch the fight — scrub left anytime to re-watch from the start.
+                  {t("notes.hpBarsFollow")}
                 </div>
                 <div className="replayHintKbd">
-                  Keyboard: <kbd>←</kbd> <kbd>→</kbd> scrub · <kbd>Home</kbd> <kbd>End</kbd> jump · <kbd>Space</kbd>{" "}
-                  toggle auto-play
+                  {t("replay.keyboardHint")}
                 </div>
                 <div className="log">
-                  {(frame?.log ?? ["(no events)"]).join("\n")}
+                  {(frame?.log ?? [t("notes.noEvents")]).join("\n")}
                 </div>
               </div>
             </>
@@ -1591,26 +1854,30 @@ export function App() {
 
       <div className="grid" style={{ marginTop: 14 }}>
         <div className="card" id="kr-section-meta">
-          <h2>Season & meta (R3)</h2>
+          <h2>{t("section.seasonMeta")}</h2>
           {seasonInfo ? (
             <div className="sub" style={{ marginBottom: 8 }}>
-              <strong>{seasonInfo.season.title}</strong> · {seasonInfo.season.seasonId} · ends{" "}
-              {seasonInfo.season.endsAtUtc.slice(0, 10)}
+              <strong>{seasonInfo.season.title}</strong> · {seasonInfo.season.seasonId} ·{" "}
+              {t("ui.seasonEndsOn", { date: seasonInfo.season.endsAtUtc.slice(0, 10) })}
             </div>
           ) : (
-            <div className="log">Season info unavailable.</div>
+            <div className="log">{t("meta.seasonInfoUnavailable")}</div>
           )}
           {metaProgress ? (
             <>
               <div className="sub">
-                Streak {metaProgress.streak.current} (best {metaProgress.streak.best}) · BP XP {metaProgress.battlePass.xp}
-                {metaProgress.battlePass.hasPremium ? " · Premium unlocked" : ""}
+                {t("notes.streakLine", { current: metaProgress.streak.current, best: metaProgress.streak.best, xp: metaProgress.battlePass.xp })}
+                {metaProgress.battlePass.hasPremium ? ` · ${t("notes.premiumUnlocked")}` : ""}
               </div>
-              <h3 style={{ marginTop: 10, fontSize: "1rem" }}>Quests</h3>
+              <h3 style={{ marginTop: 10, fontSize: "1rem" }}>{t("meta.quests")}</h3>
               <div className="row">
-                {metaProgress.quests.map((q) => (
+                {metaProgress.quests.map((q) => {
+                  const questKey = `quests.${q.id}`;
+                  const questI18n = t(questKey);
+                  const questTitle = questI18n === questKey ? q.title : questI18n;
+                  return (
                   <div key={q.id} className="pill">
-                    <strong>{q.title}</strong>
+                    <strong>{questTitle}</strong>
                     <span className="mono">
                       {q.progress}/{q.target}
                     </span>
@@ -1626,47 +1893,48 @@ export function App() {
                         }
                       }}
                     >
-                      {q.claimed ? "Claimed" : q.complete ? "Claim" : "—"}
+                      {q.claimed ? t("questsUi.claimed") : q.complete ? t("questsUi.claim") : "—"}
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
-              <h3 style={{ marginTop: 10, fontSize: "1rem" }}>Battle Pass tiers</h3>
+              <h3 style={{ marginTop: 10, fontSize: "1rem" }}>{t("meta.battlePassTiers")}</h3>
               <div className="row" style={{ flexWrap: "wrap" }}>
-                {metaProgress.battlePass.tiers.map((t) => (
-                  <div key={t.tier} className="pill">
-                    <strong>T{t.tier}</strong>
-                    <span className="mono">{t.xpCumulative} XP</span>
+                {metaProgress.battlePass.tiers.map((tier) => (
+                  <div key={tier.tier} className="pill">
+                    <strong>T{tier.tier}</strong>
+                    <span className="mono">{tier.xpCumulative} XP</span>
                     <button
                       className="btn"
                       disabled={
                         !userId ||
-                        metaProgress.battlePass.xp < t.xpCumulative ||
-                        metaProgress.battlePass.claimedFreeTiers.includes(t.tier)
+                        metaProgress.battlePass.xp < tier.xpCumulative ||
+                        metaProgress.battlePass.claimedFreeTiers.includes(tier.tier)
                       }
                       onClick={async () => {
                         try {
-                          await sdk.metaBattlePassClaim({ v: 1, tier: t.tier, track: "free" });
+                          await sdk.metaBattlePassClaim({ v: 1, tier: tier.tier, track: "free" });
                           await refreshMeta();
                         } catch (e) {
                           setState({ kind: "err", message: e instanceof Error ? e.message : "bp claim failed" });
                         }
                       }}
                     >
-                      {metaProgress.battlePass.claimedFreeTiers.includes(t.tier) ? "Free ✓" : "Claim free"}
+                      {metaProgress.battlePass.claimedFreeTiers.includes(tier.tier) ? t("questsUi.freeOk") : t("questsUi.claimFree")}
                     </button>
-                    {t.premiumReward ? (
+                    {tier.premiumReward ? (
                       <button
                         className="btn"
                         disabled={
                           !userId ||
                           !metaProgress.battlePass.hasPremium ||
-                          metaProgress.battlePass.xp < t.xpCumulative ||
-                          metaProgress.battlePass.claimedPremiumTiers.includes(t.tier)
+                          metaProgress.battlePass.xp < tier.xpCumulative ||
+                          metaProgress.battlePass.claimedPremiumTiers.includes(tier.tier)
                         }
                         onClick={async () => {
                           try {
-                            await sdk.metaBattlePassClaim({ v: 1, tier: t.tier, track: "premium" });
+                            await sdk.metaBattlePassClaim({ v: 1, tier: tier.tier, track: "premium" });
                             await refreshMeta();
                           } catch (e) {
                             setState({
@@ -1676,7 +1944,7 @@ export function App() {
                           }
                         }}
                       >
-                        {metaProgress.battlePass.claimedPremiumTiers.includes(t.tier) ? "Prem ✓" : "Claim premium"}
+                        {metaProgress.battlePass.claimedPremiumTiers.includes(tier.tier) ? t("questsUi.premOk") : t("questsUi.claimPremium")}
                       </button>
                     ) : null}
                   </div>
@@ -1687,10 +1955,9 @@ export function App() {
               accountEmail &&
               isNativeStorePurchasesAvailable() ? (
                 <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,.12)" }}>
-                  <h3 style={{ marginTop: 0, fontSize: "1rem" }}>Premium Battle Pass (App Store / Play)</h3>
+                  <h3 style={{ marginTop: 0, fontSize: "1rem" }}>{t("meta.premiumBattlePass")}</h3>
                   <div className="sub" style={{ marginBottom: 10 }}>
-                    Unlocks the premium reward track for this season. Your purchase is verified on KINDRAIL servers; use an
-                    account linked to email or Google (not guest-only).
+                    {t("notes.premiumBpDescription")}
                   </div>
                   {nativeBpProduct ? (
                     <div className="sub" style={{ marginBottom: 10 }}>
@@ -1701,8 +1968,7 @@ export function App() {
                     </div>
                   ) : (
                     <div className="sub" style={{ marginBottom: 10, opacity: 0.85 }}>
-                      Loading store listing… If this stays empty, confirm the product exists in App Store Connect / Play
-                      Console and matches <span className="mono">VITE_IAP_BP_PRODUCT_*</span>.
+                      {t("notes.loadingStoreListing")}
                     </div>
                   )}
                   <button
@@ -1735,7 +2001,7 @@ export function App() {
                       }
                     }}
                   >
-                    {iapBusy ? "Working…" : "Purchase on device"}
+                    {iapBusy ? t("iapUi.working") : t("iapUi.purchaseOnDevice")}
                   </button>
                 </div>
               ) : null}
@@ -1748,7 +2014,7 @@ export function App() {
                     borderTop: "1px solid rgba(255,255,255,.1)"
                   }}
                 >
-                  <strong>IAP → Premium BP (QA)</strong>
+                  <strong>{t("iap.qaPanelTitle")}</strong>
                   <div style={{ marginTop: 8 }}>
                     Gateway: set SKUs to match fields below; dev stub uses receipt{" "}
                     <span className="mono">STUB_PREMIUM</span> +{" "}
@@ -1756,7 +2022,7 @@ export function App() {
                   </div>
                   <div className="row" style={{ marginTop: 8, alignItems: "flex-end" }}>
                     <div className="field" style={{ minWidth: 120 }}>
-                      <label>Platform</label>
+                      <label>{t("iap.platform")}</label>
                       <select
                         className="select"
                         title="IAP platform"
@@ -1768,18 +2034,18 @@ export function App() {
                       </select>
                     </div>
                     <div className="field" style={{ flex: 1, minWidth: 180 }}>
-                      <label>Product ID</label>
+                      <label>{t("iap.productId")}</label>
                       <input
-                        title="Store product SKU"
+                        title={t("ui.storeProductSku")}
                         value={iapProductId}
                         onChange={(e) => setIapProductId(e.target.value)}
                       />
                     </div>
                   </div>
                   <div className="field" style={{ marginTop: 8 }}>
-                    <label>Receipt / purchase token</label>
+                    <label>{t("iap.receiptOrToken")}</label>
                     <textarea
-                      title="Base64 receipt or Play purchase token"
+                      title={t("ui.base64ReceiptOrToken")}
                       rows={3}
                       value={iapReceipt}
                       onChange={(e) => setIapReceipt(e.target.value)}
@@ -1807,38 +2073,43 @@ export function App() {
                       }
                     }}
                   >
-                    {iapBusy ? "Verifying…" : "Verify & unlock premium"}
+                    {iapBusy ? t("iapUi.verifying") : t("iapUi.verifyAndUnlockPremium")}
                   </button>
                 </div>
               ) : null}
             </>
           ) : (
-            <div className="log">Meta progress loads after sign-in.</div>
+            <div className="log">{t("meta.metaProgressAfterSignIn")}</div>
           )}
         </div>
 
         <div className="card" id="kr-section-cosmetics">
-          <h2>Cosmetics</h2>
+          <h2>{t("section.cosmetics")}</h2>
           {cosmeticsState ? (
             <>
               <div className="sub">
-                Owned: {cosmeticsState.owned.length ? cosmeticsState.owned.join(", ") : "none"}
+                {t("ui.ownedLabel")}{" "}
+                {cosmeticsState.owned.length
+                  ? cosmeticsState.owned.map((id) => cosmeticTitle(id)).join(", ")
+                  : t("ui.noneOwned")}
               </div>
               <div className="sub" style={{ marginTop: 6 }}>
-                Equipped:{" "}
+                {t("ui.equippedLabel")}{" "}
                 {Object.keys(cosmeticsState.equipped).length > 0
                   ? Object.entries(cosmeticsState.equipped)
-                      .map(([s, id]) => `${s}=${id}`)
+                      .map(([s, id]) => `${slotLabelFor(s)}=${cosmeticTitle(id)}`)
                       .join(", ")
-                  : "defaults"}
+                  : t("ui.equipDefaults")}
               </div>
               <div className="row" style={{ marginTop: 10 }}>
-                {(["frame", "arena", "title"] as const).map((slot) => (
+                {(["frame", "arena", "title"] as const).map((slot) => {
+                  const slotLabel = slotLabelFor(slot);
+                  return (
                   <div key={slot} className="field" style={{ minWidth: 160 }}>
-                    <label>{slot}</label>
+                    <label>{slotLabel}</label>
                     <select
                       className="select"
-                      title={`Equipped ${slot}`}
+                      title={t("ui.equippedSlotTitle", { slot: slotLabel })}
                       value={cosmeticsState.equipped[slot] ?? ""}
                       onChange={async (e) => {
                         const v = e.target.value;
@@ -1859,46 +2130,189 @@ export function App() {
                         .filter((c) => c.slot === slot && cosmeticsState.owned.includes(c.id))
                         .map((c) => (
                           <option key={`${slot}-${c.id}`} value={c.id}>
-                            {c.title}
+                            {cosmeticTitle(c.id)}
                           </option>
                         ))}
                     </select>
                   </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="sub" style={{ marginTop: 8 }}>
-                Cosmetics unlock from Battle Pass tiers (server-granted).
+                {t("notes.cosmeticsUnlock")}
               </div>
             </>
           ) : (
-            <div className="log">Sign in to load cosmetics.</div>
+            <div className="log">{t("meta.cosmeticsAfterSignIn")}</div>
+          )}
+        </div>
+
+        <div className="card" id="kr-section-planet">
+          <h2>{t("section.yourPlanet")}</h2>
+          {hubCells && cosmeticsState ? (
+            <>
+              <div className="sub">
+                {t("notes.hubDescription")}
+              </div>
+              <div
+                className="hubGrid"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                  gap: 8,
+                  marginTop: 12,
+                  maxWidth: 440
+                }}
+              >
+                {KR_HUB_CELL_IDS.map((cid) => {
+                  const placedId = hubCells[cid];
+                  const placedDef = placedId ? cosmeticCatalog.find((c) => c.id === placedId) : undefined;
+                  const hubIcon = iconUrl(placedDef?.iconId ?? null);
+                  return (
+                    <div key={cid} className="field" style={{ minWidth: 0 }}>
+                      <label className="mono" style={{ fontSize: 10, opacity: 0.75 }}>
+                        {cid}
+                      </label>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        {hubIcon ? (
+                          <img
+                            src={hubIcon}
+                            alt=""
+                            width={24}
+                            height={24}
+                            style={{ flexShrink: 0, display: "block" }}
+                          />
+                        ) : (
+                          <span style={{ width: 24, height: 24, flexShrink: 0 }} aria-hidden />
+                        )}
+                        <select
+                          className="select"
+                          title={`Planet cell ${cid}`}
+                          style={{ flex: 1, minWidth: 0 }}
+                          value={hubCells[cid] ?? ""}
+                          onChange={async (e) => {
+                            const v = e.target.value;
+                            const cosmeticId = v === "" ? null : v;
+                            try {
+                              const next = await sdk.hubLayoutPut({
+                                v: 1,
+                                placements: [{ cellId: cid, cosmeticId }]
+                              });
+                              setHubCells(next.cells);
+                            } catch (err) {
+                              setState({
+                                kind: "err",
+                                message: err instanceof Error ? err.message : "hub layout failed"
+                              });
+                            }
+                          }}
+                        >
+                          <option value="">{t("ui.emptySlot")}</option>
+                          {cosmeticCatalog
+                            .filter((c) => c.slot === "hub" && cosmeticsState.owned.includes(c.id))
+                            .map((c) => (
+                              <option key={`${cid}-${c.id}`} value={c.id}>
+                                {cosmeticTitle(c.id)}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="btnbar" style={{ marginTop: 12, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={!userId || !hubCells}
+                  onClick={() => void copyPlanetShareLink()}
+                >
+                  {t("ui.copyPlanetLink")}
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={!hubCells}
+                  onClick={() => void exportPlanetPngHub()}
+                >
+                  {t("ui.exportPlanetPng")}
+                </button>
+              </div>
+              <div id="kr-hub-share-export" className="shareCard" style={{ marginTop: 12 }}>
+                <div className="shareCardTitle">
+                  <div className="k">NYRVEXIS</div>
+                  <div className="meta mono">planet card</div>
+                </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                    gap: 4,
+                    marginTop: 8,
+                    fontSize: 11
+                  }}
+                >
+                  {KR_HUB_CELL_IDS.map((cid) => {
+                    const id = hubCells[cid];
+                    const def = id ? cosmeticCatalog.find((c) => c.id === id) : undefined;
+                    const title = id ? cosmeticTitle(id) : "—";
+                    const exIcon = iconUrl(def?.iconId ?? null);
+                    return (
+                      <div
+                        key={`ex-${cid}`}
+                        className="mono"
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 4,
+                          textAlign: "center",
+                          lineHeight: 1.15,
+                          wordBreak: "break-word"
+                        }}
+                      >
+                        {exIcon ? (
+                          <img src={exIcon} alt="" width={26} height={26} style={{ display: "block" }} />
+                        ) : (
+                          <span style={{ width: 26, height: 26 }} aria-hidden />
+                        )}
+                        <span>{title}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="log">{t("meta.planetAfterSignIn")}</div>
           )}
         </div>
       </div>
 
       <div className="grid" style={{ marginTop: 14 }}>
         <div className="card" id="kr-section-shop">
-          <h2>Shop (daily)</h2>
+          <h2>{t("section.shopDaily")}</h2>
           <div className="row">
             {shopOffers.map((o) => (
               <div key={o.offerId} className="pill">
                 <strong>{catalogNameById[o.archetype] ?? o.archetype}</strong>
                 <span className="mono">{o.priceGold}G</span>
                 <button className="btn" onClick={() => buy(o.offerId)} disabled={!userId}>
-                  Buy
+                  {t("ui.buy")}
                 </button>
               </div>
             ))}
           </div>
           <div className="sub" style={{ marginTop: 10 }}>
-            Buy unlocks a unit at level 1 (v0).
+            {t("notes.buyUnlocksHint")}
           </div>
         </div>
 
         <div className="card" id="kr-section-collection">
-          <h2>Collection</h2>
+          <h2>{t("section.collection")}</h2>
           {Object.keys(owned).length === 0 ? (
-            <div className="log">No units yet. Buy from shop.</div>
+            <div className="log">{t("meta.noUnitsYet")}</div>
           ) : (
             <div className="row">
               {Object.entries(owned)
@@ -1906,9 +2320,9 @@ export function App() {
                 .map(([arch, lvl]) => (
                   <div key={arch} className="pill">
                     <strong>{catalogNameById[arch] ?? arch}</strong>
-                    <span className="mono">Lv {lvl}</span>
+                    <span className="mono">{t("ui.levelShort", { level: lvl })}</span>
                     <button className="btn" onClick={() => upgrade(arch)} disabled={!userId}>
-                      Upgrade
+                      {t("ui.upgrade")}
                     </button>
                   </div>
                 ))}
@@ -1919,9 +2333,9 @@ export function App() {
 
       <div className="grid" style={{ marginTop: 14 }}>
         <div className="card" id="kr-section-monetization">
-          <h2>Monetization (MVP)</h2>
+          <h2>{t("section.monetization")}</h2>
           {offers.length === 0 ? (
-            <div className="log">Loading offers…</div>
+            <div className="log">{t("meta.loadingOffers")}</div>
           ) : (
             <div className="row">
               {offers.map((o) => (
@@ -1935,20 +2349,18 @@ export function App() {
                     onClick={() => buyOffer(o.offerId)}
                     disabled={!userId || !accountEmail}
                   >
-                    Buy
+                    {t("ui.buy")}
                   </button>
                 </div>
               ))}
             </div>
           )}
           <div className="sub" style={{ marginTop: 10 }}>
-            Checkout requires a linked identity (email or Google). Guests cannot open Stripe/IAP-style flows until they sign
-            in — aligns purchase restore across devices. Dev note: without `STRIPE_SECRET_KEY`, purchases are fulfilled
-            instantly (devstub).
+            {t("notes.checkoutRequiresIdentity")}
           </div>
         </div>
         <div className="card">
-          <h2>Purchase status</h2>
+          <h2>{t("section.purchaseStatus")}</h2>
           <div className="btnbar">
             <button
               className="btn"
@@ -1962,27 +2374,27 @@ export function App() {
               }}
               disabled={!userId}
             >
-              Refresh purchase status
+              {t("ui.refreshPurchaseStatus")}
             </button>
           </div>
-          <div className="log">Balances update immediately on success.</div>
+          <div className="log">{t("meta.balancesNote")}</div>
         </div>
       </div>
 
       <div className="grid" style={{ marginTop: 14 }}>
         <div className="card" id="kr-section-leaderboard">
-          <h2>Daily leaderboard</h2>
+          <h2>{t("section.dailyLeaderboard")}</h2>
           <div className="btnbar">
             <button className="btn" onClick={refreshLeaderboard} disabled={!userId}>
-              Refresh leaderboard
+              {t("ui.refreshLeaderboard")}
             </button>
             <button className="btn primary" onClick={submitDailyToLeaderboard} disabled={!userId}>
-              Play daily + submit
+              {t("ui.playDailyAndSubmit")}
             </button>
           </div>
           <div className="row" style={{ marginTop: 10 }}>
             <div className="pill">
-              <strong>ME</strong>
+              <strong>{t("notes.me")}</strong>
               <span className="mono">
                 {leaderboardMe ? `#${leaderboardMe.rank ?? "—"} / ${leaderboardMe.total}` : "—"}
               </span>
@@ -1991,7 +2403,7 @@ export function App() {
           </div>
           <div className="log" style={{ marginTop: 10 }}>
             {leaderboardTop.length === 0
-              ? "No entries yet."
+              ? t("ui.noEntriesYet")
               : leaderboardTop
                   .map((e, i) => `${String(i + 1).padStart(2, "0")}  ${e.userId}  score=${e.score}`)
                   .join("\n")}
@@ -1999,32 +2411,28 @@ export function App() {
         </div>
 
         <div className="card" id="kr-section-share">
-          <h2>Share rewards</h2>
+          <h2>{t("section.shareRewards")}</h2>
           <div className="btnbar">
             <button className="btn" onClick={createShareTicketLink} disabled={!userId}>
-              Create share ticket (copy link)
+              {t("ui.createShareTicket")}
             </button>
           </div>
           {shareLink ? <div className="log" style={{ marginTop: 10 }}>{shareLink}</div> : <div className="log">—</div>}
           <div className="sub" style={{ marginTop: 10 }}>
-            Tip: send the copied link to a friend. When they open it, they get a small reward and you get a small reward.
+            {t("notes.shareTip")}
           </div>
         </div>
       </div>
 
       <div className="grid" style={{ marginTop: 14 }}>
         <div className="card" id="kr-section-push">
-          <h2>Push (daily reminder)</h2>
+          <h2>{t("section.push")}</h2>
           <div className="sub" style={{ marginBottom: 10 }}>
-            Web Push MVP: subscribe stores an endpoint on the gateway. Operators:{" "}
-            <span className="mono">POST /admin/push/test</span> + <span className="mono">x-kr-admin-token</span>, or
-            scheduled <span className="mono">POST /internal/push/daily</span> +{" "}
-            <span className="mono">x-kr-internal-cron-secret</span> (<span className="mono">KR_INTERNAL_CRON_SECRET</span>
-            ).
+            {t("notes.pushSubscribeIntro")}
           </div>
           <div className="btnbar">
             <button className="btn primary" onClick={() => void registerWebPush()} disabled={!userId || pushBusy}>
-              {pushBusy ? "Working…" : "Enable push on this device"}
+              {pushBusy ? t("iapUi.working") : t("iapUi.enablePushOnThisDevice")}
             </button>
           </div>
           {pushNote ? <div className="log" style={{ marginTop: 10 }}>{pushNote}</div> : null}
@@ -2033,7 +2441,7 @@ export function App() {
 
       <div style={{ marginTop: 14 }} className="pill">
         <span className="mono">
-          Tip: this page URL encodes the request. Share it and anyone can replay the same deterministic battle.
+          {t("notes.deepLinkTip")}
         </span>
       </div>
 
@@ -2042,19 +2450,12 @@ export function App() {
       {onboardingOpen ? (
         <div className="onbOverlay" role="dialog" aria-modal="true">
           <div className="onbCard">
-            <h2 className="onbH">Welcome to KINDRAIL</h2>
+            <h2 className="onbH">{t("onboarding.welcome")}</h2>
             <ol className="onbList">
-              <li>
-                <strong>Build</strong> your squad (4 slots).
-              </li>
-              <li>
-                Press <strong>Daily battle</strong> (needs gateway <span className="mono">OK</span>) or{" "}
-                <strong>Run battle</strong>.
-              </li>
-              <li>
-                Replay opens at the <strong>first tick</strong> — scrub the timeline or turn on <strong>Auto-play</strong>{" "}
-                to watch hits; HP bars follow the scrubber.
-              </li>
+              <li>{t("onboarding.stepBuildSquad")}</li>
+              <li>{t("onboarding.stepRunBattle")}</li>
+              <li>{t("onboarding.stepAutoPlay")}</li>
+              <li>{t("onboarding.stepMissNote")}</li>
             </ol>
             <div className="btnbar" style={{ marginTop: 12 }}>
               <button
@@ -2066,7 +2467,16 @@ export function App() {
                   setOnboardingOpen(false);
                 }}
               >
-                Start
+                {t("ui.start")}
+              </button>
+              <button
+                type="button"
+                className="btn"
+                disabled={state.kind === "loading"}
+                title={`seed: ${NYRVEXIS_FIRST_BATTLE_SEED}`}
+                onClick={() => void runTutorialBattle()}
+              >
+                {t("ui.tutorialBattle")}
               </button>
             </div>
           </div>

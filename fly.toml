@@ -1,0 +1,43 @@
+# =============================================================================
+# Fly.io app config — Nyrvexis gateway
+#
+# Build: deploy/Dockerfile.gateway (monorepo root context)
+# Run:   /entrypoint.sh runs SQL migrations against KR_DATABASE_URL then
+#        starts node services/gateway/dist/index.js on :8787.
+#
+# First-time:
+#   fly launch --no-deploy --copy-config --name nyrvexis-gateway
+#   fly secrets set KR_AUTH_SECRET=... KR_DATABASE_URL=... (see SPRINT1_DEPLOY.md)
+#   fly deploy
+# =============================================================================
+
+app = "nyrvexis-gateway"
+primary_region = "fra"  # Frankfurt; nearest EU region for AB/TR users
+
+[build]
+  dockerfile = "deploy/Dockerfile.gateway"
+
+[env]
+  KR_PORT = "8787"
+  KR_HOST = "0.0.0.0"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0  # free-tier friendly; cold-starts on first request
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"  # 256mb is too tight once tsx + pg pool warm up
+  cpus = 1

@@ -1,76 +1,76 @@
 import { z } from "zod";
-import { KrUserId } from "./account.js";
+import { NvUserId } from "./account.js";
 
-export const KrUtcDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-export type KrUtcDate = z.infer<typeof KrUtcDate>;
+export const NvUtcDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+export type NvUtcDate = z.infer<typeof NvUtcDate>;
 
 // ---------- Leaderboard ----------
 
-export const KrLeaderboardSubmitRequest = z
+export const NvLeaderboardSubmitRequest = z
   .object({
     v: z.literal(1),
-    dateUtc: KrUtcDate,
+    dateUtc: NvUtcDate,
     // build/request to simulate (server-run)
     battleRequest: z.unknown()
   })
   .strict();
-export type KrLeaderboardSubmitRequest = z.infer<typeof KrLeaderboardSubmitRequest>;
+export type NvLeaderboardSubmitRequest = z.infer<typeof NvLeaderboardSubmitRequest>;
 
-export const KrLeaderboardEntry = z
+export const NvLeaderboardEntry = z
   .object({
-    userId: KrUserId,
+    userId: NvUserId,
     score: z.number().int(),
     ticks: z.number().int().nonnegative(),
     remainingHp: z.number().int().nonnegative()
   })
   .strict();
-export type KrLeaderboardEntry = z.infer<typeof KrLeaderboardEntry>;
+export type NvLeaderboardEntry = z.infer<typeof NvLeaderboardEntry>;
 
-export const KrLeaderboardSubmitResponse = z
+export const NvLeaderboardSubmitResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    dateUtc: KrUtcDate,
-    entry: KrLeaderboardEntry,
+    dateUtc: NvUtcDate,
+    entry: NvLeaderboardEntry,
     rank: z.number().int().min(1),
     total: z.number().int().min(1)
   })
   .strict();
-export type KrLeaderboardSubmitResponse = z.infer<typeof KrLeaderboardSubmitResponse>;
+export type NvLeaderboardSubmitResponse = z.infer<typeof NvLeaderboardSubmitResponse>;
 
-export const KrLeaderboardTopResponse = z
+export const NvLeaderboardTopResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    dateUtc: KrUtcDate,
-    entries: z.array(KrLeaderboardEntry).max(200)
+    dateUtc: NvUtcDate,
+    entries: z.array(NvLeaderboardEntry).max(200)
   })
   .strict();
-export type KrLeaderboardTopResponse = z.infer<typeof KrLeaderboardTopResponse>;
+export type NvLeaderboardTopResponse = z.infer<typeof NvLeaderboardTopResponse>;
 
-export const KrLeaderboardMeResponse = z
+export const NvLeaderboardMeResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    dateUtc: KrUtcDate,
-    entry: KrLeaderboardEntry.optional(),
+    dateUtc: NvUtcDate,
+    entry: NvLeaderboardEntry.optional(),
     rank: z.number().int().min(1).optional(),
     total: z.number().int().min(1)
   })
   .strict();
-export type KrLeaderboardMeResponse = z.infer<typeof KrLeaderboardMeResponse>;
+export type NvLeaderboardMeResponse = z.infer<typeof NvLeaderboardMeResponse>;
 
 // ---------- Referral ----------
 
-export const KrReferralAcceptRequest = z
+export const NvReferralAcceptRequest = z
   .object({
     v: z.literal(1),
-    referrerUserId: KrUserId
+    referrerUserId: NvUserId
   })
   .strict();
-export type KrReferralAcceptRequest = z.infer<typeof KrReferralAcceptRequest>;
+export type NvReferralAcceptRequest = z.infer<typeof NvReferralAcceptRequest>;
 
-export const KrReferralAcceptResponse = z
+export const NvReferralAcceptResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -80,21 +80,21 @@ export const KrReferralAcceptResponse = z
     rewardShards: z.number().int().nonnegative().optional()
   })
   .strict();
-export type KrReferralAcceptResponse = z.infer<typeof KrReferralAcceptResponse>;
+export type NvReferralAcceptResponse = z.infer<typeof NvReferralAcceptResponse>;
 
-export const KrReferralStatusResponse = z
+export const NvReferralStatusResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    referrerUserId: KrUserId.optional(),
+    referrerUserId: NvUserId.optional(),
     rewarded: z.boolean()
   })
   .strict();
-export type KrReferralStatusResponse = z.infer<typeof KrReferralStatusResponse>;
+export type NvReferralStatusResponse = z.infer<typeof NvReferralStatusResponse>;
 
 // ---------- Share tickets ----------
 
-export const KrShareTicketCreateResponse = z
+export const NvShareTicketCreateResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -102,17 +102,17 @@ export const KrShareTicketCreateResponse = z
     expiresAtMs: z.number().int().nonnegative()
   })
   .strict();
-export type KrShareTicketCreateResponse = z.infer<typeof KrShareTicketCreateResponse>;
+export type NvShareTicketCreateResponse = z.infer<typeof NvShareTicketCreateResponse>;
 
-export const KrShareRedeemRequest = z
+export const NvShareRedeemRequest = z
   .object({
     v: z.literal(1),
     ticketId: z.string().min(8)
   })
   .strict();
-export type KrShareRedeemRequest = z.infer<typeof KrShareRedeemRequest>;
+export type NvShareRedeemRequest = z.infer<typeof NvShareRedeemRequest>;
 
-export const KrShareRedeemResponse = z
+export const NvShareRedeemResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -121,5 +121,5 @@ export const KrShareRedeemResponse = z
     rewardShards: z.number().int().nonnegative().optional()
   })
   .strict();
-export type KrShareRedeemResponse = z.infer<typeof KrShareRedeemResponse>;
+export type NvShareRedeemResponse = z.infer<typeof NvShareRedeemResponse>;
 

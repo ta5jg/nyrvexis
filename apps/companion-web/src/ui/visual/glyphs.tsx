@@ -14,21 +14,21 @@
  * ============================================================================= */
 
 import React from "react";
-import type { KrUnitRole } from "@kindrail/protocol";
+import type { NvUnitRole } from "@nyrvexis/protocol";
 import { iconUrl } from "./iconRegistry";
 
-export function roleClass(role: KrUnitRole): string {
+export function roleClass(role: NvUnitRole): string {
   if (role === "tank") return "role tank";
   if (role === "dps") return "role dps";
   if (role === "support") return "role support";
   return "role control";
 }
 
-export function RoleBadge(props: { role: KrUnitRole }) {
+export function RoleBadge(props: { role: NvUnitRole }) {
   return <span className={roleClass(props.role)}>{props.role.toUpperCase()}</span>;
 }
 
-function RoleIcon(props: { role: KrUnitRole }) {
+function RoleIcon(props: { role: NvUnitRole }) {
   const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none" as const };
   const stroke = { stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   if (props.role === "tank") {
@@ -72,7 +72,7 @@ function hash32(s: string): number {
   return h >>> 0;
 }
 
-export function UnitGlyph(props: { archetypeId: string; role: KrUnitRole; iconId?: string; fxProfileId?: string }) {
+export function UnitGlyph(props: { archetypeId: string; role: NvUnitRole; iconId?: string; fxProfileId?: string }) {
   const h = hash32(props.iconId && props.iconId.length > 0 ? props.iconId : props.archetypeId);
   const variant = h % 3;
   const common = { width: 26, height: 26, viewBox: "0 0 24 24", fill: "none" as const };

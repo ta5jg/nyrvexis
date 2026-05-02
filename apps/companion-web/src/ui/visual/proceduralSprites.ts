@@ -18,7 +18,7 @@ import { Application, Assets, Graphics, Texture } from "pixi.js";
 import { SPRITE_FRAMES } from "./spriteAssets";
 import { ATLAS_JSON_URL } from "./atlasManifest";
 
-export type KrUiRole = "tank" | "dps" | "support" | "control";
+export type NvUiRole = "tank" | "dps" | "support" | "control";
 
 export type SpriteSet = {
   idle: Texture[];
@@ -113,7 +113,7 @@ function texFromAtlasOrNull(frameId: string): Texture | null {
   return fromMap ?? null;
 }
 
-function roleBase(role: KrUiRole): number {
+function roleBase(role: NvUiRole): number {
   if (role === "tank") return 0x35d07f;
   if (role === "dps") return 0xff5c7c;
   if (role === "support") return 0x7c5cff;
@@ -136,7 +136,7 @@ function gen(app: Application, g: Graphics): Texture {
   return app.renderer.generateTexture({ target: g, resolution: 2 });
 }
 
-function makeFrame(role: KrUiRole, accent: number, frame: number, kind: "idle" | "attack" | "death"): Graphics {
+function makeFrame(role: NvUiRole, accent: number, frame: number, kind: "idle" | "attack" | "death"): Graphics {
   const base = roleBase(role);
   const g = new Graphics();
 
@@ -211,7 +211,7 @@ function tryLoadFileSpritePack(params: { iconId?: string | null }): SpriteSet | 
   }
 }
 
-export function getSpriteSet(app: Application, params: { role: KrUiRole; fxProfileId?: string | null; iconId?: string | null }): SpriteSet {
+export function getSpriteSet(app: Application, params: { role: NvUiRole; fxProfileId?: string | null; iconId?: string | null }): SpriteSet {
   const key = `${params.iconId ?? ""}|${params.role}|${params.fxProfileId ?? ""}`;
   const hit = CACHE.get(key);
   if (hit) return hit;

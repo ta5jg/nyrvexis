@@ -1,6 +1,6 @@
 let ctx: AudioContext | null = null;
 
-const STORAGE_KEY = "kindrail_sfx_muted";
+const STORAGE_KEY = "nyrvexis_sfx_muted";
 
 export function getSfxMuted(): boolean {
   if (typeof window === "undefined") return false;

@@ -1,4 +1,4 @@
-import type { KrBattleSimRequest } from "@kindrail/protocol";
+import type { NvBattleSimRequest } from "@nyrvexis/protocol";
 import { decodeJsonFromUrlParam } from "./share";
 
 const MAP_SLOTS = [0, 1, 6, 7] as const;
@@ -10,7 +10,7 @@ export function readInitialSquadFromUrl(): Array<string | null> {
     const url = new URL(window.location.href);
     const q = url.searchParams.get("q");
     if (q) {
-      const req = decodeJsonFromUrlParam<KrBattleSimRequest>(q);
+      const req = decodeJsonFromUrlParam<NvBattleSimRequest>(q);
       const slots: Array<string | null> = [null, null, null, null];
       for (const u of req.a.units) {
         const slot = (u.slot ?? 0) | 0;

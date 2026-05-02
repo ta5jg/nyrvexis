@@ -1,0 +1,34 @@
+{
+  "$ref": "#/definitions/NvAuthRefreshResponse",
+  "definitions": {
+    "NvAuthRefreshResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "token": {
+          "type": "string",
+          "minLength": 20
+        },
+        "refreshToken": {
+          "type": "string",
+          "minLength": 20
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "token",
+        "refreshToken"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

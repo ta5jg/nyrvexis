@@ -15,7 +15,7 @@
 
 /**
  * Validates that content catalogs parse under current protocol schemas.
- * Usage: pnpm --filter @kindrail/gateway content:validate
+ * Usage: pnpm --filter @nyrvexis/gateway content:validate
  */
 import { loadContent } from "../src/content/loader.js";
 import { loadMetaContent } from "../src/content/metaLoader.js";

@@ -20,13 +20,13 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { KrMetaContent } from "@kindrail/protocol";
+import { NvMetaContent } from "@nyrvexis/protocol";
 import { dailyOfferBaseGold, upgradeCost } from "../src/meta/shop.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const metaPath = path.join(__dirname, "../src/content/catalogs/meta.v0.1.0.json");
 
-const meta = KrMetaContent.parse(JSON.parse(readFileSync(metaPath, "utf8")));
+const meta = NvMetaContent.parse(JSON.parse(readFileSync(metaPath, "utf8")));
 const e = meta.economyDefaults;
 
 const days = Number(process.argv[2] || 30);
@@ -51,5 +51,5 @@ for (let d = 0; d < days; d++) {
   }
 }
 
-console.log(`KINDRAIL economy sim — ${days} days (defaults from ${meta.contentVersion})`);
+console.log(`NYRVEXIS economy sim — ${days} days (defaults from ${meta.contentVersion})`);
 console.log({ endGold: gold, endShards: shards, shopBuys, upgrades, dailyClaimGold: e.dailyClaimGold });

@@ -1,5 +1,5 @@
 {
-  "name": "@kindrail/gateway",
+  "name": "@nyrvexis/gateway",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -10,6 +10,8 @@
     "build": "tsc && node scripts/copy-catalogs.mjs",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:verify-analytics-db": "tsx scripts/verify-analytics-db.ts",
@@ -17,9 +19,9 @@
     "content:validate": "tsx scripts/validate-content.ts"
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
     "@fastify/cors": "^10.1.0",
-    "@kindrail/protocol": "workspace:*",
+    "@nyrvexis/protocol": "workspace:*",
+    "dotenv": "^16.4.7",
     "fastify": "^5.5.0",
     "google-auth-library": "^9.0.0",
     "nanoid": "^5.1.6",
@@ -35,6 +37,7 @@
     "eslint": "^9.30.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.41.0"
+    "typescript-eslint": "^8.41.0",
+    "vitest": "^4.1.5"
   }
 }

@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { KrUnitCatalog, type KrUnitArchetypeDef } from "@kindrail/protocol";
+import { NvUnitCatalog, type NvUnitArchetypeDef } from "@nyrvexis/protocol";
 
 export type LoadedContent = {
-  catalog: KrUnitCatalog;
-  unitById: Map<string, KrUnitArchetypeDef>;
+  catalog: NvUnitCatalog;
+  unitById: Map<string, NvUnitArchetypeDef>;
 };
 
 export async function loadContent(contentVersion = "v0.0.1"): Promise<LoadedContent> {
@@ -14,8 +14,8 @@ export async function loadContent(contentVersion = "v0.0.1"): Promise<LoadedCont
   const p = path.join(__dirname, "catalogs", `units.${contentVersion}.json`);
   const raw = await fs.readFile(p, "utf8");
   const json = JSON.parse(raw);
-  const catalog = KrUnitCatalog.parse(json);
-  const unitById = new Map<string, KrUnitArchetypeDef>();
+  const catalog = NvUnitCatalog.parse(json);
+  const unitById = new Map<string, NvUnitArchetypeDef>();
   for (const u of catalog.units) unitById.set(u.id, u);
   return { catalog, unitById };
 }

@@ -1,19 +1,22 @@
 {
-  "name": "kindrail",
+  "name": "nyrvexis",
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "dev": "pnpm --filter @kindrail/gateway dev",
-    "dev:gateway": "pnpm --filter @kindrail/gateway dev",
-    "dev:companion": "pnpm --filter @kindrail/companion-web dev",
+    "dev": "pnpm --filter @nyrvexis/gateway dev",
+    "dev:gateway": "pnpm --filter @nyrvexis/gateway dev",
+    "dev:companion": "pnpm --filter @nyrvexis/companion-web dev",
     "dev:full": "concurrently -n gateway,web -c cyan,magenta \"pnpm run dev:gateway\" \"pnpm run dev:companion\"",
     "play:local": "bash scripts/play-local.sh",
-    "mobile:sync": "pnpm --filter @kindrail/companion-web build && pnpm --filter @kindrail/companion-mobile cap:sync",
+    "mobile:sync": "pnpm --filter @nyrvexis/companion-web build && pnpm --filter @nyrvexis/companion-mobile cap:sync",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "test:e2e": "pnpm --filter @kindrail/companion-web run test:e2e",
-    "test:e2e:smoke": "bash scripts/ci-e2e-smoke.sh"
+    "test": "pnpm -r --if-present test",
+    "test:gateway": "pnpm --filter @nyrvexis/gateway test",
+    "test:e2e": "pnpm --filter @nyrvexis/companion-web run test:e2e",
+    "test:e2e:smoke": "bash scripts/ci-e2e-smoke.sh",
+    "unity:golden-export": "node scripts/export-golden-unity-battle.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

@@ -1,0 +1,24 @@
+{
+  "$ref": "#/definitions/NvPushWebUnsubscribeRequest",
+  "definitions": {
+    "NvPushWebUnsubscribeRequest": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "endpoint": {
+          "type": "string",
+          "minLength": 10
+        }
+      },
+      "required": [
+        "v",
+        "endpoint"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

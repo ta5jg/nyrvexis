@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const KrInternalPushDailyRequest = z
+export const NvInternalPushDailyRequest = z
   .object({
     v: z.literal(1),
     dateUtc: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -8,9 +8,9 @@ export const KrInternalPushDailyRequest = z
     limit: z.number().int().min(1).max(10_000).optional()
   })
   .strict();
-export type KrInternalPushDailyRequest = z.infer<typeof KrInternalPushDailyRequest>;
+export type NvInternalPushDailyRequest = z.infer<typeof NvInternalPushDailyRequest>;
 
-export const KrInternalPushDailyResponse = z
+export const NvInternalPushDailyResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -23,4 +23,4 @@ export const KrInternalPushDailyResponse = z
     removed: z.number().int().nonnegative()
   })
   .strict();
-export type KrInternalPushDailyResponse = z.infer<typeof KrInternalPushDailyResponse>;
+export type NvInternalPushDailyResponse = z.infer<typeof NvInternalPushDailyResponse>;

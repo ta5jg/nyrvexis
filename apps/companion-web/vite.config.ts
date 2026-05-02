@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "KINDRAIL",
-        short_name: "KINDRAIL",
+        name: "NYRVEXIS",
+        short_name: "NYRVEXIS",
         description: "Daily battles, replays, shop, leaderboard, and share rewards.",
         theme_color: "#070a12",
         background_color: "#070a12",

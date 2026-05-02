@@ -15,7 +15,7 @@
 
 import { z } from "zod";
 
-export const KrAnalyticsEventRequest = z
+export const NvAnalyticsEventRequest = z
   .object({
     v: z.literal(1),
     name: z.string().min(1).max(128),
@@ -23,13 +23,13 @@ export const KrAnalyticsEventRequest = z
   })
   .strict();
 
-export type KrAnalyticsEventRequest = z.infer<typeof KrAnalyticsEventRequest>;
+export type NvAnalyticsEventRequest = z.infer<typeof NvAnalyticsEventRequest>;
 
-export const KrAnalyticsEventResponse = z
+export const NvAnalyticsEventResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true)
   })
   .strict();
 
-export type KrAnalyticsEventResponse = z.infer<typeof KrAnalyticsEventResponse>;
+export type NvAnalyticsEventResponse = z.infer<typeof NvAnalyticsEventResponse>;

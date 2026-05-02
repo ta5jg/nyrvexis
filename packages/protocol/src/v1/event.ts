@@ -17,7 +17,7 @@ import { z } from "zod";
 
 const IsoUtc = z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/);
 
-export const KrEventDef = z
+export const NvEventDef = z
   .object({
     v: z.literal(1),
     eventId: z.string().min(1).max(64),
@@ -28,15 +28,15 @@ export const KrEventDef = z
     flag: z.string().min(1).max(80).optional()
   })
   .strict();
-export type KrEventDef = z.infer<typeof KrEventDef>;
+export type NvEventDef = z.infer<typeof NvEventDef>;
 
-export const KrEventViewResponse = z
+export const NvEventViewResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     /** Current active event (server decides by time window). */
-    event: KrEventDef.optional()
+    event: NvEventDef.optional()
   })
   .strict();
-export type KrEventViewResponse = z.infer<typeof KrEventViewResponse>;
+export type NvEventViewResponse = z.infer<typeof NvEventViewResponse>;
 

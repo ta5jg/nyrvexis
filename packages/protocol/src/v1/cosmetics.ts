@@ -4,28 +4,30 @@
 
 import { z } from "zod";
 
-export const KrCosmeticSlot = z.enum(["frame", "arena", "title"]);
-export type KrCosmeticSlot = z.infer<typeof KrCosmeticSlot>;
+export const NvCosmeticSlot = z.enum(["frame", "arena", "title", "hub"]);
+export type NvCosmeticSlot = z.infer<typeof NvCosmeticSlot>;
 
-export const KrCosmeticDef = z
+export const NvCosmeticDef = z
   .object({
     id: z.string().min(1).max(80),
     title: z.string().min(1).max(120),
-    slot: KrCosmeticSlot
+    slot: NvCosmeticSlot,
+    /** Companion `iconRegistry` anahtarı (hub ve diğer kozmetikler için opsiyonel). */
+    iconId: z.string().min(1).max(80).optional()
   })
   .strict();
-export type KrCosmeticDef = z.infer<typeof KrCosmeticDef>;
+export type NvCosmeticDef = z.infer<typeof NvCosmeticDef>;
 
-export const KrCosmeticsCatalogResponse = z
+export const NvCosmeticsCatalogResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
-    cosmetics: z.array(KrCosmeticDef).max(128)
+    cosmetics: z.array(NvCosmeticDef).max(128)
   })
   .strict();
-export type KrCosmeticsCatalogResponse = z.infer<typeof KrCosmeticsCatalogResponse>;
+export type NvCosmeticsCatalogResponse = z.infer<typeof NvCosmeticsCatalogResponse>;
 
-export const KrCosmeticsMeResponse = z
+export const NvCosmeticsMeResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -34,22 +36,22 @@ export const KrCosmeticsMeResponse = z
     equipped: z.record(z.string().min(1).max(32), z.string().min(1).max(80))
   })
   .strict();
-export type KrCosmeticsMeResponse = z.infer<typeof KrCosmeticsMeResponse>;
+export type NvCosmeticsMeResponse = z.infer<typeof NvCosmeticsMeResponse>;
 
-export const KrCosmeticsEquipRequest = z
+export const NvCosmeticsEquipRequest = z
   .object({
     v: z.literal(1),
-    slot: KrCosmeticSlot,
+    slot: NvCosmeticSlot,
     cosmeticId: z.string().min(1).max(80)
   })
   .strict();
-export type KrCosmeticsEquipRequest = z.infer<typeof KrCosmeticsEquipRequest>;
+export type NvCosmeticsEquipRequest = z.infer<typeof NvCosmeticsEquipRequest>;
 
-export const KrCosmeticsEquipResponse = z
+export const NvCosmeticsEquipResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     equipped: z.record(z.string().min(1).max(32), z.string().min(1).max(80))
   })
   .strict();
-export type KrCosmeticsEquipResponse = z.infer<typeof KrCosmeticsEquipResponse>;
+export type NvCosmeticsEquipResponse = z.infer<typeof NvCosmeticsEquipResponse>;

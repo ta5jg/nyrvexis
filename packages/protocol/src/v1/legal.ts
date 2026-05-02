@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** Store-facing legal/support pointers — populate via gateway env; optional until prod. */
-export const KrLegalPublicResponse = z.object({
+export const NvLegalPublicResponse = z.object({
   v: z.literal(1),
   /** False when no URLs/email configured yet */
   ok: z.boolean(),
@@ -14,4 +14,4 @@ export const KrLegalPublicResponse = z.object({
   contentDescriptorsHint: z.string().max(2000).optional()
 });
 
-export type KrLegalPublicResponse = z.infer<typeof KrLegalPublicResponse>;
+export type NvLegalPublicResponse = z.infer<typeof NvLegalPublicResponse>;

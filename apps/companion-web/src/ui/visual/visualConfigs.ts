@@ -13,8 +13,9 @@
  *   Proprietary. All rights reserved. See LICENSE in the repository root.
  * ============================================================================= */
 
-import type { KrUnitRole } from "@kindrail/protocol";
+import type { NvUnitRole } from "@nyrvexis/protocol";
 import type {
+  ArenaPresentationConfig,
   ArenaVisualConfig,
   ArenaVisualVariant,
   RarityTier,
@@ -24,7 +25,7 @@ import type {
 } from "./visualModels";
 import { UNIT_RAW, cropSet01, cropSet02 } from "./unitSpriteSheets";
 
-const ROLE_ICON_BY_ROLE: Record<KrUnitRole, string> = {
+const ROLE_ICON_BY_ROLE: Record<NvUnitRole, string> = {
   tank: "/assets/icons/role_tank.svg",
   dps: "/assets/icons/role_dps.svg",
   support: "/assets/icons/role_support.svg",
@@ -100,6 +101,18 @@ const UNIT_IMAGE_HINTS: Record<
   inquisitor: { image: "/assets/units/raw/units_set_06.png", crop: crop(734, 304, 360, 328), rarity: "epic" }
 };
 
+/** Defaults: grounded battlefield — ring konturu kapalı; arenaya `presentation` ile geçilebilir. */
+export const DEFAULT_ARENA_PRESENTATION: ArenaPresentationConfig = {
+  portraitRingStrength: 0
+};
+
+function mergeArenaPresentation(cfg: ArenaVisualConfig): ArenaPresentationConfig {
+  return {
+    portraitRingStrength:
+      cfg.presentation?.portraitRingStrength ?? DEFAULT_ARENA_PRESENTATION.portraitRingStrength
+  };
+}
+
 const ARENA_CONFIGS: Record<string, ArenaVisualConfig> = {
   arena_darkfantasy_v2: {
     id: "arena_darkfantasy_v2",
@@ -140,7 +153,7 @@ export function resolveRarityVisual(rarity: RarityTier): RarityVisualConfig {
 
 export function resolveUnitVisualConfig(params: {
   archetypeId: string;
-  role: KrUnitRole;
+  role: NvUnitRole;
 }): UnitVisualConfig {
   const hint = UNIT_IMAGE_HINTS[params.archetypeId];
   const rarity = rarityForArchetype(params.archetypeId);
@@ -160,14 +173,15 @@ export function resolveUnitVisualConfig(params: {
 export function resolveArenaVisual(seedLike: string | null | undefined): {
   config: ArenaVisualConfig;
   variant: ArenaVisualVariant;
+  presentation: ArenaPresentationConfig;
 } {
   // Prefer v2 full board; use v1 strip variants for seeded variety.
   const arena = ARENA_CONFIGS.arena_darkfantasy_v2;
-  const seed = seedLike && seedLike.length > 0 ? seedLike : "kindrail-default-arena";
+  const seed = seedLike && seedLike.length > 0 ? seedLike : "nyrvexis-default-arena";
   const v1 = ARENA_CONFIGS.arena_darkfantasy_v1;
   const useV1 = (hash32(seed) & 1) === 1;
   const active = useV1 ? v1 : arena;
   const idx = hash32(`${seed}|${active.id}`) % active.variants.length;
   const variant = active.variants[idx] ?? active.variants[0] ?? { id: "full" };
-  return { config: active, variant };
+  return { config: active, variant, presentation: mergeArenaPresentation(active) };
 }

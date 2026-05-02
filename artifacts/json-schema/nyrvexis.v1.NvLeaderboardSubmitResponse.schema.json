@@ -1,0 +1,68 @@
+{
+  "$ref": "#/definitions/NvLeaderboardSubmitResponse",
+  "definitions": {
+    "NvLeaderboardSubmitResponse": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "type": "number",
+          "const": 1
+        },
+        "ok": {
+          "type": "boolean",
+          "const": true
+        },
+        "dateUtc": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "entry": {
+          "type": "object",
+          "properties": {
+            "userId": {
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 80
+            },
+            "score": {
+              "type": "integer"
+            },
+            "ticks": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "remainingHp": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "userId",
+            "score",
+            "ticks",
+            "remainingHp"
+          ],
+          "additionalProperties": false
+        },
+        "rank": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "v",
+        "ok",
+        "dateUtc",
+        "entry",
+        "rank",
+        "total"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { KrContentVersion } from "./content.js";
+import { NvContentVersion } from "./content.js";
 
-export const KrShopOffer = z
+export const NvShopOffer = z
   .object({
     offerId: z.string().min(1),
     archetype: z.string().min(1),
@@ -10,28 +10,28 @@ export const KrShopOffer = z
     qty: z.number().int().min(1).default(1)
   })
   .strict();
-export type KrShopOffer = z.infer<typeof KrShopOffer>;
+export type NvShopOffer = z.infer<typeof NvShopOffer>;
 
-export const KrDailyShopResponse = z
+export const NvDailyShopResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
     dateUtc: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    contentVersion: KrContentVersion,
-    offers: z.array(KrShopOffer).min(1).max(12)
+    contentVersion: NvContentVersion,
+    offers: z.array(NvShopOffer).min(1).max(12)
   })
   .strict();
-export type KrDailyShopResponse = z.infer<typeof KrDailyShopResponse>;
+export type NvDailyShopResponse = z.infer<typeof NvDailyShopResponse>;
 
-export const KrShopBuyRequest = z
+export const NvShopBuyRequest = z
   .object({
     v: z.literal(1),
     offerId: z.string().min(1)
   })
   .strict();
-export type KrShopBuyRequest = z.infer<typeof KrShopBuyRequest>;
+export type NvShopBuyRequest = z.infer<typeof NvShopBuyRequest>;
 
-export const KrShopBuyResponse = z
+export const NvShopBuyResponse = z
   .object({
     v: z.literal(1),
     ok: z.literal(true),
@@ -44,5 +44,5 @@ export const KrShopBuyResponse = z
     owned: z.record(z.string(), z.number().int().min(0)) // archetype -> level
   })
   .strict();
-export type KrShopBuyResponse = z.infer<typeof KrShopBuyResponse>;
+export type NvShopBuyResponse = z.infer<typeof NvShopBuyResponse>;
 

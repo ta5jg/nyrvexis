@@ -13,14 +13,14 @@ License:
   Proprietary. All rights reserved. See LICENSE in the repository root.
 ============================================================================= -->
 
-## KINDRAIL — Metrikler ve incident runbook (R6.3)
+## NYRVEXIS — Metrikler ve incident runbook (R6.3)
 
 ### Metrikler (gateway)
 
 | Endpoint / kaynak | Amaç |
 |-------------------|------|
 | `GET /health` | Liveness — servis + sürüm (`KR_SERVICE_VERSION`). CI smoke öncesi kapı. |
-| `GET /metrics` | Prometheus metin (`kindrail-gateway`): route sayaçları ve HTTP status dağılımı (gateway iç `metrics` modülü). |
+| `GET /metrics` | Prometheus metin (`nyrvexis-gateway`): route sayaçları ve HTTP status dağılımı (gateway iç `metrics` modülü). |
 | Uygulama logları | Fastify `req.log` — ekonomi/IAP denetimleri (`r3_audit`, `r7_audit` vb.). |
 
 **Önerilen prod:** Prometheus scrape → `GET /metrics`; alert kuralı ör. `health` başarısız 3 dk veya 5xx oranı eşiği.
@@ -35,5 +35,5 @@ License:
 
 ### CI ile ilişki
 
-- **KINDRAIL CI** başarısızsa merge bloklanır: derleme + gateway typecheck + Playwright smoke.
-- Günlük push cron (`kindrail-push-daily.yml`) ayrı secret’lar gerektirir; gateway ayakta değilse cron başarısız — uyarı üretin.
+- **NYRVEXIS CI** başarısızsa merge bloklanır: derleme + gateway typecheck + Playwright smoke.
+- Günlük push cron (`nyrvexis-push-daily.yml`) ayrı secret’lar gerektirir; gateway ayakta değilse cron başarısız — uyarı üretin.

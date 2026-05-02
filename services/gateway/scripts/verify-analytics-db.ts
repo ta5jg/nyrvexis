@@ -1,6 +1,6 @@
 /* =============================================================================
  * Postgres-only smoke: apply migrations, insert one analytics row, read it back.
- * Usage (repo root): KR_DATABASE_URL=postgres://... pnpm --filter @kindrail/gateway db:verify-analytics-db
+ * Usage (repo root): KR_DATABASE_URL=postgres://... pnpm --filter @nyrvexis/gateway db:verify-analytics-db
  * ============================================================================= */
 
 import { spawnSync } from "node:child_process";
