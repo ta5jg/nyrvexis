@@ -25,7 +25,7 @@ import {
   NvAuthSessionIssued
 } from "./account.js";
 import { NvDailyClaimResponse, NvInventoryResponse } from "./inventory.js";
-import { NvCatalogResponse } from "./content.js";
+import { NvCatalogResponse, NvSynergyRule, NvAugmentDef, NvStatBonus } from "./content.js";
 import { NvDailyShopResponse, NvShopBuyRequest, NvShopBuyResponse } from "./shop.js";
 import { NvOwnedUnitsResponse, NvUpgradeUnitRequest, NvUpgradeUnitResponse } from "./progression.js";
 import {
@@ -111,6 +111,9 @@ export const NvV1Schemas = {
   NvInventoryResponse,
   NvDailyClaimResponse,
   NvCatalogResponse,
+  NvSynergyRule,
+  NvAugmentDef,
+  NvStatBonus,
   NvDailyShopResponse,
   NvShopBuyRequest,
   NvShopBuyResponse,

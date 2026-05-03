@@ -1,0 +1,347 @@
+:root {
+  --bg: #070a12;
+  --bg-alt: #0c1220;
+  --fg: #e9eef8;
+  --fg-dim: rgba(233, 238, 248, 0.72);
+  --fg-mute: rgba(233, 238, 248, 0.5);
+  --accent: #ffce4a;
+  --accent-2: #4fc3f7;
+  --line: rgba(255, 255, 255, 0.1);
+  --line-2: rgba(255, 255, 255, 0.18);
+  --card: rgba(255, 255, 255, 0.04);
+  --card-hover: rgba(255, 255, 255, 0.07);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+  line-height: 1.55;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(79, 195, 247, 0.10), transparent 60%),
+    radial-gradient(900px 600px at 110% 20%, rgba(255, 206, 74, 0.08), transparent 55%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ============================================================================
+ * Nav
+ * ============================================================================ */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px clamp(20px, 4vw, 56px);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: rgba(7, 10, 18, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 10;
+}
+
+.brand {
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  font-size: 14px;
+}
+
+.navLinks {
+  display: flex;
+  gap: clamp(12px, 2vw, 28px);
+  align-items: center;
+  font-size: 14px;
+  color: var(--fg-dim);
+}
+
+.navLinks a:hover { color: var(--fg); }
+
+.ctaSm {
+  background: var(--fg);
+  color: var(--bg) !important;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.ctaSm:hover { transform: translateY(-1px); }
+
+/* ============================================================================
+ * Hero
+ * ============================================================================ */
+.hero {
+  padding: clamp(60px, 10vw, 120px) clamp(20px, 4vw, 56px);
+  display: flex;
+  justify-content: center;
+}
+
+.heroInner {
+  max-width: 920px;
+  width: 100%;
+}
+
+.heroTitle {
+  font-size: clamp(34px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 0 0 24px;
+}
+
+.accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroSub {
+  font-size: clamp(15px, 1.4vw, 19px);
+  color: var(--fg-dim);
+  max-width: 680px;
+  margin: 0 0 36px;
+}
+
+.heroCtas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.cta, .ctaGhost {
+  display: inline-block;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.cta {
+  background: var(--accent);
+  color: #1a1100;
+}
+.cta:hover { transform: translateY(-2px); }
+
+.cta.dark {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.ctaGhost {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line-2);
+}
+.ctaGhost:hover { background: var(--card); }
+
+.heroNote {
+  font-size: 13px;
+  color: var(--fg-mute);
+  max-width: 560px;
+}
+.heroNote a { text-decoration: underline; text-decoration-color: var(--line-2); }
+.heroNote a:hover { text-decoration-color: var(--fg); }
+
+/* ============================================================================
+ * Blocks
+ * ============================================================================ */
+.block {
+  padding: clamp(48px, 7vw, 96px) clamp(20px, 4vw, 56px);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.block.alt {
+  background: var(--bg-alt);
+  max-width: 100%;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.block.alt > * {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.block h2 {
+  font-size: clamp(24px, 3vw, 36px);
+  letter-spacing: -0.015em;
+  margin: 0 0 28px;
+}
+
+.lead {
+  color: var(--fg-dim);
+  font-size: 16px;
+  max-width: 720px;
+  margin: 0 0 20px;
+}
+
+.lead.small { font-size: 14px; color: var(--fg-mute); margin-top: 12px; }
+
+/* ============================================================================
+ * 3-card grid
+ * ============================================================================ */
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 24px;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.card:hover {
+  background: var(--card-hover);
+  transform: translateY(-2px);
+}
+
+.cardNum {
+  font-family: ui-monospace, monospace;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.card p {
+  margin: 0;
+  color: var(--fg-dim);
+  font-size: 14px;
+}
+
+/* ============================================================================
+ * Token grid
+ * ============================================================================ */
+.tokenGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.kv {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.kv span {
+  color: var(--fg-mute);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kv strong {
+  font-size: 14px;
+  text-align: right;
+}
+
+/* ============================================================================
+ * Building / Waitlist
+ * ============================================================================ */
+.links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.formEmbed {
+  margin-top: 24px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  min-height: 100px;
+}
+
+.formFallback {
+  font-size: 13px;
+  color: var(--fg-mute);
+  margin: 12px 0 0;
+}
+.formFallback a { color: var(--accent); text-decoration: underline; }
+
+/* ============================================================================
+ * Footer
+ * ============================================================================ */
+.foot {
+  border-top: 1px solid var(--line);
+  padding: 32px clamp(20px, 4vw, 56px) 22px;
+  margin-top: 80px;
+}
+
+.footInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  max-width: 1100px;
+  margin: 0 auto 8px;
+}
+
+.footBrand {
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  font-size: 13px;
+}
+
+.footLinks {
+  display: flex;
+  gap: 18px;
+  font-size: 13px;
+  color: var(--fg-dim);
+}
+.footLinks a:hover { color: var(--fg); }
+
+.footNote {
+  text-align: center;
+  font-size: 11px;
+  color: var(--fg-mute);
+  margin: 6px 0 0;
+}
+
+/* ============================================================================
+ * Mobile tweaks
+ * ============================================================================ */
+@media (max-width: 600px) {
+  .navLinks a:not(.ctaSm) { display: none; }
+  .heroTitle { font-size: 36px; }
+  .footInner { flex-direction: column; align-items: flex-start; }
+}

@@ -81,6 +81,7 @@ import {
 } from "@nyrvexis/protocol";
 import { readEnv } from "./env.js";
 import { runBattleSim } from "./sim/battleSim.js";
+import { verifyUsdtgPayment } from "./payments/usdtg.js";
 import { registerAuth, requireAuth } from "./auth/middleware.js";
 import { issueAccessToken, issueRefreshToken, verifyToken, type TokenPayload } from "./auth/token.js";
 import { hashPassword, normalizeEmail, verifyPassword } from "./auth/password.js";
@@ -1732,7 +1733,12 @@ app.post("/leaderboard/submit", async (req, reply) => {
     const body = NvLeaderboardSubmitRequest.parse(req.body);
 
     // Server-run simulation: accept battleRequest (same shape as /sim/battle request)
-    const sim = runBattleSim(body.battleRequest);
+    const sim = runBattleSim(body.battleRequest, {
+      synergyCatalog: {
+        archetypeById: content.unitById,
+        synergies: content.catalog.synergies ?? []
+      }
+    });
 
     const remainingHp =
       Object.values(sim.remaining.a).reduce((a, v) => a + (typeof v === "number" ? v : 0), 0) | 0;
@@ -2113,7 +2119,12 @@ app.post("/units/upgrade", async (req, reply) => {
 
 app.post("/sim/battle", async (req, reply) => {
   try {
-    const res = runBattleSim(req.body);
+    const res = runBattleSim(req.body, {
+      synergyCatalog: {
+        archetypeById: content.unitById,
+        synergies: content.catalog.synergies ?? []
+      }
+    });
     return res;
   } catch (err) {
     req.log.warn({ err }, "battle sim request rejected");
@@ -2122,6 +2133,64 @@ app.post("/sim/battle", async (req, reply) => {
       ok: false,
       error: "BAD_REQUEST"
     };
+  }
+});
+
+const UsdtgVerifyBody = z
+  .object({
+    v: z.literal(1),
+    txHash: z.string().regex(/^[0-9a-fA-F]{64}$/),
+    productId: z.enum(["nyrvexis_bp_premium_s0_web"]),
+    amountMicro: z.coerce.bigint().positive()
+  })
+  .strict();
+
+app.post("/payments/usdtg/verify", async (req, reply) => {
+  try {
+    const userId = requireAuth(req);
+    const body = UsdtgVerifyBody.parse(req.body);
+    if (!env.KR_USDTG_TREASURY || !env.KR_USDTG_CONTRACT) {
+      reply.code(503);
+      return { ok: false, error: "USDTG_UNCONFIGURED" };
+    }
+    const fp = `usdtg:${body.txHash}`;
+    const existing = store.snapshot().iapGrants[fp];
+    if (existing && existing.userId !== userId) {
+      reply.code(403);
+      return { ok: false, error: "TX_ALREADY_USED" };
+    }
+    const result = await verifyUsdtgPayment({
+      txHash: body.txHash,
+      expectedAmountMicro: body.amountMicro,
+      treasuryAddress: env.KR_USDTG_TREASURY,
+      contractAddress: env.KR_USDTG_CONTRACT
+    });
+    if (!result.ok) {
+      reply.code(400);
+      return { ok: false, error: result.reason };
+    }
+    store.mutate((s) => {
+      setUserBattlePassPremium(s, userId, metaContent.seasonId, true);
+      s.iapGrants[fp] = {
+        userId,
+        seasonId: metaContent.seasonId,
+        atMs: Date.now(),
+        platform: "usdtg",
+        productId: body.productId
+      };
+    });
+    return {
+      ok: true,
+      productId: body.productId,
+      from: result.from,
+      amountMicro: result.amountMicro.toString(),
+      txHash: result.txHash,
+      premiumGranted: true
+    };
+  } catch (err) {
+    req.log.warn({ err }, "usdtg verify rejected");
+    reply.code(400);
+    return { ok: false, error: "BAD_REQUEST" };
   }
 });
 

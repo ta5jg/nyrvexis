@@ -695,6 +695,34 @@ export class NyrvexisSdk {
     return NvBattlePassIapVerifyResponseOk.parse(json);
   }
 
+  /** USDTg (TRON / TRC20) payment verification — granted Battle Pass premium on success. */
+  async paymentsUsdtgVerify(req: {
+    v: 1;
+    txHash: string;
+    productId: "nyrvexis_bp_premium_s0_web";
+    amountMicro: string; // bigint as string
+  }): Promise<{ ok: true; productId: string; from: string; amountMicro: string; txHash: string; premiumGranted: boolean }> {
+    const res = await this.fetchImpl(`${this.baseUrl}/payments/usdtg/verify`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        ...this.authHeaders()
+      },
+      body: JSON.stringify(req)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(errorFromGateway(json, `paymentsUsdtgVerify failed: ${res.status}`));
+    return json as {
+      ok: true;
+      productId: string;
+      from: string;
+      amountMicro: string;
+      txHash: string;
+      premiumGranted: boolean;
+    };
+  }
+
   async pushWebVapidPublic(): Promise<NvPushWebVapidResponse> {
     const res = await this.fetchImpl(`${this.baseUrl}/push/web/vapid-public`, {
       method: "GET",

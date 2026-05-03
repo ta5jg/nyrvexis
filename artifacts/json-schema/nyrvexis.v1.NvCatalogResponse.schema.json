@@ -45,6 +45,22 @@
                       "control"
                     ]
                   },
+                  "faction": {
+                    "type": "string",
+                    "enum": [
+                      "vanguard",
+                      "marauder",
+                      "arcane",
+                      "ranger",
+                      "order"
+                    ]
+                  },
+                  "iconId": {
+                    "type": "string"
+                  },
+                  "fxProfileId": {
+                    "type": "string"
+                  },
                   "base": {
                     "type": "object",
                     "properties": {
@@ -83,6 +99,125 @@
                 "additionalProperties": false
               },
               "minItems": 1
+            },
+            "synergies": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "requireRole": {
+                    "type": "string",
+                    "enum": [
+                      "tank",
+                      "dps",
+                      "support",
+                      "control"
+                    ]
+                  },
+                  "requireFaction": {
+                    "type": "string",
+                    "enum": [
+                      "vanguard",
+                      "marauder",
+                      "arcane",
+                      "ranger",
+                      "order"
+                    ]
+                  },
+                  "minCount": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12
+                  },
+                  "bonus": {
+                    "type": "object",
+                    "properties": {
+                      "hpFlat": {
+                        "type": "integer"
+                      },
+                      "atkFlat": {
+                        "type": "integer"
+                      },
+                      "defFlat": {
+                        "type": "integer"
+                      },
+                      "spdFlat": {
+                        "type": "integer"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "minCount",
+                  "bonus"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "augments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "iconId": {
+                    "type": "string"
+                  },
+                  "rarity": {
+                    "type": "string",
+                    "enum": [
+                      "common",
+                      "rare",
+                      "epic"
+                    ]
+                  },
+                  "uiHint": {
+                    "type": "string"
+                  },
+                  "bonus": {
+                    "type": "object",
+                    "properties": {
+                      "hpFlat": {
+                        "type": "integer"
+                      },
+                      "atkFlat": {
+                        "type": "integer"
+                      },
+                      "defFlat": {
+                        "type": "integer"
+                      },
+                      "spdFlat": {
+                        "type": "integer"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "bonus"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [

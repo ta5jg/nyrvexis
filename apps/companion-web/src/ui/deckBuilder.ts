@@ -1,5 +1,4 @@
 import type { NvBattleSimRequest, NvTeam, NvUnit, NvUnitArchetypeDef } from "@nyrvexis/protocol";
-import { makeDemoTeams } from "./demoBattle";
 
 export type EnemyPreset = "demo" | "mirror";
 
@@ -9,6 +8,55 @@ function defaultCrit(archetypeId: string): { critPct: number; critMulPct: number
   if (archetypeId === "archer") return { critPct: 5, critMulPct: 175 };
   if (archetypeId === "rogue") return { critPct: 15, critMulPct: 160 };
   return { critPct: 0, critMulPct: 150 };
+}
+
+// Tiny deterministic RNG so the random demo team is reproducible from the
+// battle seed (FNV-1a hash + mulberry32). Same seed → same demo team.
+function hashSeed(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed: number): () => number {
+  let t = seed >>> 0;
+  return () => {
+    t = (t + 0x6d2b79f5) >>> 0;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function buildRandomEnemyTeam(
+  seed: string,
+  count: number,
+  defs: NvUnitArchetypeDef[]
+): NvTeam {
+  const slots = [0, 1, 6, 7] as const;
+  const rng = mulberry32(hashSeed(seed + ":demo-enemy"));
+  const units: NvUnit[] = [];
+  for (let i = 0; i < count && i < slots.length; i++) {
+    const idx = Math.floor(rng() * defs.length);
+    const d = defs[idx];
+    if (!d) continue;
+    const c = defaultCrit(d.id);
+    units.push({
+      id: `b${i + 1}`,
+      archetype: d.id,
+      hp: d.base.hp,
+      atk: d.base.atk,
+      def: d.base.def,
+      spd: d.base.spd,
+      slot: slots[i],
+      critPct: c.critPct,
+      critMulPct: c.critMulPct
+    });
+  }
+  return { name: "RIFT", units };
 }
 
 export function picksToTeam(name: string, picks: SlotPick[], defs: Map<string, NvUnitArchetypeDef>): NvTeam {
@@ -72,7 +120,8 @@ export function buildBattleRequest(opts: {
 
   let b: NvTeam;
   if (opts.enemyPreset === "demo") {
-    b = makeDemoTeams().b;
+    const aCount = Math.max(1, a.units.length);
+    b = buildRandomEnemyTeam(opts.seed, aCount, opts.catalogDefs);
   } else {
     const bpicks: SlotPick[] = slots.map((slot, i) => ({ slot, archetypeId: opts.playerSlots[i] ?? null }));
     b = picksToTeam("RIFT", bpicks, map);

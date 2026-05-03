@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { NvBattleSimRequest, NvUnit } from "@nyrvexis/protocol";
+import type {
+  NvBattleSimRequest,
+  NvSynergyRule,
+  NvUnit,
+  NvUnitArchetypeDef
+} from "@nyrvexis/protocol";
 import { runBattleSim } from "./battleSim.js";
 
 function unit(overrides: Partial<NvUnit> & { id: string }): NvUnit {
@@ -127,5 +132,49 @@ describe("runBattleSim", () => {
       (e) => e.kind === "status_apply" && e.status?.kind === "shield"
     );
     expect(shield).toBeDefined();
+  });
+
+  it("applies role + faction synergies when a catalog is provided", () => {
+    const archetypeById = new Map<string, NvUnitArchetypeDef>([
+      ["soldier", { id: "soldier", name: "Soldier", role: "tank", faction: "vanguard", base: { hp: 30, atk: 8, def: 2, spd: 10 } }],
+      ["knight", { id: "knight", name: "Knight", role: "tank", faction: "vanguard", base: { hp: 36, atk: 8, def: 4, spd: 9 } }],
+      ["paladin", { id: "paladin", name: "Paladin", role: "tank", faction: "vanguard", base: { hp: 34, atk: 8, def: 3, spd: 10 } }]
+    ]);
+    const synergies: NvSynergyRule[] = [
+      { id: "frontline_3", name: "Frontline (3)", requireRole: "tank", minCount: 3, bonus: { defFlat: 2, hpFlat: 5 } },
+      { id: "vanguard_3", name: "Vanguard (3)", requireFaction: "vanguard", minCount: 3, bonus: { defFlat: 1, hpFlat: 3 } }
+    ];
+    const aTeam = [
+      unit({ id: "a1", archetype: "soldier" }),
+      unit({ id: "a2", archetype: "knight" }),
+      unit({ id: "a3", archetype: "paladin" })
+    ];
+    const bTeam = [unit({ id: "b1", archetype: "soldier" })];
+    const result = runBattleSim(req("synergy", aTeam, bTeam), {
+      synergyCatalog: { archetypeById, synergies }
+    });
+    expect(result.activeSynergies?.a.map((s) => s.id).sort()).toEqual(["frontline_3", "vanguard_3"]);
+    expect(result.activeSynergies?.b ?? []).toEqual([]);
+  });
+
+  it("synergy application is deterministic across runs", () => {
+    const archetypeById = new Map<string, NvUnitArchetypeDef>([
+      ["soldier", { id: "soldier", name: "Soldier", role: "tank", faction: "vanguard", base: { hp: 30, atk: 8, def: 2, spd: 10 } }]
+    ]);
+    const synergies: NvSynergyRule[] = [
+      { id: "frontline_2", name: "Frontline (2)", requireRole: "tank", minCount: 2, bonus: { hpFlat: 3 } }
+    ];
+    const r = req(
+      "syn-det",
+      [unit({ id: "a1", archetype: "soldier" }), unit({ id: "a2", archetype: "soldier" })],
+      [unit({ id: "b1", archetype: "soldier" })]
+    );
+    const opts = { synergyCatalog: { archetypeById, synergies } };
+    const r1 = runBattleSim(r, opts);
+    const r2 = runBattleSim(r, opts);
+    expect(r1.outcome).toBe(r2.outcome);
+    expect(r1.ticks).toBe(r2.ticks);
+    expect(r1.events).toEqual(r2.events);
+    expect(r1.activeSynergies).toEqual(r2.activeSynergies);
   });
 });

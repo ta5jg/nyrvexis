@@ -22,7 +22,7 @@ const EnvRaw = z
     KR_CORS_ORIGIN: z.string().min(1).default("*"),
     KR_BODY_LIMIT_BYTES: z.coerce.number().int().min(1024).max(50_000_000).default(1_000_000),
     KR_ADMIN_TOKEN: z.string().min(16).optional(),
-    KR_CONTENT_VERSION: z.string().min(1).default("v0.0.1"),
+    KR_CONTENT_VERSION: z.string().min(1).default("v0.3.0"),
     KR_RATE_WINDOW_MS: z.coerce.number().int().min(1000).max(60 * 60 * 1000).default(60_000),
     KR_RATE_MAX_PER_WINDOW_IP: z.coerce.number().int().min(1).max(10000).default(120),
     KR_RATE_MAX_PER_WINDOW_USER: z.coerce.number().int().min(1).max(10000).default(240),
@@ -62,7 +62,11 @@ const EnvRaw = z
     KR_LEGAL_CONTENT_DESCRIPTORS: z.preprocess(
       (v) => (v === "" || v == null ? undefined : v),
       z.string().max(2000).optional()
-    )
+    ),
+    /** USDTg TRC20 contract address (base58, e.g. "T..."). Set in prod. */
+    KR_USDTG_CONTRACT: z.string().min(30).optional(),
+    /** Treasury wallet address (base58) that receives in-game USDTg payments. */
+    KR_USDTG_TREASURY: z.string().min(30).optional()
   });
 
 export type GatewayEnv = Omit<z.infer<typeof EnvRaw>, "KR_SESSION_TTL_MS"> & {

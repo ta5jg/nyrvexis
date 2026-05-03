@@ -4,12 +4,20 @@ import {
   NvBattleSimResult,
   MATCH_PACING,
   scaleUnitForMatchPacing,
+  type NvActiveSynergy,
   type NvBattleEvent,
   type NvBattleEventPresentation,
   type NvStatusKind,
   type NvUnit
 } from "@nyrvexis/protocol";
 import { seedToU32, XorShift32 } from "./rng.js";
+import { applyBonusToUnit, evaluateTeamSynergies, type SynergyCatalogView } from "./synergy.js";
+
+export type RunBattleSimOptions = {
+  /** Optional catalog view; when supplied, synergies fire and stat bonuses
+   * are applied before combat (deterministic, computed once per team). */
+  synergyCatalog?: SynergyCatalogView;
+};
 
 type StatusState = {
   kind: NvStatusKind;
@@ -257,12 +265,30 @@ function tickStatuses(events: NvBattleEvent[], t: number, units: LiveUnit[]) {
   }
 }
 
-export function runBattleSim(input: unknown): NvBattleSimResult {
+export function runBattleSim(
+  input: unknown,
+  options: RunBattleSimOptions = {}
+): NvBattleSimResult {
   const req = NvBattleSimRequest.parse(input);
   const rng = new XorShift32(seedToU32(req.seed.seed));
 
+  // Compute synergies (if catalog supplied) and apply flat stat bonuses to
+  // each team's units before pacing scaling — deterministic, no RNG.
+  let activeA: NvActiveSynergy[] = [];
+  let activeB: NvActiveSynergy[] = [];
+  let aUnits: NvUnit[] = req.a.units;
+  let bUnits: NvUnit[] = req.b.units;
+  if (options.synergyCatalog) {
+    const evalA = evaluateTeamSynergies(req.a.units, options.synergyCatalog);
+    const evalB = evaluateTeamSynergies(req.b.units, options.synergyCatalog);
+    activeA = evalA.active;
+    activeB = evalB.active;
+    aUnits = req.a.units.map((u) => applyBonusToUnit(u, evalA.teamBonus));
+    bUnits = req.b.units.map((u) => applyBonusToUnit(u, evalB.teamBonus));
+  }
+
   const units: LiveUnit[] = [
-    ...req.a.units.map((u) => {
+    ...aUnits.map((u) => {
       const base = scaleUnitForMatchPacing(u);
       return {
         team: "a" as const,
@@ -274,7 +300,7 @@ export function runBattleSim(input: unknown): NvBattleSimResult {
         statuses: []
       };
     }),
-    ...req.b.units.map((u) => {
+    ...bUnits.map((u) => {
       const base = scaleUnitForMatchPacing(u);
       return {
         team: "b" as const,
@@ -403,6 +429,10 @@ export function runBattleSim(input: unknown): NvBattleSimResult {
     outcome,
     ticks: t,
     remaining: { a: remainingA, b: remainingB },
+    activeSynergies:
+      options.synergyCatalog && (activeA.length > 0 || activeB.length > 0)
+        ? { a: activeA, b: activeB }
+        : undefined,
     events
   });
 }

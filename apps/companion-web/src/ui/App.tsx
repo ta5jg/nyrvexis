@@ -11,7 +11,10 @@ import {
   type NvLegalPublicResponse,
   type NvMetaProgressResponse,
   type NvSeasonViewResponse,
-  type NvUnitArchetypeDef
+  type NvUnitArchetypeDef,
+  type NvSynergyRule,
+  type NvActiveSynergy,
+  evaluateTeamSynergies
 } from "@nyrvexis/protocol";
 import { decodeJsonFromUrlParam, encodeJsonToUrlParam, copyToClipboard, downloadJsonFile } from "./share";
 import { makeRequest } from "./demoBattle";
@@ -37,6 +40,8 @@ import {
 } from "./audio";
 import { HomeGate } from "./HomeGate";
 import { LegalFooter } from "./LegalFooter";
+import { UsdtgPayModal } from "./wallet/UsdtgPayModal";
+import { readStoredAddress as readWalletAddr } from "./wallet/tronWallet";
 import {
   battlePassSkuForNativePlatform,
   fetchBattlePassStoreListing,
@@ -131,6 +136,17 @@ export function App() {
   const [currency, setCurrency] = useState<{ gold: number; shards: number; keys: number } | null>(null);
   const [catalogNameById, setCatalogNameById] = useState<Record<string, string>>({});
   const [catalogDefs, setCatalogDefs] = useState<NvUnitArchetypeDef[]>([]);
+  const [synergyRules, setSynergyRules] = useState<NvSynergyRule[]>([]);
+  const [walletAddr, setWalletAddr] = useState<string | null>(() => readWalletAddr());
+  const [usdtgModalOpen, setUsdtgModalOpen] = useState(false);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const a = readWalletAddr();
+      setWalletAddr((prev) => (prev !== a ? a : prev));
+    }, 1500);
+    return () => window.clearInterval(id);
+  }, []);
   const [playerSlots, setPlayerSlots] = useState<Array<string | null>>(() => readInitialSquadFromUrl());
   const [enemyPreset, setEnemyPreset] = useState<EnemyPreset>("demo");
   const [showAdvancedJson, setShowAdvancedJson] = useState(false);
@@ -285,6 +301,7 @@ export function App() {
         for (const u of c.catalog.units) map[u.id] = u.name;
         setCatalogNameById(map);
         setCatalogDefs(c.catalog.units);
+        setSynergyRules(c.catalog.synergies ?? []);
       })
       .catch(() => {});
 
@@ -400,6 +417,23 @@ export function App() {
       // ignore
     }
   }, [catalogDefs, playerSlots, enemyPreset, seed, maxTicks]);
+
+  const synergyCatalogView = useMemo(() => {
+    const archetypeById = new Map(catalogDefs.map((d) => [d.id, d]));
+    return { archetypeById, synergies: synergyRules };
+  }, [catalogDefs, synergyRules]);
+
+  const livePreviewSynergies = useMemo(() => {
+    if (!catalogDefs.length || !synergyRules.length) return null;
+    try {
+      const req = buildBattleRequest({ seed, maxTicks, catalogDefs, playerSlots, enemyPreset });
+      const a = evaluateTeamSynergies(req.a.units, synergyCatalogView).active;
+      const b = evaluateTeamSynergies(req.b.units, synergyCatalogView).active;
+      return { a, b };
+    } catch {
+      return null;
+    }
+  }, [catalogDefs, synergyRules, synergyCatalogView, playerSlots, enemyPreset, seed, maxTicks]);
 
   useEffect(() => {
     const ios = ((import.meta.env.VITE_IAP_BP_PRODUCT_IOS as string | undefined) ?? "").trim() || "nyrvexis_bp_premium_s0_ios";
@@ -1314,6 +1348,12 @@ export function App() {
     return slot;
   };
 
+  const synergyTitle = (s: NvActiveSynergy): string => {
+    const key = `synergies.${s.id}`;
+    const v = t(key);
+    return v === key ? s.name : v;
+  };
+
   return (
     <div className="wrap">
       {planetVisitEl}
@@ -1577,6 +1617,24 @@ export function App() {
                 </div>
               ))}
             </div>
+            {livePreviewSynergies && (livePreviewSynergies.a.length > 0 || livePreviewSynergies.b.length > 0) ? (
+              <div className="synergyPreview" style={{ marginTop: 10 }}>
+                <div className="sub" style={{ opacity: 0.85 }}>
+                  {t("synergies.activeLabel")}
+                </div>
+                <div className="row" style={{ marginTop: 6, flexWrap: "wrap", gap: 6 }}>
+                  {livePreviewSynergies.a.length === 0 ? (
+                    <span className="sub" style={{ opacity: 0.6 }}>—</span>
+                  ) : (
+                    livePreviewSynergies.a.map((s) => (
+                      <span key={`syn-a-${s.id}`} className="pill" style={{ padding: "4px 8px", fontSize: 12 }}>
+                        {synergyTitle(s)}
+                      </span>
+                    ))
+                  )}
+                </div>
+              </div>
+            ) : null}
             <div className="row" style={{ marginTop: 12, alignItems: "center" }}>
               <div className="field" style={{ minWidth: 200 }}>
                 <label>{t("battle.enemy")}</label>
@@ -1703,6 +1761,23 @@ export function App() {
                 </div>
                 <div className="outcomeHeroSub">{t("battle.youPlaySideA")}</div>
               </div>
+              {state.result.activeSynergies && (state.result.activeSynergies.a.length > 0 || state.result.activeSynergies.b.length > 0) ? (
+                <div className="synergyResult" style={{ marginTop: 10 }}>
+                  <div className="sub" style={{ opacity: 0.85 }}>{t("synergies.appliedLabel")}</div>
+                  <div className="row" style={{ marginTop: 6, flexWrap: "wrap", gap: 6 }}>
+                    {state.result.activeSynergies.a.map((s) => (
+                      <span key={`res-syn-a-${s.id}`} className="pill" style={{ padding: "4px 8px", fontSize: 12 }}>
+                        A · {synergyTitle(s)}
+                      </span>
+                    ))}
+                    {state.result.activeSynergies.b.map((s) => (
+                      <span key={`res-syn-b-${s.id}`} className="pill" style={{ padding: "4px 8px", fontSize: 12, opacity: 0.85 }}>
+                        B · {synergyTitle(s)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               <div className="btnbar" style={{ marginTop: 12, flexWrap: "wrap" }}>
                 <button
                   type="button"
@@ -2002,6 +2077,22 @@ export function App() {
                     }}
                   >
                     {iapBusy ? t("iapUi.working") : t("iapUi.purchaseOnDevice")}
+                  </button>
+                </div>
+              ) : null}
+              {metaProgress && !metaProgress.battlePass.hasPremium && walletAddr ? (
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,.12)" }}>
+                  <h3 style={{ marginTop: 0, fontSize: "1rem" }}>{t("wallet.payWithUsdtg")}</h3>
+                  <div className="sub" style={{ marginBottom: 10 }}>
+                    5 USDTg → Battle Pass Premium ({t("wallet.premiumOnVerify")})
+                  </div>
+                  <button
+                    type="button"
+                    className="btn primary"
+                    disabled={!userId}
+                    onClick={() => setUsdtgModalOpen(true)}
+                  >
+                    {t("wallet.payWithUsdtg")}
                   </button>
                 </div>
               ) : null}
@@ -2446,6 +2537,16 @@ export function App() {
       </div>
 
       <LegalFooter legal={legalPublic} />
+
+      {usdtgModalOpen ? (
+        <UsdtgPayModal
+          sdk={sdk}
+          onClose={() => setUsdtgModalOpen(false)}
+          onPremiumGranted={() => {
+            void refreshMeta();
+          }}
+        />
+      ) : null}
 
       {onboardingOpen ? (
         <div className="onbOverlay" role="dialog" aria-modal="true">

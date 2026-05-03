@@ -132,7 +132,7 @@ export type StoreState = {
   /** SHA256(platform+product+receipt) → Premium BP doğrulaması (R7). */
   iapGrants: Record<
     string,
-    { userId: string; seasonId: string; atMs: number; platform: "ios" | "android" | "stub"; productId: string }
+    { userId: string; seasonId: string; atMs: number; platform: "ios" | "android" | "stub" | "usdtg"; productId: string }
   >;
   /** Read-only planet previews (`hp_*` tickets). */
   hubShareSnapshots: Record<

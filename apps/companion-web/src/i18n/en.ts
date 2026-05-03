@@ -219,6 +219,36 @@ const enLiteral = {
     q_weekly_lb: "Daily leaderboard submits (5×)",
     q_weekly_shop: "Buy from daily shop (3×)"
   },
+  synergies: {
+    activeLabel: "Active synergies",
+    appliedLabel: "Synergies applied",
+    frontline_2: "Frontline (2)",
+    frontline_3: "Frontline (3)",
+    frontline_4: "Frontline (4)",
+    assault_2: "Assault (2)",
+    assault_3: "Assault (3)",
+    assault_4: "Assault (4)",
+    backline_2: "Backline (2)",
+    backline_3: "Backline (3)",
+    backline_4: "Backline (4)",
+    control_2: "Control (2)",
+    control_3: "Control (3)",
+    vanguard_2: "Vanguard (2)",
+    vanguard_3: "Vanguard (3)",
+    vanguard_4: "Vanguard (4)",
+    marauder_2: "Marauder (2)",
+    marauder_3: "Marauder (3)",
+    marauder_4: "Marauder (4)",
+    arcane_2: "Arcane (2)",
+    arcane_3: "Arcane (3)",
+    arcane_4: "Arcane (4)",
+    ranger_2: "Ranger (2)",
+    ranger_3: "Ranger (3)",
+    ranger_4: "Ranger (4)",
+    order_2: "Order (2)",
+    order_3: "Order (3)",
+    order_4: "Order (4)"
+  },
   cosmetics: {
     cos_frame_nyrvexis_v1: "Nyrvexis frame",
     cos_arena_twilight_v1: "Twilight arena tint",
@@ -285,6 +315,35 @@ const enLiteral = {
     guest: "guest",
     statusOk: "OK",
     statusDown: "DOWN"
+  },
+  wallet: {
+    connectTronLink: "Connect TronLink",
+    installTronLink: "Install TronLink",
+    connecting: "Connecting…",
+    connected: "Wallet",
+    disconnect: "Disconnect",
+    connectFailed: "Connection failed",
+    payWithUsdtg: "Pay with USDTg",
+    verifyingTx: "Verifying transaction…",
+    txConfirmed: "Payment confirmed",
+    txFailed: "Payment verification failed",
+    invalidTxHash: "Invalid transaction hash format",
+    premiumOnVerify: "Premium granted on confirmation",
+    step1OpenWallet: "Open TronLink (or any TRON wallet).",
+    step2SendTo: "Send USDTg to this treasury address:",
+    step3Amount: "Amount",
+    step4PasteTxHash: "Paste the transaction hash below.",
+    iSentIt: "I sent it →",
+    copyAddress: "Copy address",
+    txHashLabel: "Transaction hash",
+    txHashHint: "64-character hex string from your wallet's tx detail view.",
+    verify: "Verify",
+    back: "Back"
+  },
+  web3: {
+    poweredBy: "Powered by USDTg on TRON",
+    earnUsdtg: "Top-100 daily players earn USDTg airdrops",
+    web3Note: "Web version supports USDTg cosmetics. Mobile version is fiat-only."
   }
 } as const;
 

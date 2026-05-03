@@ -531,12 +531,13 @@ function computeUnitFeetMotion(
   for (let i = 0; i < u.id.length; i++) idSum = (idSum + u.id.charCodeAt(i)) | 0;
   const phase = (idSum % 1000) / 1000;
 
-  // Subtle breathing — small vertical bob (~1px) on idle so the unit reads
-  // alive without the old "fanus patrol" feel. Phase per-id keeps the squad
-  // from bobbing in sync.
-  const bob = unitAlive && !reduceMotion
-    ? Math.sin(now * 0.0026 + phase * Math.PI * 2) * 0.9
-    : 0;
+  // Idle motion — vertical bob + small lateral sway so standing units read as
+  // alive rather than static portraits. Per-id phase keeps the squad from
+  // bobbing in unison; reduceMotion skips it for users with the OS preference set.
+  const idleClock = now * 0.0026 + phase * Math.PI * 2;
+  const swayClock = now * 0.0017 + phase * 1.7;
+  const bob = unitAlive && !reduceMotion ? Math.sin(idleClock) * 2.4 : 0;
+  const idleSway = unitAlive && !reduceMotion ? Math.sin(swayClock) * 1.1 : 0;
 
   const deathA = deathAt[u.id];
   const deadAge = typeof deathA === "number" ? now - deathA : 9999;
@@ -564,7 +565,7 @@ function computeUnitFeetMotion(
   const atkPulse = clamp(1 - easeOutCubic(atkAge / 195), 0, 1);
 
   const dir = u.side === "a" ? 1 : -1;
-  let p = { x: anchorX, y: anchorY + bob };
+  let p = { x: anchorX + idleSway, y: anchorY + bob };
 
   const loco = arenaLocomotionOffsetPx(
     battleSeed,
@@ -1343,6 +1344,14 @@ export function ArenaCanvas(props: {
               sheetParts.push("contrast(1.06)");
             }
             ctx.filter = sheetParts.length ? sheetParts.join(" ") : "none";
+            // Mirror sprite around its own X for team B so the character faces
+            // the enemy. Frame/icon overlays drawn outside this save/restore
+            // stay in their natural orientation.
+            if (u.side === "b") {
+              ctx.translate(p.x, 0);
+              ctx.scale(-1, 1);
+              ctx.translate(-p.x, 0);
+            }
             ctx.drawImage(sheet, sx, sy, sw, sh, p.x - dw / 2, p.y - dh / 2, dw, dh);
             ctx.filter = "none";
             ctx.restore();
@@ -1410,6 +1419,11 @@ export function ArenaCanvas(props: {
             }
             ctx.filter = svgParts.length ? svgParts.join(" ") : "none";
             const sq = drawR * 2;
+            if (u.side === "b") {
+              ctx.translate(p.x, 0);
+              ctx.scale(-1, 1);
+              ctx.translate(-p.x, 0);
+            }
             ctx.drawImage(frameImg, p.x - sq / 2, p.y - sq / 2, sq, sq);
             ctx.filter = "none";
             ctx.restore();
@@ -1433,6 +1447,7 @@ export function ArenaCanvas(props: {
               if (img.complete && img.naturalWidth > 0) {
                 ctx.save();
                 ctx.translate(p.x, p.y);
+                if (u.side === "b") ctx.scale(-1, 1);
                 ctx.globalAlpha = 0.95 * fade;
                 const s = prof.size + critPulse * 6;
                 ctx.drawImage(img, -s / 2, -s / 2, s, s);

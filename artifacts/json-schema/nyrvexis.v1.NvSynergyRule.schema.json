@@ -21,6 +21,16 @@
             "control"
           ]
         },
+        "requireFaction": {
+          "type": "string",
+          "enum": [
+            "vanguard",
+            "marauder",
+            "arcane",
+            "ranger",
+            "order"
+          ]
+        },
         "minCount": {
           "type": "integer",
           "minimum": 1,
@@ -48,7 +58,6 @@
       "required": [
         "id",
         "name",
-        "requireRole",
         "minCount",
         "bonus"
       ],

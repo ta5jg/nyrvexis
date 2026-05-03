@@ -100,6 +100,7 @@ export class UnitVisual {
   public state: AnimationState = "idle";
   public alive = true;
 
+  private team: "A" | "B";
   private baseX: number;
   private baseY: number;
   private idleClock = 0;
@@ -131,12 +132,12 @@ export class UnitVisual {
     this.container.x = options.x;
     this.container.y = options.y;
 
+    this.team = options.team;
     this.body = options.body;
     const bs = options.bodyScale ?? 1;
     this.body.scale.set(bs);
-    if (options.team === "B") {
-      this.body.scale.x *= -1;
-    }
+    // Body root stays unflipped — animations use this.facingDir for direction
+    // and PixiArena flips only the inner art so frames/icons stay correct.
     this.bodyBaseScaleX = this.body.scale.x;
     this.bodyBaseScaleY = this.body.scale.y;
 
@@ -295,10 +296,14 @@ export class UnitVisual {
     if (t >= 1) this.completeAndIdle();
   }
 
+  private get facingDir(): number {
+    return this.team === "B" ? -1 : 1;
+  }
+
   private updateAttack(dt: number): void {
     this.commandTime += dt;
     const t = clamp01(this.commandTime / this.commandDuration);
-    const dir = this.bodyBaseScaleX < 0 ? -1 : 1;
+    const dir = this.facingDir;
     const lungeMax = 22 * this.profile.lungeMul;
 
     // Three phases: anticipation (0..0.25), strike (0.25..0.55), recovery (0.55..1)
@@ -380,7 +385,7 @@ export class UnitVisual {
   private updateHit(dt: number): void {
     this.commandTime += dt;
     const t = clamp01(this.commandTime / this.commandDuration);
-    const dir = this.bodyBaseScaleX < 0 ? -1 : 1;
+    const dir = this.facingDir;
 
     // Three phases: impulse (0..0.18), recoil (0.18..0.5), recover (0.5..1).
     if (t < 0.18) {

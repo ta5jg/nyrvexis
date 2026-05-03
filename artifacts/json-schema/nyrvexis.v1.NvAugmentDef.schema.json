@@ -12,6 +12,20 @@
           "type": "string",
           "minLength": 1
         },
+        "iconId": {
+          "type": "string"
+        },
+        "rarity": {
+          "type": "string",
+          "enum": [
+            "common",
+            "rare",
+            "epic"
+          ]
+        },
+        "uiHint": {
+          "type": "string"
+        },
         "bonus": {
           "type": "object",
           "properties": {

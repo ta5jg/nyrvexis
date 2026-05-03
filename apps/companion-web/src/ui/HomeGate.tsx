@@ -16,6 +16,7 @@
 import React from "react";
 import { useTranslation } from "../i18n";
 import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
+import { WalletConnect } from "./wallet/WalletConnect";
 
 export function HomeGate(props: {
   gatewayOk: boolean | null;
@@ -46,6 +47,17 @@ export function HomeGate(props: {
           {props.gatewayInfo ? <span className="gameGateStatusMeta"> · {props.gatewayInfo}</span> : null}
         </p>
         <p className="gameGateHint">{t("home.panelsHint")}</p>
+        <div className="gameGateWeb3" style={{ marginTop: 12, padding: "10px 12px", borderRadius: 10, background: "rgba(120,140,255,0.08)", border: "1px solid rgba(160,180,255,0.18)" }}>
+          <div style={{ fontSize: 12, opacity: 0.92 }}>
+            <strong>{t("web3.poweredBy")}</strong>
+          </div>
+          <div style={{ fontSize: 11, opacity: 0.78, marginTop: 4 }}>
+            {t("web3.earnUsdtg")}
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <WalletConnect />
+          </div>
+        </div>
         <p className="gameGateMeta">
           {props.runtimeEnvLabel ? `${props.runtimeEnvLabel} · ` : null}
           {t("app.sameClientNote")}

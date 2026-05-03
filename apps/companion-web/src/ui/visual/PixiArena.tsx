@@ -287,6 +287,12 @@ export function PixiArena(props: {
           height: CARD_H
         });
 
+        // Flip only the inner art for team B so the portrait faces the enemy
+        // while the card frame, role icon, and rarity frame remain readable.
+        if (u.side === "b") {
+          card.art.scale.x *= -1;
+        }
+
         const highlight = new Graphics();
         const p0 = slotToPos.get(`${u.side}:${u.slot}`) ?? { x: w / 2, y: h / 2 };
 

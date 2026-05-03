@@ -103,6 +103,16 @@ export type NvBattleEvent = z.infer<typeof NvBattleEvent>;
 export const NvBattleOutcome = z.enum(["a", "b", "draw"]);
 export type NvBattleOutcome = z.infer<typeof NvBattleOutcome>;
 
+/** Synergy actually applied to a team during battle resolution. */
+export const NvActiveSynergy = z
+  .object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    count: z.number().int().min(1).max(12)
+  })
+  .strict();
+export type NvActiveSynergy = z.infer<typeof NvActiveSynergy>;
+
 export const NvBattleSimResult = z
   .object({
     v: z.literal(1),
@@ -116,6 +126,15 @@ export const NvBattleSimResult = z
         b: z.record(z.string(), z.number().int().nonnegative())
       })
       .strict(),
+    // Synergies that fired for each team (deterministic, computed before combat).
+    // Optional so older clients/recordings remain valid.
+    activeSynergies: z
+      .object({
+        a: z.array(NvActiveSynergy),
+        b: z.array(NvActiveSynergy)
+      })
+      .strict()
+      .optional(),
     events: z.array(NvBattleEvent).max(50_000)
   })
   .strict();
