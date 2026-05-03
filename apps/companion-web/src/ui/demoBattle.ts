@@ -37,7 +37,7 @@ export function makeDemoTeams(): { a: NvTeam; b: NvTeam } {
   };
 }
 
-export function makeRequest(seed: string, maxTicks = 12000): NvBattleSimRequest {
+export function makeRequest(seed: string, maxTicks = 4000): NvBattleSimRequest {
   const { a, b } = makeDemoTeams();
   return {
     v: 1,

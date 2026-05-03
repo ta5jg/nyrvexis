@@ -69,11 +69,6 @@ function nowSeed(): string {
 }
 
 /** Last scrub index so arena HP/outcome match the battle result panel (not tick 0). */
-function finalReplayTickIndex(req: NvBattleSimRequest, res: NvBattleSimResult): number {
-  const fr = buildReplayFrames(req, res);
-  return Math.max(0, fr.length - 1);
-}
-
 function summarize(result: NvBattleSimResult): string {
   const a = result.remaining.a;
   const b = result.remaining.b;
@@ -88,7 +83,7 @@ function squadDisplayLine(units: NvBattleSimRequest["a"]["units"], defs: Map<str
 }
 
 /** Target wall-clock (ms) for full Auto-play at 1× — shorter = snappier watch (R9 parity). */
-const TARGET_AUTOPLAY_MS = 4 * 60 * 1000;
+const TARGET_AUTOPLAY_MS = 75 * 1000;
 
 function gatewayBaseUrl(): string {
   const raw = import.meta.env.VITE_GATEWAY_URL?.trim();
@@ -216,8 +211,8 @@ export function App() {
 
   const [maxTicks, setMaxTicks] = useState<number>(() => {
     const url = new URL(window.location.href);
-    const mt = Number(url.searchParams.get("maxTicks") ?? "12000");
-    return Number.isFinite(mt) ? Math.max(1, Math.min(100_000, Math.floor(mt))) : 12000;
+    const mt = Number(url.searchParams.get("maxTicks") ?? "4000");
+    return Number.isFinite(mt) ? Math.max(1, Math.min(100_000, Math.floor(mt))) : 4000;
   });
 
   const [requestText, setRequestText] = useState<string>(() => {
@@ -549,7 +544,8 @@ export function App() {
       syncUrlFromReq(req);
       const res = await sdk.battleSim(req);
       setState({ kind: "ok", result: res, request: req });
-      setTick(finalReplayTickIndex(req, res));
+      setTick(0);
+      setAutoReplay(true);
       focusResultSection();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
@@ -579,7 +575,8 @@ export function App() {
       syncUrlFromReq(req);
       const res = await sdk.battleSim(req);
       setState({ kind: "ok", result: res, request: req });
-      setTick(finalReplayTickIndex(req, res));
+      setTick(0);
+      setAutoReplay(true);
       focusResultSection();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
@@ -668,7 +665,8 @@ export function App() {
       syncUrlFromReq(req);
       const res = await sdk.battleSim(req);
       setState({ kind: "ok", result: res, request: req });
-      setTick(finalReplayTickIndex(req, res));
+      setTick(0);
+      setAutoReplay(true);
       focusResultSection();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown error";
@@ -961,7 +959,8 @@ export function App() {
       setRequestText(JSON.stringify(req, null, 2));
       const sim = await sdk.battleSim(req);
       setState({ kind: "ok", result: sim, request: req });
-      setTick(finalReplayTickIndex(req, sim));
+      setTick(0);
+      setAutoReplay(true);
       focusResultSection();
 
       const submit = await sdk.leaderboardSubmit({ v: 1, dateUtc: d.dateUtc, battleRequest: req });
@@ -1584,7 +1583,7 @@ export function App() {
               <input
                 value={String(maxTicks)}
                 onChange={(e) => {
-                  const n = Math.max(1, Math.min(100_000, Math.floor(Number(e.target.value) || 12000)));
+                  const n = Math.max(1, Math.min(100_000, Math.floor(Number(e.target.value) || 4000)));
                   setMaxTicks(n);
                 }}
               />

@@ -161,7 +161,7 @@ export const tr: Translations = {
     matchSteps: "Maç adımları",
     formationPreviewHint: "Formasyon önizleme — savaşı başlat ve arenada animasyon başlasın.",
     scrubAfterBattleHint:
-      "Her savaştan sonra zaman çubuğu son tık'a atlar; HP sonuçla eşleşir. Başa sarmak için sola çek.",
+      "Savaş canlı oynatılır. İstediğin anı zaman çubuğundan tekrar izle, ya da sona atla.",
     mirrorB: "Yansıma (B)",
     opponentB: "Rakip (B)",
     frontL: "Ön Sol",
@@ -269,7 +269,7 @@ export const tr: Translations = {
     home: "Ana sayfa",
     snapshotPreviewExpires: "Anlık önizleme · sona erme {{when}}",
     autoPlayDuration:
-      "1×'te tam Otomatik oynat, mevcut kaydırıcı konumundan sona kadar oynatır — 1× hızında tick 0'dan son tick'e yaklaşık 4 dakikalık izleme.",
+      "Otomatik oynat 1× hızında savaşı canlı akıtır — yaklaşık 60–90 saniye. 2× / 4× ile hızlandır ya da zaman çubuğundan istediğin ana dön.",
     cosmeticsUnlock: "Kozmetikler Battle Pass kademelerinden açılır (sunucu verir).",
     hubDescription:
       "Sadece kozmetik 4×4 merkez — sahip olduğun süslemeleri yerleştir. Çekirdek beacon yeni hesaplarda gelir; daha fazlası Battle Pass ile açılır.",
@@ -288,7 +288,7 @@ export const tr: Translations = {
     premiumUnlocked: "Premium açık",
     productionTagline: "Faz 11 • yasal/link kapısı • takım • tekrar • günlük döngü",
     hpBarsFollow:
-      "HP barları kaydırıcıyı takip eder. Yeni savaşlar son tick'te açılır; başa sarmak için sola çek veya mevcut konumdan Otomatik oynat'ı aç.",
+      "HP barları kaydırıcıyı takip eder. Yeni savaşlar tick 0'dan canlı oynar — 2×/4× ile hızlandır ya da çubuktan istediğin yere git.",
     noEvents: "(olay yok)",
     pushSubscribeIntro:
       "Web Bildirim: abone olmak sunucuda bir uç nokta saklar. Operatörler yönetici veya günlük-cron gönderim tetikleyebilir.",

@@ -178,7 +178,7 @@ const enLiteral = {
     matchSteps: "Match steps",
     formationPreviewHint: "Formation preview — run a battle to animate combat on the arena.",
     scrubAfterBattleHint:
-      "After each battle the scrubber jumps to the final tick so HP matches the result — scrub left to replay from the start.",
+      "Battle plays out live. Use the timeline to rewatch any moment, or jump to the result.",
     mirrorB: "Mirror (B)",
     opponentB: "Opponent (B)",
     frontL: "Front L",
@@ -286,7 +286,7 @@ const enLiteral = {
     home: "Home",
     snapshotPreviewExpires: "Snapshot preview · expires {{when}}",
     autoPlayDuration:
-      "Full Auto-play at 1× replays from your current scrub position toward the end — about a 4 minute watch from tick 0 to the last tick at 1×.",
+      "Auto-play streams the battle live at 1× — about 60–90 seconds. Use 2× / 4× to fast-forward, or scrub the timeline to revisit a moment.",
     cosmeticsUnlock: "Cosmetics unlock from Battle Pass tiers (server-granted).",
     hubDescription:
       "Cosmetic-only 4×4 hub — place decorations you own. Core beacon is granted on new accounts; more unlock via Battle Pass.",
@@ -305,7 +305,7 @@ const enLiteral = {
     premiumUnlocked: "Premium unlocked",
     productionTagline: "Phase 11 • legal/links gate • squad • replay • daily loop",
     hpBarsFollow:
-      "HP bars follow the scrubber. New battles open on the last tick; scrub left to watch from the opening, or enable Auto-play from your current position.",
+      "HP bars follow the scrubber. New battles play live from tick 0 — scrub or use 2×/4× to fast-forward.",
     noEvents: "(no events)",
     pushSubscribeIntro:
       "Web Push: subscribing stores an endpoint on the gateway. Operators can trigger admin or daily-cron sends.",

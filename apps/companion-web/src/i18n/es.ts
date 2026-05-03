@@ -161,7 +161,7 @@ export const es: Translations = {
     matchSteps: "Pasos de la partida",
     formationPreviewHint: "Vista previa de formación — inicia una batalla para animar el combate.",
     scrubAfterBattleHint:
-      "Tras cada batalla el control salta al último tick para que HP coincida con el resultado — desplázate a la izquierda para reproducir desde el inicio.",
+      "La batalla se reproduce en vivo. Usa la línea de tiempo para revivir un momento o salta al resultado.",
     mirrorB: "Espejo (B)",
     opponentB: "Oponente (B)",
     frontL: "Frente Izq.",
@@ -269,7 +269,7 @@ export const es: Translations = {
     home: "Inicio",
     snapshotPreviewExpires: "Vista previa · caduca {{when}}",
     autoPlayDuration:
-      "Reproducción automática a 1× reproduce desde tu posición actual hasta el final — unos 4 minutos del tick 0 al último tick a 1×.",
+      "Reproducción automática a 1× transmite la batalla en vivo — unos 60–90 segundos. Usa 2× / 4× para acelerar.",
     cosmeticsUnlock: "Los cosméticos se desbloquean en niveles del Battle Pass (otorgados por el servidor).",
     hubDescription:
       "Hub cosmético 4×4 — coloca decoraciones que tengas. La baliza central viene en cuentas nuevas; otras se desbloquean con el Battle Pass.",
@@ -288,7 +288,7 @@ export const es: Translations = {
     premiumUnlocked: "Premium desbloqueado",
     productionTagline: "Fase 11 • puerta legal/enlaces • escuadrón • repetición • bucle diario",
     hpBarsFollow:
-      "Las barras de HP siguen al control. Las batallas nuevas abren en el último tick; desplaza a la izquierda para ver desde el inicio o activa Reproducción automática.",
+      "Las barras de HP siguen al control. Las batallas nuevas se reproducen desde el tick 0 — usa 2×/4× para acelerar o desplaza la línea de tiempo.",
     noEvents: "(sin eventos)",
     pushSubscribeIntro:
       "Web Push: suscribirse guarda un endpoint en el servidor. Operadores pueden disparar envíos admin o por cron diario.",

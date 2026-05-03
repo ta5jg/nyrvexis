@@ -2,13 +2,16 @@ import type { NvUnit } from "./battle.js";
 
 /**
  * Match pacing for gateway sim + web replay: catalog stats stay compact;
- * runtime scales HP/ATK so ticks align with ~5–7 min cinematic sessions.
+ * runtime scales HP/ATK so battles align with ~60–90 sec mobile-friendly
+ * sessions (target avg ~75 sec). Peer async battlers (AFK, RAID, MSF, Hero
+ * Wars) all sit in the 1–2 min band — that's where retention math works.
  */
 export const MATCH_PACING = {
-  hpMul: 6,
-  atkMul: 0.88,
-  /** Higher threshold ⇒ fewer actions per tick ⇒ sparser combat. Tuned for publish-feel density (R9). */
-  actThreshold: 220,
+  hpMul: 2.5,
+  atkMul: 0.95,
+  /** Lower threshold ⇒ more actions per tick ⇒ denser combat read. Combined
+   *  with hpMul reduction, average match resolves in ~200–400 ticks. */
+  actThreshold: 130,
   /** Basic attack miss chance (deterministic roll). On miss, no damage / on-hit effects. */
   baseHitPct: 88
 } as const;

@@ -161,7 +161,7 @@ export const de: Translations = {
     matchSteps: "Match-Schritte",
     formationPreviewHint: "Formationsvorschau — starte einen Kampf, um die Animation in der Arena zu sehen.",
     scrubAfterBattleHint:
-      "Nach jedem Kampf springt der Schieber zum letzten Tick, damit HP zum Ergebnis passt — nach links scrubben, um von vorne abzuspielen.",
+      "Der Kampf wird live gespielt. Nutze die Zeitleiste, um einen Moment erneut anzusehen, oder springe zum Ergebnis.",
     mirrorB: "Spiegel (B)",
     opponentB: "Gegner (B)",
     frontL: "Vorne L",
@@ -269,7 +269,7 @@ export const de: Translations = {
     home: "Start",
     snapshotPreviewExpires: "Snapshot-Vorschau · läuft ab {{when}}",
     autoPlayDuration:
-      "Volle automatische Wiedergabe bei 1× spielt von deiner aktuellen Position bis zum Ende — etwa 4 Minuten von Tick 0 bis zum letzten Tick bei 1×.",
+      "Auto-Wiedergabe läuft den Kampf live mit 1× — etwa 60–90 Sekunden. Nutze 2× / 4× zum Vorspulen.",
     cosmeticsUnlock: "Kosmetik schaltet sich über Battle-Pass-Stufen frei (vom Server vergeben).",
     hubDescription:
       "Reines Kosmetik-4×4-Hub — platziere deine Dekorationen. Die zentrale Bake bekommen neue Konten; mehr per Battle Pass.",
@@ -288,7 +288,7 @@ export const de: Translations = {
     premiumUnlocked: "Premium freigeschaltet",
     productionTagline: "Phase 11 • Rechts-/Link-Gate • Squad • Wiedergabe • Tagesloop",
     hpBarsFollow:
-      "HP-Balken folgen dem Schieber. Neue Kämpfe öffnen am letzten Tick; nach links scrubben oder Automatisch abspielen aktivieren.",
+      "HP-Balken folgen dem Schieber. Neue Kämpfe spielen ab Tick 0 live — 2×/4× zum Vorspulen oder Zeitleiste nutzen.",
     noEvents: "(keine Ereignisse)",
     pushSubscribeIntro:
       "Web Push: Abonnieren speichert einen Endpunkt am Gateway. Betreiber können Admin- oder Tages-Cron-Sendungen auslösen.",
